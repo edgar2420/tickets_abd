@@ -1,8 +1,9 @@
 /**
- * Crea las cuentas de demostracion necesarias para recorrer el ciclo completo
- * del ticket: quien solicita, quien atiende y quien supervisa.
+ * Crea las cuentas de prueba necesarias para recorrer el ciclo completo del
+ * ticket con varios perfiles y areas: quien solicita, quien atiende y quien
+ * escala. Todas comparten la misma contrasena para agilizar las pruebas.
  *
- * Es idempotente: si la cuenta ya existe solo repone su contrasena, area y rol.
+ * Es idempotente: si la cuenta ya existe, repone su contrasena, area y rol.
  * No forma parte de la carga inicial del sistema, porque son credenciales
  * conocidas que no deben existir en un despliegue productivo.
  *
@@ -11,24 +12,52 @@
 import bcrypt from 'bcryptjs';
 import { pool } from '../config/db.js';
 
+const PASSWORD = 'Prueba123*';
+
 const CUENTAS = [
+  // --- Solicitantes: solo crean y consultan sus propios tickets ---
   {
     nombre: 'Ana Quispe Torrez',
     usuario: 'solicitante',
-    email: 'solicitante@empresa.local',
-    password: 'Solicitante123*',
     area: 'Contabilidad',
     rol: 'cliente',
-    proposito: 'Registra y consulta unicamente sus propios tickets'
+    proposito: 'Solicitante de Contabilidad'
   },
+  {
+    nombre: 'Carlos Vargas Rojas',
+    usuario: 'solicitante2',
+    area: 'Recursos Humanos',
+    rol: 'cliente',
+    proposito: 'Solicitante de Recursos Humanos'
+  },
+  {
+    nombre: 'Maria Flores Colque',
+    usuario: 'solicitante3',
+    area: 'Comercial',
+    rol: 'cliente',
+    proposito: 'Solicitante de Comercial'
+  },
+  // --- Mesa de ayuda: atienden y resuelven tickets de toda la organizacion ---
   {
     nombre: 'Luis Mamani Colque',
     usuario: 'tecnico',
-    email: 'tecnico@empresa.local',
-    password: 'Tecnico123*',
     area: 'Tecnologias de la Informacion',
     rol: 'tecnico_l1',
-    proposito: 'Atiende, asigna y resuelve tickets de toda la organizacion'
+    proposito: 'Tecnico de primer nivel'
+  },
+  {
+    nombre: 'Jorge Choque Silva',
+    usuario: 'tecnico2',
+    area: 'Tecnologias de la Informacion',
+    rol: 'tecnico_l1',
+    proposito: 'Tecnico de primer nivel, para probar la asignacion entre tecnicos'
+  },
+  {
+    nombre: 'Patricia Nina Alvarez',
+    usuario: 'tecnico3',
+    area: 'Tecnologias de la Informacion',
+    rol: 'tecnico_l2',
+    proposito: 'Tecnico de segundo nivel, para probar el escalamiento'
   }
 ];
 
@@ -39,12 +68,16 @@ const idDe = async (tabla, nombre) => {
 };
 
 const ejecutar = async () => {
+  const hash = await bcrypt.hash(PASSWORD, 10);
+
+  console.log('\n  USUARIO         CONTRASENA     ROL           AREA');
+  console.log('  ' + '-'.repeat(88));
+
   for (const cuenta of CUENTAS) {
     const areaId = await idDe('areas', cuenta.area);
     const rolId = await idDe('roles', cuenta.rol);
-    const hash = await bcrypt.hash(cuenta.password, 10);
 
-    const { rows } = await pool.query(
+    await pool.query(
       `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
        VALUES ($1, $2, $3, $4, $5, $6)
        ON CONFLICT (usuario) DO UPDATE
@@ -53,19 +86,18 @@ const ejecutar = async () => {
              password_hash = EXCLUDED.password_hash,
              area_id = EXCLUDED.area_id,
              rol_id = EXCLUDED.rol_id,
-             activo = TRUE
-       RETURNING id`,
-      [cuenta.nombre, cuenta.usuario, cuenta.email, hash, areaId, rolId]
+             activo = TRUE`,
+      [cuenta.nombre, cuenta.usuario, `${cuenta.usuario}@empresa.local`, hash, areaId, rolId]
     );
 
     console.log(
-      `[demo] ${cuenta.usuario.padEnd(12)} / ${cuenta.password.padEnd(17)}` +
-      ` rol=${cuenta.rol.padEnd(11)} area=${cuenta.area}  (id ${rows[0].id})`
+      `  ${cuenta.usuario.padEnd(15)} ${PASSWORD.padEnd(14)} ${cuenta.rol.padEnd(13)} ${cuenta.area}`
     );
-    console.log(`       ${cuenta.proposito}`);
+    console.log(`  ${''.padEnd(15)} ${cuenta.nombre} - ${cuenta.proposito}`);
   }
 
-  console.log('\n[demo] Cuentas de demostracion listas. Cambie o desactive estas credenciales antes de publicar en produccion.');
+  console.log('\n  Todas las cuentas comparten la contrasena ' + PASSWORD);
+  console.log('  Desactivelas o cambie sus contrasenas antes de publicar el sistema en produccion.\n');
   await pool.end();
 };
 

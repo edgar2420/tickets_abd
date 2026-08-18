@@ -90,10 +90,16 @@ cd backend
 npm run demo
 ```
 
-| Usuario | Contrasena | Rol | Alcance |
-|---|---|---|---|
-| `solicitante` | `Solicitante123*` | cliente | Registra y consulta unicamente sus propios tickets |
-| `tecnico` | `Tecnico123*` | tecnico_l1 | Atiende, asigna y resuelve tickets de toda la organizacion |
+Todas comparten la contrasena `Prueba123*`:
+
+| Usuario | Nombre | Rol | Area | Para probar |
+|---|---|---|---|---|
+| `solicitante` | Ana Quispe Torrez | cliente | Contabilidad | Alta de tickets y visibilidad restringida a los propios |
+| `solicitante2` | Carlos Vargas Rojas | cliente | Recursos Humanos | Que un solicitante no vea los tickets de otro |
+| `solicitante3` | Maria Flores Colque | cliente | Comercial | Distribucion de tickets por area en el tablero |
+| `tecnico` | Luis Mamani Colque | tecnico_l1 | Tecnologias de la Informacion | Atender, resolver y cerrar |
+| `tecnico2` | Jorge Choque Silva | tecnico_l1 | Tecnologias de la Informacion | Asignacion de un ticket a otro tecnico |
+| `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Tecnologias de la Informacion | Escalamiento a segundo nivel |
 
 Estas credenciales son conocidas y por eso **no** forman parte de la carga inicial: el script
 es de ejecucion manual y las cuentas deben desactivarse antes de publicar el sistema.

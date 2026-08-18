@@ -130,6 +130,13 @@ export const NuevoTicket = () => {
                   );
                 })}
               </div>
+              {/* Explicacion de la categoria elegida, para orientar al solicitante */}
+              {formulario.categoria && (
+                <p className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+                  {categorias?.find((c) => c.nombre === formulario.categoria)?.descripcion
+                    ?? 'Sin descripcion registrada para esta categoria.'}
+                </p>
+              )}
             </div>
 
             <div>
