@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import { Alerta, Cargando, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { CampoPassword } from '../components/CampoPassword';
 import { fechaCorta } from '../lib/formato';
 import type { Area, Rol, Usuario } from '../lib/tipos';
 
@@ -223,16 +224,15 @@ export const AdminUsuarios = () => {
               </select>
             </div>
             <div className="sm:col-span-2">
-              <label className="etiqueta">
-                {formulario.id ? 'Nueva contrasena (opcional)' : 'Contrasena inicial'}
-              </label>
-              <input
-                type="password"
-                className="campo"
-                minLength={formulario.id ? 0 : 8}
-                required={!formulario.id}
-                value={formulario.password}
-                onChange={(e) => setFormulario((f) => ({ ...f, password: e.target.value }))}
+              <CampoPassword
+                id="password-usuario"
+                etiqueta={formulario.id ? 'Nueva contrasena (opcional)' : 'Contrasena inicial'}
+                valor={formulario.password}
+                alCambiar={(password) => setFormulario((f) => ({ ...f, password }))}
+                requerido={!formulario.id}
+                minimo={formulario.id ? undefined : 8}
+                autoComplete="new-password"
+                marcador={formulario.id ? 'Dejar en blanco para conservar la actual' : 'Minimo 8 caracteres'}
               />
             </div>
             {formulario.id && (

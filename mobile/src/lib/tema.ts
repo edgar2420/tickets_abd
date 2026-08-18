@@ -19,10 +19,10 @@ export const colorEstado: Record<string, string> = {
 };
 
 export const colorPrioridad: Record<string, string> = {
-  'Baja': '#64748B',
-  'Media': '#1D4ED8',
+  'Baja': '#15803D',
+  'Media': '#A16207',
   'Alta': '#C2410C',
-  'Critica': '#BE123C'
+  'Critica': '#B91C1C'
 };
 
 export const codigoTicket = (id: number) => `TI-${String(id).padStart(5, '0')}`;

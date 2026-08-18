@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { usarAuth } from '../context/AuthContext';
 import { Boton, PiePagina, estilos } from '../components/Comunes';
@@ -11,6 +11,7 @@ export const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [verPassword, setVerPassword] = useState(false);
 
   const ingresar = async () => {
     setError(null);
@@ -53,14 +54,30 @@ export const LoginScreen = () => {
             </View>
             <View>
               <Text style={estilos.etiqueta}>Contrasena</Text>
-              <TextInput
-                style={estilos.campo}
-                secureTextEntry
-                value={password}
-                onChangeText={setPassword}
-                placeholder="contrasena"
-                placeholderTextColor="#94A3B8"
-              />
+              <View style={{ justifyContent: 'center' }}>
+                <TextInput
+                  style={[estilos.campo, { paddingRight: 44 }]}
+                  secureTextEntry={!verPassword}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="contrasena"
+                  placeholderTextColor="#94A3B8"
+                />
+                <TouchableOpacity
+                  onPress={() => setVerPassword((v) => !v)}
+                  style={{ position: 'absolute', right: 10, padding: 4 }}
+                  accessibilityLabel={verPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                >
+                  <Feather name={verPassword ? 'eye-off' : 'eye'} size={18} color={tema.suave} />
+                </TouchableOpacity>
+              </View>
+              {password.length > 0 && password === password.toUpperCase() && password !== password.toLowerCase() && (
+                <Text style={{ marginTop: 6, fontSize: 12, color: '#B45309', fontWeight: '600' }}>
+                  La contrasena esta escrita en mayusculas
+                </Text>
+              )}
             </View>
 
             {error && <Text style={estilos.error}>{error}</Text>}
