@@ -1,0 +1,80 @@
+# =====================================================================
+# Sistema de Gestion de Tickets TI & Control de Acceso RBAC
+# Despliegue completo: base de datos, API con WebSockets y aplicacion web
+# Autor: Ing. Edgar Rojas Apaza - Desarrollo de Modulo de Tickets
+# =====================================================================
+services:
+  base_datos:
+    image: postgres:16-alpine
+    container_name: tickets_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-tickets_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-tickets_app}
+      POSTGRES_DB: ${DB_NAME:-tickets_ti}
+      TZ: America/La_Paz
+    volumes:
+      - datos_postgres:/var/lib/postgresql/data
+      # El esquema y la carga inicial se aplican en el primer arranque
+      - ./db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "${DB_PORT_EXPUESTO:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tickets_app} -d ${DB_NAME:-tickets_ti}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [red_tickets]
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tickets_api
+    restart: unless-stopped
+    depends_on:
+      base_datos:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      API_PREFIX: /api/v1
+      DB_HOST: base_datos
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-tickets_app}
+      DB_PASSWORD: ${DB_PASSWORD:-tickets_app}
+      DB_NAME: ${DB_NAME:-tickets_ti}
+      JWT_SECRET: ${JWT_SECRET:-cambie-esta-clave-en-produccion}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:8081}
+      DOCS_OUTPUT_DIR: storage/documentos
+      TZ: America/La_Paz
+    volumes:
+      # Repositorio documental: actas PDF generadas automaticamente
+      - documentos_pdf:/app/storage/documentos
+    ports:
+      - "${API_PORT:-4000}:4000"
+    networks: [red_tickets]
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api/v1
+        VITE_SOCKET_URL: ""
+    container_name: tickets_web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    networks: [red_tickets]
+
+volumes:
+  datos_postgres:
+  documentos_pdf:
+
+networks:
+  red_tickets:
+    driver: bridge
