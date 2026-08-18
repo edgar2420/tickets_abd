@@ -55,6 +55,35 @@ export const api = async <T,>(ruta: string, opciones: Opciones = {}): Promise<T>
   return datos as T;
 };
 
+/** Envia un formulario con archivos adjuntos (multipart). */
+export const apiFormData = async <T,>(ruta: string, formulario: FormData): Promise<T> => {
+  const token = almacenToken.obtener();
+  const respuesta = await fetch(construirUrl(ruta), {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formulario
+  });
+  const datos = await respuesta.json().catch(() => ({}));
+  if (!respuesta.ok) {
+    throw new ErrorApi(respuesta.status, datos.mensaje ?? 'No fue posible enviar el mensaje', datos.detalle);
+  }
+  return datos as T;
+};
+
+/**
+ * Descarga un adjunto protegido y devuelve una URL temporal utilizable en
+ * una etiqueta de imagen. El endpoint exige token, por eso no puede
+ * referenciarse directamente desde el atributo src.
+ */
+export const urlAdjunto = async (id: number): Promise<string> => {
+  const token = almacenToken.obtener();
+  const respuesta = await fetch(construirUrl(`/adjuntos/${id}`), {
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+  if (!respuesta.ok) throw new ErrorApi(respuesta.status, 'No fue posible obtener el archivo');
+  return URL.createObjectURL(await respuesta.blob());
+};
+
 /** Descarga un PDF autenticado y lo abre en una pestana nueva. */
 export const descargarPdf = async (ruta: string, parametros?: Opciones['parametros'], nombre = 'documento.pdf') => {
   const token = almacenToken.obtener();

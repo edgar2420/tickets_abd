@@ -3,6 +3,18 @@ import { DocumentoPDF, PALETA } from './documento.js';
 import { env } from '../../config/env.js';
 
 const fecha = (valor) => (valor ? new Date(valor).toLocaleString('es-BO') : null);
+
+/** Convierte una cantidad de horas decimales en un texto legible. */
+export const duracionLegible = (horas) => {
+  if (horas === null || horas === undefined) return null;
+  const minutosTotales = Math.max(0, Math.round(Number(horas) * 60));
+  const dias = Math.floor(minutosTotales / 1440);
+  const restoHoras = Math.floor((minutosTotales % 1440) / 60);
+  const minutos = minutosTotales % 60;
+  if (dias > 0) return `${dias} d ${restoHoras} h ${minutos} min`;
+  if (restoHoras > 0) return `${restoHoras} h ${minutos} min`;
+  return `${minutos} min`;
+};
 const soloFecha = (valor) => (valor ? new Date(valor).toLocaleDateString('es-BO') : '-');
 
 export const codigoTicket = (id) => 'TI-' + String(id).padStart(5, '0');
@@ -44,53 +56,41 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
     icono: iconoEstado(ticket.estado)
   });
 
-  doc.titulo1('Clasificacion del requerimiento', 'ticket');
+  // Ficha resumida: clasificacion, responsables y tiempos en un solo bloque
+  doc.titulo1('Ficha del requerimiento', 'ticket');
   doc.camposClaveValor([
-    { etiqueta: 'Numero de ticket', valor: codigoTicket(ticket.id) },
-    { etiqueta: 'Estado actual', valor: ticket.estado },
+    { etiqueta: 'Ticket', valor: codigoTicket(ticket.id) },
+    { etiqueta: 'Estado', valor: ticket.estado },
     { etiqueta: 'Categoria', valor: ticket.categoria },
-    { etiqueta: 'Prioridad', valor: ticket.prioridad }
-  ], 2);
-
-  doc.titulo1('Trazabilidad de responsables', 'usuario');
-  doc.camposClaveValor([
+    { etiqueta: 'Prioridad', valor: ticket.prioridad },
     { etiqueta: 'Solicitante', valor: ticket.solicitante_nombre },
     { etiqueta: 'Area solicitante', valor: ticket.solicitante_area },
     { etiqueta: 'Atendido por', valor: ticket.asignado_nombre },
-    { etiqueta: 'Resuelto por', valor: ticket.resuelto_por_nombre }
-  ], 2);
-
-  const horas = ticket.horas_atencion;
-  doc.titulo1('Linea de tiempo', 'reloj');
-  doc.camposClaveValor([
-    { etiqueta: 'Fecha de creacion', valor: fecha(ticket.fecha_creacion) },
-    { etiqueta: 'Fecha de asignacion', valor: fecha(ticket.fecha_asignacion) },
-    { etiqueta: 'Fecha de resolucion', valor: fecha(ticket.fecha_resolucion) },
-    { etiqueta: 'Tiempo total de atencion', valor: horas === null || horas === undefined ? null : Number(horas).toFixed(2) + ' horas' }
-  ], 2);
+    { etiqueta: 'Resuelto por', valor: ticket.resuelto_por_nombre },
+    { etiqueta: 'Creacion', valor: fecha(ticket.fecha_creacion) },
+    { etiqueta: 'Asignacion', valor: fecha(ticket.fecha_asignacion) },
+    { etiqueta: 'Resolucion', valor: fecha(ticket.fecha_resolucion) },
+    { etiqueta: 'Tiempo de atencion', valor: duracionLegible(ticket.horas_atencion) }
+  ], 4);
 
   doc.titulo1('Descripcion reportada', 'documento');
   doc.parrafo(ticket.descripcion);
 
   if (ticket.solucion_detalle) {
-    doc.titulo1('Solucion tecnica registrada', 'check');
+    doc.titulo1('Solucion tecnica', 'check');
     doc.parrafo(ticket.solucion_detalle);
   } else {
     doc.nota('El ticket aun no cuenta con una solucion tecnica registrada.', { icono: 'alerta', color: PALETA.advertencia });
   }
 
   if (bitacora.length) {
-    doc.titulo1('Bitacora de acciones sobre el ticket', 'flujo');
+    doc.titulo1('Bitacora', 'flujo');
     doc.tabla([
-      { titulo: 'Fecha', ancho: 0.26, render: (f) => fecha(f.fecha) },
-      { titulo: 'Accion', campo: 'accion', ancho: 0.26 },
-      { titulo: 'Ejecutado por', ancho: 0.28, render: (f) => f.usuario_nombre ?? 'Sistema' },
-      { titulo: 'Origen', campo: 'ip', ancho: 0.2 }
-    ], bitacora);
+      { titulo: 'Fecha', ancho: 0.32, render: (f) => fecha(f.fecha) },
+      { titulo: 'Accion', campo: 'accion', ancho: 0.32 },
+      { titulo: 'Ejecutado por', ancho: 0.36, render: (f) => f.usuario_nombre ?? 'Sistema' }
+    ], bitacora, { alturaFila: 15 });
   }
-
-  doc.nota('Documento generado automaticamente por el Sistema de Gestion de Tickets TI. '
-    + 'Su contenido refleja el estado del registro al momento de la emision.', { icono: 'escudo' });
 
   return doc;
 };
@@ -159,13 +159,12 @@ export const construirReporteAuditoria = ({ filas, filtros }) => {
 
   doc.titulo1('Detalle de acciones registradas', 'documento');
   doc.tabla([
-    { titulo: 'Fecha', ancho: 0.16, render: (f) => fecha(f.fecha) },
-    { titulo: 'Usuario', ancho: 0.2, render: (f) => f.usuario_nombre ?? 'Sistema' },
-    { titulo: 'Entidad', campo: 'entidad', ancho: 0.12 },
-    { titulo: 'Registro', ancho: 0.09, render: (f) => f.entidad_id ?? '-' },
-    { titulo: 'Accion', campo: 'accion', ancho: 0.23 },
-    { titulo: 'Origen', campo: 'ip', ancho: 0.2 }
-  ], filas);
+    { titulo: 'Fecha', ancho: 0.22, render: (f) => fecha(f.fecha) },
+    { titulo: 'Usuario', ancho: 0.28, render: (f) => f.usuario_nombre ?? 'Sistema' },
+    { titulo: 'Entidad', campo: 'entidad', ancho: 0.14 },
+    { titulo: 'Registro', ancho: 0.1, render: (f) => f.entidad_id ?? '-' },
+    { titulo: 'Accion', campo: 'accion', ancho: 0.26 }
+  ], filas, { alturaFila: 15 });
 
   return doc;
 };

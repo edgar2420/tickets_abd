@@ -8,7 +8,8 @@ import { api, descargarPdf } from '../lib/api';
 import { obtenerSocket } from '../lib/socket';
 import { usarAuth } from '../context/AuthContext';
 import { Alerta, Cargando, Etiqueta, Modal, Panel } from '../components/Ui';
-import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
+import { Conversacion } from '../components/Conversacion';
+import { codigoTicket, duracionLegible, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
 import type { Ticket } from '../lib/tipos';
 
 interface Tecnico {
@@ -106,8 +107,14 @@ export const DetalleTicket = () => {
     <div className="space-y-5">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <button type="button" onClick={() => navegar('/tickets')} className="mb-1 inline-flex items-center gap-1 text-xs text-slate-500 hover:text-institucional-700">
-            <ArrowLeft className="h-3.5 w-3.5" />
+          <button
+            type="button"
+            onClick={() => navegar('/tickets')}
+            className="group mb-2.5 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800"
+          >
+            <span className="rounded-md bg-slate-100 p-1 transition group-hover:bg-institucional-100">
+              <ArrowLeft className="h-3.5 w-3.5" />
+            </span>
             Volver al listado
           </button>
           <h1 className="text-xl font-bold text-institucional-900">
@@ -174,6 +181,8 @@ export const DetalleTicket = () => {
             )}
           </Panel>
 
+          <Conversacion ticketId={ticket.id} />
+
           <Panel titulo="Bitacora de acciones" icono={History}>
             <ol className="space-y-3">
               {(ticket.bitacora ?? []).map((registro, indice) => (
@@ -208,10 +217,7 @@ export const DetalleTicket = () => {
               <Dato etiqueta="Creacion" valor={fechaHora(ticket.fecha_creacion)} />
               <Dato etiqueta="Asignacion" valor={ticket.fecha_asignacion ? fechaHora(ticket.fecha_asignacion) : null} />
               <Dato etiqueta="Resolucion" valor={ticket.fecha_resolucion ? fechaHora(ticket.fecha_resolucion) : null} />
-              <Dato
-                etiqueta="Tiempo transcurrido"
-                valor={ticket.horas_atencion !== null ? `${Number(ticket.horas_atencion).toFixed(2)} horas` : null}
-              />
+              <Dato etiqueta="Tiempo transcurrido" valor={duracionLegible(ticket.horas_atencion)} />
             </div>
           </Panel>
         </div>

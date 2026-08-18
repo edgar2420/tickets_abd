@@ -3,9 +3,13 @@ import { autenticar } from '../../middleware/auth.js';
 import { requierePermiso } from '../../middleware/rbac.js';
 import { validate } from '../../middleware/validate.js';
 import * as ctrl from './tickets.controller.js';
+import { comentariosRouter } from '../comentarios/comentarios.routes.js';
 
 export const ticketsRouter = Router();
 ticketsRouter.use(autenticar);
+
+// Conversacion del ticket: /tickets/:id/comentarios
+ticketsRouter.use('/:id/comentarios', comentariosRouter);
 
 // Tablero e informes
 ticketsRouter.get('/tablero', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.tablero);

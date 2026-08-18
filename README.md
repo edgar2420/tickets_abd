@@ -161,6 +161,7 @@ personal y los perfiles con `tickets.ver_todos` se incorporan a la sala del equi
 | `ticket:actualizado` | Servidor a cliente | Cambio de estado, asignacion o cierre |
 | `ticket:resuelto` | Servidor a cliente | Registro de la solucion tecnica |
 | `notificacion:nueva` | Servidor a cliente | Notificacion personal para el destinatario |
+| `comentario:nuevo` | Servidor a cliente | Mensaje nuevo en la conversacion del ticket |
 
 ## Documentacion en PDF
 
@@ -211,6 +212,18 @@ Prefijo base: `/api/v1`
 | GET | `/permisos` | `admin.roles` |
 | GET | `/notificaciones` | Autenticado |
 | GET | `/auditoria` | `reportes.ver` / `admin.usuarios` |
+
+## Conversacion y adjuntos
+
+Cada ticket incluye un hilo de mensajes entre el solicitante y el tecnico, con envio de
+capturas de pantalla y documentos: hasta cinco archivos por mensaje, de 5 MB cada uno, en
+formato PNG, JPEG, WEBP, GIF o PDF. Las imagenes se muestran como miniatura y se amplian
+dentro de la aplicacion.
+
+Los archivos se guardan con un nombre opaco en `backend/storage/adjuntos/` y se entregan
+unicamente a traves de `GET /adjuntos/:id`, que verifica la visibilidad del ticket antes de
+responder: un solicitante no puede leer los archivos de un ticket ajeno. Cada mensaje queda
+registrado en la bitacora de auditoria y avisa a la contraparte en tiempo real.
 
 ## Catalogo de categorias
 
