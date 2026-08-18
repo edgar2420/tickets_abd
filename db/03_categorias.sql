@@ -19,10 +19,10 @@ CREATE TABLE IF NOT EXISTS categorias (
 ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_categoria;
 
 INSERT INTO categorias (nombre, descripcion, color, icono) VALUES
-    ('Hardware', 'Equipos, perifericos, impresoras y componentes fisicos.', 'ambar',    'monitor'),
-    ('Software', 'Aplicaciones, sistemas operativos y licencias.',          'violeta',  'codigo'),
-    ('Redes',    'Conectividad, cableado, wifi y enlaces de datos.',        'celeste',  'red'),
-    ('Accesos',  'Altas, bajas y permisos sobre sistemas y carpetas.',      'esmeralda','llave')
+    ('Hardware', 'Equipos y componentes fisicos: computadoras, impresoras, monitores, teclados y escaneres que no encienden, fallan o estan danados.', 'ambar',    'monitor'),
+    ('Software', 'Programas y sistemas: instalacion de aplicaciones, errores al ejecutarlas, licencias, ofimatica y sistema operativo.',               'violeta',  'codigo'),
+    ('Redes',    'Conectividad y comunicaciones: sin internet, wifi intermitente, cableado, telefonia IP y enlaces entre oficinas.',                    'celeste',  'red'),
+    ('Accesos',  'Cuentas y permisos: alta o baja de usuarios, restablecimiento de contrasenas y acceso a carpetas compartidas o sistemas.',            'esmeralda','llave')
 ON CONFLICT (nombre) DO NOTHING;
 
 -- Permiso atomico para administrar el catalogo
