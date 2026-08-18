@@ -6,3 +6,4 @@ build/
 backend/storage/
 .expo/
 *.tsbuildinfo
+.vite/
