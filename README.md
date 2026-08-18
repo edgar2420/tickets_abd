@@ -9,7 +9,7 @@ seguridad basada en roles con asignacion dinamica de permisos.
 
 | Carpeta | Contenido |
 |---|---|
-| `db/` | Esquema DDL de PostgreSQL y carga inicial (areas, roles, permisos, administrador) |
+| `db/` | Esquema DDL de PostgreSQL, carga inicial y catalogo de categorias |
 | `backend/` | API REST en Node.js + Express, JWT, guard RBAC, WebSockets y motor documental PDF |
 | `frontend/` | Aplicacion web en React 18 + Tailwind CSS con iconografia vectorial (lucide-react) |
 | `mobile/` | Aplicacion movil en React Native (Expo) sobre la misma API y el mismo canal de eventos |
@@ -42,8 +42,8 @@ Servicios publicados:
 - API REST: `http://localhost:4000/api/v1`
 - Verificacion de estado: `http://localhost:4000/salud`
 
-La base de datos aplica automaticamente `db/01_schema.sql` y `db/02_seed.sql` en su primer
-arranque, mediante el directorio de inicializacion de la imagen oficial de PostgreSQL.
+La base de datos aplica automaticamente todos los archivos de `db/` en orden numerico durante
+su primer arranque, mediante el directorio de inicializacion de la imagen oficial de PostgreSQL.
 
 ## Ejecucion en desarrollo
 
@@ -101,6 +101,7 @@ Permisos precargados:
 | ADMIN | `admin.usuarios` | Gestion CRUD de usuarios |
 | ADMIN | `admin.roles` | Gestion CRUD de roles y matriz de permisos |
 | ADMIN | `admin.areas` | Gestion del catalogo de areas |
+| ADMIN | `admin.categorias` | Gestion del catalogo de categorias de tickets |
 | REPORTES | `reportes.ver` | Consultar tablero de indicadores |
 | REPORTES | `reportes.exportar` | Exportar reportes y documentacion en PDF |
 
@@ -180,9 +181,18 @@ Prefijo base: `/api/v1`
 | GET/POST/PUT/DELETE | `/usuarios` | `admin.usuarios` |
 | GET/POST/PUT/DELETE | `/roles` | `admin.roles` |
 | GET/POST/PUT/DELETE | `/areas` | `admin.areas` |
+| GET/POST/PUT/DELETE | `/categorias` | `admin.categorias` (lectura: autenticado) |
 | GET | `/permisos` | `admin.roles` |
 | GET | `/notificaciones` | Autenticado |
 | GET | `/auditoria` | `reportes.ver` / `admin.usuarios` |
+
+## Catalogo de categorias
+
+La clasificacion del ticket no esta fija en el codigo: se administra desde
+**Categorias** en el panel, con nombre, descripcion, color e icono propios. El backend
+valida cada ticket contra el catalogo y, al renombrar una categoria, propaga el cambio a
+los tickets ya registrados. La baja es logica, de modo que el historial conserva su
+clasificacion aunque la categoria deje de ofrecerse.
 
 ## Seguridad aplicada
 

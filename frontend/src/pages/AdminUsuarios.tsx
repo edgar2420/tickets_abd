@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
 import { api } from '../lib/api';
-import { Alerta, Cargando, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { usarConfirmacion } from '../components/Confirmacion';
 import { CampoPassword } from '../components/CampoPassword';
 import { fechaCorta } from '../lib/formato';
 import type { Area, Rol, Usuario } from '../lib/tipos';
@@ -29,6 +30,7 @@ export const AdminUsuarios = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const { confirmar, dialogo } = usarConfirmacion();
 
   const cargar = useCallback(async () => {
     try {
@@ -97,34 +99,40 @@ export const AdminUsuarios = () => {
     }
   };
 
-  const desactivar = async (usuario: Usuario) => {
-    if (!window.confirm(`Desactivar al usuario ${usuario.nombre}?`)) return;
-    try {
+  const desactivar = (usuario: Usuario) => confirmar({
+    titulo: 'Desactivar usuario',
+    mensaje: (
+      <>
+        <strong>{usuario.nombre}</strong> no podra volver a iniciar sesion. Su historial de
+        tickets se conserva intacto y la cuenta puede reactivarse mas adelante.
+      </>
+    ),
+    textoConfirmar: 'Desactivar',
+    icono: Ban,
+    alConfirmar: async () => {
       await api(`/usuarios/${usuario.id}`, { metodo: 'DELETE' });
       await cargar();
-    } catch (fallo) {
-      setError(fallo instanceof Error ? fallo.message : 'No fue posible desactivar el usuario');
     }
-  };
+  });
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">Gestion de usuarios</h1>
-          <p className="text-sm text-slate-500">Alta, edicion y habilitacion de cuentas por area y rol</p>
-        </div>
+      <EncabezadoPagina
+        titulo="Gestion de usuarios"
+        descripcion="Alta, edicion y habilitacion de cuentas por area y rol"
+        icono={Users}
+      >
         <button type="button" className="boton-primario" onClick={abrirNuevo}>
           <PlusCircle className="h-4 w-4" />
           Nuevo usuario
         </button>
-      </header>
+      </EncabezadoPagina>
 
       {error && <Alerta mensaje={error} />}
 
       <section className="panel overflow-hidden">
         {!usuarios && <Cargando />}
-        {usuarios && usuarios.length === 0 && <Vacio texto="No existen usuarios registrados" />}
+        {usuarios && usuarios.length === 0 && <Vacio icono={Users} texto="No existen usuarios registrados" />}
         {usuarios && usuarios.length > 0 && (
           <div className="overflow-x-auto">
             <table className="tabla">
@@ -160,16 +168,16 @@ export const AdminUsuarios = () => {
                         <button
                           type="button"
                           onClick={() => abrirEdicion(usuario)}
-                          className="rounded-md border border-slate-300 p-1.5 text-slate-600 transition hover:bg-slate-50"
+                          className="boton-icono"
                           title="Editar"
                         >
                           <PencilLine className="h-4 w-4" />
                         </button>
                         <button
                           type="button"
-                          onClick={() => void desactivar(usuario)}
+                          onClick={() => desactivar(usuario)}
                           disabled={!usuario.activo}
-                          className="rounded-md border border-rose-200 p-1.5 text-rose-700 transition hover:bg-rose-50 disabled:opacity-40"
+                          className="boton-icono-peligro"
                           title="Desactivar"
                         >
                           <Ban className="h-4 w-4" />
@@ -257,6 +265,8 @@ export const AdminUsuarios = () => {
           </div>
         </form>
       </Modal>
+
+      {dialogo}
     </div>
   );
 };

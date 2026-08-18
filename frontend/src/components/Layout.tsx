@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Bell, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Menu, ScrollText,
-  ShieldCheck, Ticket, UserCog, Users, X, type LucideIcon
+  ShieldCheck, Tags, Ticket, UserCog, Users, X, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
@@ -23,6 +23,7 @@ const ENLACES: Enlace[] = [
   { ruta: '/admin/usuarios', texto: 'Usuarios', icono: Users, permisos: ['admin.usuarios'] },
   { ruta: '/admin/roles', texto: 'Roles y permisos', icono: ShieldCheck, permisos: ['admin.roles'] },
   { ruta: '/admin/areas', texto: 'Areas', icono: Building2, permisos: ['admin.areas'] },
+  { ruta: '/admin/categorias', texto: 'Categorias', icono: Tags, permisos: ['admin.categorias'] },
   { ruta: '/auditoria', texto: 'Auditoria', icono: ScrollText, permisos: ['reportes.ver', 'admin.usuarios'] }
 ];
 
@@ -152,24 +153,31 @@ export const Layout = () => {
           }`}
         >
           <nav className="flex flex-col gap-1 p-4">
-            {enlaces.map(({ ruta, texto, icono: Icono }) => (
-              <NavLink
-                key={ruta}
-                to={ruta}
-                end={ruta === '/tickets'}
-                onClick={() => setMenuAbierto(false)}
-                className={({ isActive }) =>
-                  `flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-institucional-900 text-white'
-                      : 'text-slate-600 hover:bg-institucional-50 hover:text-institucional-900'
-                  }`
-                }
-              >
-                <Icono className="h-4 w-4" />
-                {texto}
-              </NavLink>
-            ))}
+            {enlaces.map(({ ruta, texto, icono: Icono }, indice) => {
+              // Rotulo separador al pasar de la operacion diaria a la administracion
+              const abreAdministracion = indice > 0
+                && enlaces[indice - 1].permisos[0].startsWith('tickets')
+                && !ruta.startsWith('/tickets');
+
+              return (
+                <div key={ruta} className="contents">
+                  {abreAdministracion && (
+                    <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      Administracion
+                    </p>
+                  )}
+                  <NavLink
+                    to={ruta}
+                    end={ruta === '/tickets'}
+                    onClick={() => setMenuAbierto(false)}
+                    className={({ isActive }) => (isActive ? 'enlace-menu-activo' : 'enlace-menu-inactivo')}
+                  >
+                    <Icono className="h-4 w-4" />
+                    {texto}
+                  </NavLink>
+                </div>
+              );
+            })}
           </nav>
 
           <div className="mx-4 mt-4 rounded-md border border-slate-200 bg-slate-50 p-3">

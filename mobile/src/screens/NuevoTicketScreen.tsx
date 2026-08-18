@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { api } from '../lib/api';
 import { Boton, Panel, PiePagina, estilos } from '../components/Comunes';
 import { tema } from '../lib/tema';
-import type { CategoriaTicket, PrioridadTicket, Ticket } from '../lib/tipos';
+import type { PrioridadTicket, Ticket } from '../lib/tipos';
 import type { ParametrosNavegacion } from '../navegacion';
 
 type Propiedades = NativeStackScreenProps<ParametrosNavegacion, 'NuevoTicket'>;
 
-const CATEGORIAS: CategoriaTicket[] = ['Hardware', 'Software', 'Redes', 'Accesos'];
 const PRIORIDADES: PrioridadTicket[] = ['Baja', 'Media', 'Alta', 'Critica'];
+
+interface Categoria {
+  id: number;
+  nombre: string;
+  descripcion: string | null;
+}
 
 const Selector = <T extends string>({ etiqueta, opciones, valor, alCambiar }: {
   etiqueta: string;
@@ -44,10 +49,21 @@ const Selector = <T extends string>({ etiqueta, opciones, valor, alCambiar }: {
 export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
   const [titulo, setTitulo] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [categoria, setCategoria] = useState<CategoriaTicket>('Software');
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [categoria, setCategoria] = useState('');
   const [prioridad, setPrioridad] = useState<PrioridadTicket>('Media');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+
+  // El catalogo de categorias se administra desde el panel web
+  useEffect(() => {
+    void api<{ datos: Categoria[] }>('/categorias', { parametros: { activas: true } })
+      .then(({ datos }) => {
+        setCategorias(datos);
+        setCategoria((actual) => actual || datos[0]?.nombre || '');
+      })
+      .catch(() => setError('No fue posible cargar las categorias'));
+  }, []);
 
   const registrar = async () => {
     setEnviando(true);
@@ -80,7 +96,12 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
             />
           </View>
 
-          <Selector etiqueta="Categoria" opciones={CATEGORIAS} valor={categoria} alCambiar={setCategoria} />
+          <Selector
+            etiqueta="Categoria"
+            opciones={categorias.map((c) => c.nombre)}
+            valor={categoria}
+            alCambiar={setCategoria}
+          />
           <Selector etiqueta="Prioridad" opciones={PRIORIDADES} valor={prioridad} alCambiar={setPrioridad} />
 
           <View>
@@ -100,7 +121,7 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
           <Boton
             texto="Registrar ticket"
             icono="save"
-            deshabilitado={enviando || titulo.trim().length < 6 || descripcion.trim().length < 10}
+            deshabilitado={enviando || !categoria || titulo.trim().length < 6 || descripcion.trim().length < 10}
             alPresionar={() => void registrar()}
           />
         </Panel>

@@ -7,6 +7,7 @@ import { env } from './config/env.js';
 import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { areasRouter } from './modules/areas/areas.routes.js';
+import { categoriasRouter } from './modules/categorias/categorias.routes.js';
 import { rolesRouter } from './modules/roles/roles.routes.js';
 import { permisosRouter } from './modules/permisos/permisos.routes.js';
 import { usuariosRouter } from './modules/usuarios/usuarios.routes.js';
@@ -36,6 +37,7 @@ export const crearApp = () => {
   const api = express.Router();
   api.use('/auth', authRouter);
   api.use('/areas', areasRouter);
+  api.use('/categorias', categoriasRouter);
   api.use('/roles', rolesRouter);
   api.use('/permisos', permisosRouter);
   api.use('/usuarios', usuariosRouter);
