@@ -2,7 +2,7 @@ import { ShieldCheck } from 'lucide-react';
 
 /** Pie institucional presente en toda la aplicacion web. */
 export const PiePagina = () => (
-  <footer className="border-t border-slate-200 bg-white px-6 py-4">
+  <footer className="shrink-0 border-t border-slate-200 bg-white px-6 py-3">
     <div className="flex flex-col items-center justify-between gap-2 text-xs text-slate-500 sm:flex-row">
       <p className="flex items-center gap-2">
         <ShieldCheck className="h-4 w-4 text-institucional-700" />

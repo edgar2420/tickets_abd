@@ -78,7 +78,6 @@ export const Auditoria = () => {
                   <th>Entidad</th>
                   <th>Registro</th>
                   <th>Accion</th>
-                  <th>Origen</th>
                 </tr>
               </thead>
               <tbody>
@@ -94,7 +93,6 @@ export const Auditoria = () => {
                     </td>
                     <td className="font-mono text-xs text-slate-600">{registro.entidad_id ?? '-'}</td>
                     <td className="text-slate-700">{registro.accion}</td>
-                    <td className="font-mono text-xs text-slate-500">{registro.ip ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>

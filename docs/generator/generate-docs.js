@@ -53,6 +53,9 @@ const ENDPOINTS = [
   { metodo: 'PUT', ruta: '/tickets/:id/cerrar', permiso: 'Solicitante o mesa de ayuda', descripcion: 'Cierre conforme del ticket' },
   { metodo: 'GET', ruta: '/tickets/:id/pdf', permiso: 'tickets.ver_propios / ver_todos', descripcion: 'Acta PDF individual del ticket' },
   { metodo: 'GET', ruta: '/tickets/reporte/pdf', permiso: 'reportes.exportar', descripcion: 'Reporte consolidado en PDF' },
+  { metodo: 'GET', ruta: '/tickets/:id/comentarios', permiso: 'Participante del ticket', descripcion: 'Conversacion del ticket' },
+  { metodo: 'POST', ruta: '/tickets/:id/comentarios', permiso: 'Participante del ticket', descripcion: 'Mensaje con hasta cinco adjuntos' },
+  { metodo: 'GET', ruta: '/adjuntos/:id', permiso: 'Participante del ticket', descripcion: 'Descarga del archivo adjunto' },
   { metodo: 'GET', ruta: '/areas', permiso: 'Autenticado', descripcion: 'Catalogo de areas' },
   { metodo: 'POST', ruta: '/areas', permiso: 'admin.areas', descripcion: 'Alta de area' },
   { metodo: 'PUT', ruta: '/areas/:id', permiso: 'admin.areas', descripcion: 'Edicion de area' },
@@ -85,13 +88,15 @@ const EVENTOS = [
   { evento: 'ticket:creado', direccion: 'Servidor a cliente', descripcion: 'Nuevo ticket registrado en la mesa de ayuda' },
   { evento: 'ticket:actualizado', direccion: 'Servidor a cliente', descripcion: 'Cambio de estado, asignacion o cierre' },
   { evento: 'ticket:resuelto', direccion: 'Servidor a cliente', descripcion: 'Registro de la solucion tecnica' },
-  { evento: 'notificacion:nueva', direccion: 'Servidor a cliente', descripcion: 'Notificacion personal para el destinatario' }
+  { evento: 'notificacion:nueva', direccion: 'Servidor a cliente', descripcion: 'Notificacion personal para el destinatario' },
+  { evento: 'comentario:nuevo', direccion: 'Servidor a cliente', descripcion: 'Mensaje nuevo en la conversacion del ticket' }
 ];
 
 const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/01_schema.sql', descripcion: 'Esquema DDL completo e indices' },
   { componente: 'Base de datos', ruta: 'db/02_seed.sql', descripcion: 'Areas, roles, permisos y usuario administrador' },
   { componente: 'Base de datos', ruta: 'db/03_categorias.sql', descripcion: 'Catalogo administrable de categorias' },
+  { componente: 'Base de datos', ruta: 'db/04_comentarios.sql', descripcion: 'Conversacion y adjuntos del ticket' },
   { componente: 'API', ruta: 'backend/src/app.js', descripcion: 'Composicion de middlewares y montaje de rutas' },
   { componente: 'API', ruta: 'backend/src/server.js', descripcion: 'Servidor HTTP, sockets y apagado ordenado' },
   { componente: 'API', ruta: 'backend/src/middleware/auth.js', descripcion: 'Verificacion JWT para HTTP y para sockets' },
@@ -166,7 +171,9 @@ const construir = async () => {
     { tabla: 'usuarios', proposito: 'Cuentas con area, rol, estado y hash bcrypt de la contrasena' },
     { tabla: 'tickets', proposito: 'Requerimientos con trazabilidad de solicitante, asignado y resolutor' },
     { tabla: 'auditoria', proposito: 'Bitacora de cada accion ejecutada, base de los reportes PDF' },
-    { tabla: 'notificaciones', proposito: 'Persistencia de los avisos emitidos por WebSockets' }
+    { tabla: 'notificaciones', proposito: 'Persistencia de los avisos emitidos por WebSockets' },
+    { tabla: 'comentarios', proposito: 'Conversacion entre solicitante y tecnico sobre el ticket' },
+    { tabla: 'adjuntos', proposito: 'Capturas de pantalla y documentos asociados al ticket' }
   ]);
   doc.nota('La categoria del ticket dejo de ser una lista fija en el codigo: ahora se valida contra el '
     + 'catalogo administrable de la tabla categorias, mantenible desde el panel de administracion. '
