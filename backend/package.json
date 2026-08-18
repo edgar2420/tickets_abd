@@ -11,6 +11,7 @@
     "dev": "node --watch src/server.js",
     "migrate": "node src/scripts/migrate.js",
     "seed": "node src/scripts/seed.js",
+    "demo": "node src/scripts/demo.js",
     "docs:pdf": "node ../docs/generator/generate-docs.js"
   },
   "dependencies": {
