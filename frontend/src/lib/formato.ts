@@ -31,3 +31,31 @@ export const estiloPrioridad: Record<PrioridadTicket, string> = {
   // La prioridad critica parpadea para destacar sobre el resto del listado
   'Critica': 'bg-red-100 text-red-800 border-red-300 animate-pulse'
 };
+
+/** Paleta de las categorias administrables, resuelta desde el token guardado en la base. */
+export const estiloCategoria: Record<string, string> = {
+  celeste: 'bg-sky-100 text-sky-800 border-sky-300',
+  violeta: 'bg-violet-100 text-violet-800 border-violet-300',
+  esmeralda: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+  ambar: 'bg-amber-100 text-amber-800 border-amber-300',
+  rosa: 'bg-rose-100 text-rose-800 border-rose-300',
+  pizarra: 'bg-slate-100 text-slate-700 border-slate-300'
+};
+
+export const fondoCategoria: Record<string, string> = {
+  celeste: 'bg-sky-500',
+  violeta: 'bg-violet-500',
+  esmeralda: 'bg-emerald-500',
+  ambar: 'bg-amber-500',
+  rosa: 'bg-rose-500',
+  pizarra: 'bg-slate-500'
+};
+
+export const textoCategoria: Record<string, string> = {
+  celeste: 'text-sky-600',
+  violeta: 'text-violet-600',
+  esmeralda: 'text-emerald-600',
+  ambar: 'text-amber-600',
+  rosa: 'text-rose-600',
+  pizarra: 'text-slate-600'
+};

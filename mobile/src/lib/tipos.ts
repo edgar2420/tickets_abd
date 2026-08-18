@@ -1,6 +1,7 @@
 export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
-export type CategoriaTicket = 'Hardware' | 'Software' | 'Redes' | 'Accesos';
+/** La categoria proviene del catalogo administrable. */
+export type CategoriaTicket = string;
 
 export interface Usuario {
   id: number;

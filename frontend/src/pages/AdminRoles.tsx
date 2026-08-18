@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { CheckCircle2, FileDown, PencilLine, PlusCircle, ShieldCheck, Trash2 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
-import { Alerta, Cargando, Etiqueta, Modal, Panel, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Panel, Vacio } from '../components/Ui';
+import { usarConfirmacion } from '../components/Confirmacion';
 import type { Permiso, Rol } from '../lib/tipos';
 
 interface Formulario {
@@ -27,6 +28,7 @@ export const AdminRoles = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const { confirmar, dialogo } = usarConfirmacion();
 
   const cargar = useCallback(async () => {
     try {
@@ -101,24 +103,33 @@ export const AdminRoles = () => {
     }
   };
 
-  const eliminar = async (rol: Rol) => {
-    if (!window.confirm(`Eliminar el rol ${rol.nombre}?`)) return;
-    try {
-      await api(`/roles/${rol.id}`, { metodo: 'DELETE' });
-      await cargar();
-    } catch (fallo) {
-      setError(fallo instanceof Error ? fallo.message : 'No fue posible eliminar el rol');
+  const eliminar = (rol: Rol) => confirmar({
+    titulo: 'Eliminar rol',
+    mensaje: (
+      <>
+        Se eliminara el rol <strong>{rol.nombre}</strong> junto con su matriz de permisos.
+        La operacion se rechaza si todavia tiene usuarios asignados.
+      </>
+    ),
+    textoConfirmar: 'Eliminar',
+    icono: Trash2,
+    alConfirmar: async () => {
+      try {
+        await api(`/roles/${rol.id}`, { metodo: 'DELETE' });
+        await cargar();
+      } catch (fallo) {
+        setError(fallo instanceof Error ? fallo.message : 'No fue posible eliminar el rol');
+      }
     }
-  };
+  });
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">Roles y matriz de permisos</h1>
-          <p className="text-sm text-slate-500">Construccion dinamica de roles sobre los permisos atomicos del sistema</p>
-        </div>
-        <div className="flex gap-2">
+      <EncabezadoPagina
+        titulo="Roles y matriz de permisos"
+        descripcion="Construccion dinamica de roles sobre los permisos atomicos del sistema"
+        icono={ShieldCheck}
+      >
           <button
             type="button"
             className="boton-secundario"
@@ -131,13 +142,12 @@ export const AdminRoles = () => {
             <PlusCircle className="h-4 w-4" />
             Nuevo rol
           </button>
-        </div>
-      </header>
+      </EncabezadoPagina>
 
       {error && <Alerta mensaje={error} />}
 
       {!roles && <Cargando />}
-      {roles && roles.length === 0 && <Vacio texto="No existen roles configurados" />}
+      {roles && roles.length === 0 && <Vacio icono={ShieldCheck} texto="No existen roles configurados" />}
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {(roles ?? []).map((rol) => (
@@ -147,12 +157,10 @@ export const AdminRoles = () => {
             icono={ShieldCheck}
             acciones={
               <div className="flex gap-2">
-                <button type="button" onClick={() => abrirEdicion(rol)}
-                  className="rounded-md border border-slate-300 p-1.5 text-slate-600 transition hover:bg-slate-50" title="Editar">
+                <button type="button" onClick={() => abrirEdicion(rol)} className="boton-icono" title="Editar">
                   <PencilLine className="h-4 w-4" />
                 </button>
-                <button type="button" onClick={() => void eliminar(rol)}
-                  className="rounded-md border border-rose-200 p-1.5 text-rose-700 transition hover:bg-rose-50" title="Eliminar">
+                <button type="button" onClick={() => eliminar(rol)} className="boton-icono-peligro" title="Eliminar">
                   <Trash2 className="h-4 w-4" />
                 </button>
               </div>
@@ -236,6 +244,8 @@ export const AdminRoles = () => {
           </div>
         </form>
       </Modal>
+
+      {dialogo}
     </div>
   );
 };

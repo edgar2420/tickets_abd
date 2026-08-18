@@ -11,6 +11,7 @@ import { DetalleTicket } from './pages/DetalleTicket';
 import { AdminUsuarios } from './pages/AdminUsuarios';
 import { AdminRoles } from './pages/AdminRoles';
 import { AdminAreas } from './pages/AdminAreas';
+import { AdminCategorias } from './pages/AdminCategorias';
 import { Auditoria } from './pages/Auditoria';
 
 const Privado = ({ permisos, elemento }: { permisos?: string[]; elemento: JSX.Element }) => (
@@ -37,6 +38,7 @@ export const App = () => (
           <Route path="/admin/usuarios" element={<Privado permisos={['admin.usuarios']} elemento={<AdminUsuarios />} />} />
           <Route path="/admin/roles" element={<Privado permisos={['admin.roles']} elemento={<AdminRoles />} />} />
           <Route path="/admin/areas" element={<Privado permisos={['admin.areas']} elemento={<AdminAreas />} />} />
+          <Route path="/admin/categorias" element={<Privado permisos={['admin.categorias']} elemento={<AdminCategorias />} />} />
           <Route path="/auditoria" element={<Privado permisos={['reportes.ver', 'admin.usuarios']} elemento={<Auditoria />} />} />
         </Route>
         <Route path="*" element={<Navigate to="/tablero" replace />} />

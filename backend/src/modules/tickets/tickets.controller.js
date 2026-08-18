@@ -10,15 +10,21 @@ import {
   bitacoraTicket, archivarActaTicket
 } from './tickets.service.js';
 
-const CATEGORIAS = ['Hardware', 'Software', 'Redes', 'Accesos'];
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
 
 export const crearTicketSchema = z.object({
   titulo: z.string().min(6).max(200),
   descripcion: z.string().min(10),
-  categoria: z.enum(CATEGORIAS),
+  categoria: z.string().min(3).max(50),
   prioridad: z.enum(PRIORIDADES).default('Media')
 });
+
+/** La categoria se valida contra el catalogo administrable, no contra una lista fija. */
+const validarCategoria = async (nombre) => {
+  const { rows } = await query('SELECT nombre FROM categorias WHERE nombre = $1 AND activo = TRUE', [nombre]);
+  if (!rows[0]) throw HttpError.badRequest(`La categoria "${nombre}" no existe o no esta habilitada`);
+  return rows[0].nombre;
+};
 
 export const resolverSchema = z.object({
   solucion_detalle: z.string().min(10, 'Debe describir la solucion aplicada')
@@ -51,7 +57,8 @@ export const detalle = asyncHandler(async (req, res) => {
 
 /** ESTADO ABIERTO: el solicitante se toma del JWT, sin confiar en el cliente. */
 export const crear = asyncHandler(async (req, res) => {
-  const { titulo, descripcion, categoria, prioridad } = req.body;
+  const { titulo, descripcion, prioridad } = req.body;
+  const categoria = await validarCategoria(req.body.categoria);
   const { rows } = await query(
     `INSERT INTO tickets (titulo, descripcion, categoria, prioridad, estado, solicitante_id)
      VALUES ($1, $2, $3, $4, 'Abierto', $5) RETURNING id`,

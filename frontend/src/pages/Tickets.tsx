@@ -4,18 +4,18 @@ import { FileDown, Filter, PlusCircle, RefreshCcw, Search, Ticket as IconoTicket
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
-import { Alerta, Cargando, Etiqueta, Panel, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio } from '../components/Ui';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
-import type { Ticket } from '../lib/tipos';
+import type { Categoria, Ticket } from '../lib/tipos';
 
 const ESTADOS = ['Abierto', 'En Proceso', 'Resuelto', 'Cerrado'];
-const CATEGORIAS = ['Hardware', 'Software', 'Redes', 'Accesos'];
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
 
 export const Tickets = () => {
   const { puede } = usarAuth();
   const { ultimoEventoTicket } = usarNotificaciones();
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
+  const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [filtros, setFiltros] = useState({ estado: '', categoria: '', prioridad: '', busqueda: '' });
 
@@ -33,20 +33,22 @@ export const Tickets = () => {
     void cargar();
   }, [cargar, ultimoEventoTicket]);
 
+  // El filtro se alimenta del catalogo administrable de categorias
+  useEffect(() => {
+    void api<{ datos: Categoria[] }>('/categorias')
+      .then(({ datos }) => setCategorias(datos))
+      .catch(() => setCategorias([]));
+  }, []);
+
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">
-            {puede('tickets.ver_todos') ? 'Todos los tickets' : 'Mis tickets'}
-          </h1>
-          <p className="text-sm text-slate-500">
-            {puede('tickets.ver_todos')
-              ? 'Listado completo de requerimientos registrados en la mesa de ayuda'
-              : 'Requerimientos registrados por su usuario'}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <EncabezadoPagina
+        icono={IconoTicket}
+        titulo={puede('tickets.ver_todos') ? 'Todos los tickets' : 'Mis tickets'}
+        descripcion={puede('tickets.ver_todos')
+          ? 'Listado completo de requerimientos registrados en la mesa de ayuda'
+          : 'Requerimientos registrados por su usuario'}
+      >
           <button type="button" className="boton-secundario" onClick={() => void cargar()}>
             <RefreshCcw className="h-4 w-4" />
             Actualizar
@@ -67,8 +69,7 @@ export const Tickets = () => {
               Nuevo ticket
             </Link>
           )}
-        </div>
-      </header>
+      </EncabezadoPagina>
 
       <Panel titulo="Filtros de busqueda" icono={Filter}>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -83,7 +84,9 @@ export const Tickets = () => {
             <label className="etiqueta">Categoria</label>
             <select className="campo" value={filtros.categoria} onChange={(e) => setFiltros((f) => ({ ...f, categoria: e.target.value }))}>
               <option value="">Todas</option>
-              {CATEGORIAS.map((categoria) => <option key={categoria} value={categoria}>{categoria}</option>)}
+              {categorias.map((categoria) => (
+                <option key={categoria.id} value={categoria.nombre}>{categoria.nombre}</option>
+              ))}
             </select>
           </div>
           <div>
@@ -112,7 +115,9 @@ export const Tickets = () => {
 
       <section className="panel overflow-hidden">
         {!tickets && <Cargando texto="Consultando tickets" />}
-        {tickets && tickets.length === 0 && <Vacio texto="No se encontraron tickets con los criterios aplicados" />}
+        {tickets && tickets.length === 0 && (
+          <Vacio icono={IconoTicket} texto="No se encontraron tickets con los criterios aplicados" />
+        )}
         {tickets && tickets.length > 0 && (
           <div className="overflow-x-auto">
             <table className="tabla">
