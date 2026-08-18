@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, Building2, CheckCircle2, PencilLine, PlusCircle } from 'lucide-react';
 import { api } from '../lib/api';
-import { Alerta, Cargando, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaCorta } from '../lib/formato';
 import type { Area } from '../lib/tipos';
 
@@ -13,6 +14,7 @@ export const AdminAreas = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
+  const { confirmar, dialogo } = usarConfirmacion();
 
   const cargar = useCallback(async () => {
     try {
@@ -46,23 +48,29 @@ export const AdminAreas = () => {
     }
   };
 
-  const desactivar = async (area: Area) => {
-    if (!window.confirm(`Desactivar el area ${area.nombre}?`)) return;
-    try {
+  const desactivar = (area: Area) => confirmar({
+    titulo: 'Desactivar area',
+    mensaje: (
+      <>
+        El area <strong>{area.nombre}</strong> dejara de ofrecerse al registrar usuarios.
+        Los {area.total_usuarios ?? 0} usuarios asignados conservan su area actual.
+      </>
+    ),
+    textoConfirmar: 'Desactivar',
+    icono: Ban,
+    alConfirmar: async () => {
       await api(`/areas/${area.id}`, { metodo: 'DELETE' });
       await cargar();
-    } catch (fallo) {
-      setError(fallo instanceof Error ? fallo.message : 'No fue posible desactivar el area');
     }
-  };
+  });
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">Areas de la empresa</h1>
-          <p className="text-sm text-slate-500">Catalogo organizacional utilizado en la asignacion de usuarios</p>
-        </div>
+      <EncabezadoPagina
+        titulo="Areas de la empresa"
+        descripcion="Catalogo organizacional utilizado en la asignacion de usuarios"
+        icono={Building2}
+      >
         <button
           type="button"
           className="boton-primario"
@@ -71,13 +79,13 @@ export const AdminAreas = () => {
           <PlusCircle className="h-4 w-4" />
           Nueva area
         </button>
-      </header>
+      </EncabezadoPagina>
 
       {error && <Alerta mensaje={error} />}
 
       <section className="panel overflow-hidden">
         {!areas && <Cargando />}
-        {areas && areas.length === 0 && <Vacio texto="No existen areas registradas" />}
+        {areas && areas.length === 0 && <Vacio icono={Building2} texto="No existen areas registradas" />}
         {areas && areas.length > 0 && (
           <div className="overflow-x-auto">
             <table className="tabla">
@@ -108,7 +116,7 @@ export const AdminAreas = () => {
                       <div className="flex justify-end gap-2">
                         <button
                           type="button"
-                          className="rounded-md border border-slate-300 p-1.5 text-slate-600 transition hover:bg-slate-50"
+                          className="boton-icono"
                           title="Editar"
                           onClick={() => { setFormulario({ id: area.id, nombre: area.nombre, activo: area.activo }); setModalAbierto(true); }}
                         >
@@ -116,10 +124,10 @@ export const AdminAreas = () => {
                         </button>
                         <button
                           type="button"
-                          className="rounded-md border border-rose-200 p-1.5 text-rose-700 transition hover:bg-rose-50 disabled:opacity-40"
+                          className="boton-icono-peligro"
                           title="Desactivar"
                           disabled={!area.activo}
-                          onClick={() => void desactivar(area)}
+                          onClick={() => desactivar(area)}
                         >
                           <Ban className="h-4 w-4" />
                         </button>
@@ -160,6 +168,8 @@ export const AdminAreas = () => {
           </div>
         </form>
       </Modal>
+
+      {dialogo}
     </div>
   );
 };

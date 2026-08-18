@@ -7,46 +7,118 @@
   body {
     @apply bg-slate-100 text-slate-800 antialiased;
   }
+  /* Barra de desplazamiento discreta y acorde a la paleta institucional */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { @apply bg-slate-100; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-slate-300; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
 }
 
 @layer components {
   .panel {
-    @apply bg-white rounded-lg border border-slate-200 shadow-panel;
+    @apply rounded-xl border border-slate-200 bg-white shadow-panel;
   }
+  .panel-interactivo {
+    @apply panel transition duration-200 hover:-translate-y-0.5 hover:border-institucional-300 hover:shadow-lg;
+  }
+
   .campo {
-    @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none
-           transition focus:border-institucional-700 focus:ring-2 focus:ring-institucional-700/20
-           disabled:bg-slate-100 disabled:text-slate-500;
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none
+           transition placeholder:text-slate-400
+           focus:border-institucional-700 focus:ring-4 focus:ring-institucional-700/10
+           disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500;
   }
+  /* Selector con indicador propio: el nativo se ve distinto en cada navegador */
+  select.campo {
+    @apply cursor-pointer appearance-none bg-no-repeat pr-10 font-medium;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+  }
+  textarea.campo { @apply leading-relaxed; }
+
   .etiqueta {
-    @apply block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500;
   }
+
   .boton {
-    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold
-           transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold
+           transition duration-150 focus:outline-none focus:ring-4 active:scale-[0.98]
+           disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100;
   }
   .boton-primario {
-    @apply boton bg-institucional-900 text-white hover:bg-institucional-800 focus:ring-institucional-700;
+    @apply boton bg-institucional-900 text-white shadow-sm hover:bg-institucional-800 focus:ring-institucional-700/25;
   }
   .boton-secundario {
-    @apply boton border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-300;
+    @apply boton border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus:ring-slate-300/40;
   }
   .boton-acento {
-    @apply boton bg-institucional-700 text-white hover:bg-institucional-600 focus:ring-institucional-700;
+    @apply boton bg-institucional-700 text-white shadow-sm hover:bg-institucional-600 focus:ring-institucional-700/25;
   }
   .boton-peligro {
-    @apply boton bg-rose-700 text-white hover:bg-rose-800 focus:ring-rose-400;
+    @apply boton bg-rose-700 text-white shadow-sm hover:bg-rose-800 focus:ring-rose-400/30;
   }
+  /* Boton compacto de las columnas de acciones */
+  .boton-icono {
+    @apply inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white p-2 text-slate-600
+           transition hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800
+           disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-300
+           disabled:hover:bg-white disabled:hover:text-slate-600;
+  }
+  .boton-icono-peligro {
+    @apply boton-icono border-rose-200 text-rose-700 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-800;
+  }
+
   .tabla {
     @apply w-full text-sm;
   }
   .tabla thead th {
-    @apply bg-institucional-900 text-white text-left text-xs font-semibold uppercase tracking-wide px-4 py-3;
+    @apply sticky top-0 z-10 whitespace-nowrap bg-institucional-900 px-4 py-3 text-left text-xs
+           font-semibold uppercase tracking-wide text-white;
   }
   .tabla tbody td {
     @apply border-b border-slate-100 px-4 py-3 align-middle;
   }
+  .tabla tbody tr {
+    @apply transition-colors;
+  }
   .tabla tbody tr:hover {
-    @apply bg-institucional-50;
+    @apply bg-institucional-50/70;
+  }
+  .tabla tbody tr:last-child td {
+    @apply border-b-0;
+  }
+
+  /* Opcion seleccionable en forma de ficha, para categoria y prioridad */
+  .ficha {
+    @apply inline-flex cursor-pointer items-center gap-2 rounded-lg border-2 px-3.5 py-2 text-sm font-semibold
+           transition duration-150 hover:-translate-y-0.5;
+  }
+  .ficha-inactiva {
+    @apply ficha border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50;
+  }
+  .ficha-activa {
+    @apply ficha border-institucional-700 bg-institucional-900 text-white shadow-md;
+  }
+
+  .enlace-menu {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition duration-150;
+  }
+  .enlace-menu-activo {
+    @apply enlace-menu bg-institucional-900 text-white shadow-sm;
+  }
+  .enlace-menu-inactivo {
+    @apply enlace-menu text-slate-600 hover:bg-institucional-50 hover:text-institucional-900;
+  }
+}
+
+@layer utilities {
+  /* Entrada suave de paneles y dialogos */
+  @keyframes aparecer {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .animar-entrada {
+    animation: aparecer 0.25s ease-out both;
   }
 }

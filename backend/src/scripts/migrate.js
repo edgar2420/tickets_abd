@@ -8,7 +8,9 @@ const dirSql = path.resolve(aqui, '../../../db');
 
 /** Aplica el esquema y la carga inicial de datos de forma idempotente. */
 const ejecutar = async () => {
-  for (const archivo of ['01_schema.sql', '02_seed.sql']) {
+  const { readdir } = await import('node:fs/promises');
+  const archivos = (await readdir(dirSql)).filter((a) => a.endsWith('.sql')).sort();
+  for (const archivo of archivos) {
     const sql = await readFile(path.join(dirSql, archivo), 'utf8');
     console.log('[migracion] Aplicando ' + archivo);
     await pool.query(sql);

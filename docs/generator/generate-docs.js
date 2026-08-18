@@ -34,6 +34,7 @@ const PERMISOS = [
   { modulo: 'ADMIN', codigo: 'admin.usuarios', descripcion: 'Gestion CRUD de usuarios (crear, editar, activar/desactivar).' },
   { modulo: 'ADMIN', codigo: 'admin.roles', descripcion: 'Gestion CRUD de roles y matriz de permisos.' },
   { modulo: 'ADMIN', codigo: 'admin.areas', descripcion: 'Gestion del catalogo de areas de la empresa.' },
+  { modulo: 'ADMIN', codigo: 'admin.categorias', descripcion: 'Gestion del catalogo de categorias de tickets.' },
   { modulo: 'REPORTES', codigo: 'reportes.ver', descripcion: 'Permite consultar el tablero de indicadores y reportes.' },
   { modulo: 'REPORTES', codigo: 'reportes.exportar', descripcion: 'Permite exportar reportes y documentacion en formato PDF.' }
 ];
@@ -61,6 +62,10 @@ const ENDPOINTS = [
   { metodo: 'PUT', ruta: '/roles/:id', permiso: 'admin.roles', descripcion: 'Reemplazo integral de la matriz del rol' },
   { metodo: 'DELETE', ruta: '/roles/:id', permiso: 'admin.roles', descripcion: 'Eliminacion de rol sin usuarios' },
   { metodo: 'GET', ruta: '/permisos', permiso: 'admin.roles', descripcion: 'Catalogo de permisos agrupado por modulo' },
+  { metodo: 'GET', ruta: '/categorias', permiso: 'Autenticado', descripcion: 'Catalogo de categorias de ticket' },
+  { metodo: 'POST', ruta: '/categorias', permiso: 'admin.categorias', descripcion: 'Alta de categoria con color e icono' },
+  { metodo: 'PUT', ruta: '/categorias/:id', permiso: 'admin.categorias', descripcion: 'Edicion con propagacion del nombre a los tickets' },
+  { metodo: 'DELETE', ruta: '/categorias/:id', permiso: 'admin.categorias', descripcion: 'Baja logica de categoria' },
   { metodo: 'GET', ruta: '/usuarios', permiso: 'admin.usuarios', descripcion: 'Listado con filtros' },
   { metodo: 'GET', ruta: '/usuarios/tecnicos', permiso: 'tickets.ver_todos', descripcion: 'Tecnicos disponibles para asignacion' },
   { metodo: 'POST', ruta: '/usuarios', permiso: 'admin.usuarios', descripcion: 'Alta de usuario con hash bcrypt' },
@@ -86,6 +91,7 @@ const EVENTOS = [
 const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/01_schema.sql', descripcion: 'Esquema DDL completo e indices' },
   { componente: 'Base de datos', ruta: 'db/02_seed.sql', descripcion: 'Areas, roles, permisos y usuario administrador' },
+  { componente: 'Base de datos', ruta: 'db/03_categorias.sql', descripcion: 'Catalogo administrable de categorias' },
   { componente: 'API', ruta: 'backend/src/app.js', descripcion: 'Composicion de middlewares y montaje de rutas' },
   { componente: 'API', ruta: 'backend/src/server.js', descripcion: 'Servidor HTTP, sockets y apagado ordenado' },
   { componente: 'API', ruta: 'backend/src/middleware/auth.js', descripcion: 'Verificacion JWT para HTTP y para sockets' },
@@ -153,6 +159,7 @@ const construir = async () => {
     { titulo: 'Proposito', campo: 'proposito', ancho: 0.74 }
   ], [
     { tabla: 'areas', proposito: 'Catalogo de areas de la organizacion' },
+    { tabla: 'categorias', proposito: 'Catalogo administrable de clasificacion de tickets' },
     { tabla: 'roles', proposito: 'Roles configurables desde el panel de administracion' },
     { tabla: 'permisos', proposito: 'Permisos atomicos del sistema agrupados por modulo' },
     { tabla: 'rol_permisos', proposito: 'Relacion N:M que materializa la matriz de permisos' },
@@ -161,6 +168,10 @@ const construir = async () => {
     { tabla: 'auditoria', proposito: 'Bitacora de cada accion ejecutada, base de los reportes PDF' },
     { tabla: 'notificaciones', proposito: 'Persistencia de los avisos emitidos por WebSockets' }
   ]);
+  doc.nota('La categoria del ticket dejo de ser una lista fija en el codigo: ahora se valida contra el '
+    + 'catalogo administrable de la tabla categorias, mantenible desde el panel de administracion. '
+    + 'Al renombrar una categoria el cambio se propaga a los tickets ya clasificados.', { icono: 'engranaje' });
+
   doc.titulo2('Esquema DDL implementado');
   doc.codigoFuente(ddl);
 

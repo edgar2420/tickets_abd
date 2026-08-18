@@ -110,7 +110,3 @@ ALTER TABLE tickets ADD  CONSTRAINT chk_tickets_estado
 ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_prioridad;
 ALTER TABLE tickets ADD  CONSTRAINT chk_tickets_prioridad
     CHECK (prioridad IN ('Baja','Media','Alta','Critica'));
-
-ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_categoria;
-ALTER TABLE tickets ADD  CONSTRAINT chk_tickets_categoria
-    CHECK (categoria IN ('Hardware','Software','Redes','Accesos'));
