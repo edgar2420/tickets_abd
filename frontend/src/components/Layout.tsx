@@ -106,8 +106,8 @@ export const Layout = () => {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 bg-institucional-900 text-white shadow">
+    <div className="flex h-screen flex-col overflow-hidden">
+      <header className="z-30 shrink-0 bg-institucional-900 text-white shadow">
         <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -146,7 +146,7 @@ export const Layout = () => {
         </div>
       </header>
 
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <aside
           className={`fixed inset-y-0 left-0 z-20 flex w-64 transform flex-col border-r border-slate-200 bg-white pt-20 transition-transform lg:static lg:z-auto lg:translate-x-0 lg:pt-0 ${
             menuAbierto ? 'translate-x-0' : '-translate-x-full'
@@ -191,7 +191,7 @@ export const Layout = () => {
           </div>
         </aside>
 
-        <main className="flex-1 bg-slate-100 p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6">
           <Outlet />
         </main>
       </div>

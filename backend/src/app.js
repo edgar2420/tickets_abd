@@ -12,6 +12,7 @@ import { rolesRouter } from './modules/roles/roles.routes.js';
 import { permisosRouter } from './modules/permisos/permisos.routes.js';
 import { usuariosRouter } from './modules/usuarios/usuarios.routes.js';
 import { ticketsRouter } from './modules/tickets/tickets.routes.js';
+import { adjuntosRouter } from './modules/comentarios/comentarios.routes.js';
 import { auditoriaRouter } from './modules/auditoria/auditoria.routes.js';
 import { notificacionesRouter } from './modules/notificaciones/notificaciones.routes.js';
 
@@ -42,6 +43,7 @@ export const crearApp = () => {
   api.use('/permisos', permisosRouter);
   api.use('/usuarios', usuariosRouter);
   api.use('/tickets', ticketsRouter);
+  api.use('/adjuntos', adjuntosRouter);
   api.use('/auditoria', auditoriaRouter);
   api.use('/notificaciones', notificacionesRouter);
 

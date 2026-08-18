@@ -82,6 +82,23 @@ export interface RegistroBitacora {
   usuario_nombre: string | null;
 }
 
+export interface Adjunto {
+  id: number;
+  nombre: string;
+  tipo: string;
+  tamano: number;
+}
+
+export interface Comentario {
+  id: number;
+  mensaje: string;
+  fecha: string;
+  usuario_id: number;
+  usuario_nombre: string;
+  usuario_rol: string;
+  adjuntos: Adjunto[];
+}
+
 export interface Notificacion {
   id: number;
   ticket_id: number | null;

@@ -8,6 +8,25 @@ export const fechaHora = (valor: string | null | undefined) =>
 export const fechaCorta = (valor: string | null | undefined) =>
   valor ? new Date(valor).toLocaleDateString('es-BO') : '-';
 
+/** Convierte horas decimales en un texto legible: "2 h 15 min". */
+export const duracionLegible = (horas: number | null | undefined) => {
+  if (horas === null || horas === undefined) return 'No registrado';
+  const minutosTotales = Math.max(0, Math.round(Number(horas) * 60));
+  const dias = Math.floor(minutosTotales / 1440);
+  const restoHoras = Math.floor((minutosTotales % 1440) / 60);
+  const minutos = minutosTotales % 60;
+  if (dias > 0) return `${dias} d ${restoHoras} h ${minutos} min`;
+  if (restoHoras > 0) return `${restoHoras} h ${minutos} min`;
+  return `${minutos} min`;
+};
+
+/** Tamano de archivo legible. */
+export const pesoLegible = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+};
+
 export const tiempoRelativo = (valor: string) => {
   const minutos = Math.round((Date.now() - new Date(valor).getTime()) / 60000);
   if (minutos < 1) return 'hace instantes';
