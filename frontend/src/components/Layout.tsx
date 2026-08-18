@@ -148,11 +148,11 @@ export const Layout = () => {
 
       <div className="flex flex-1">
         <aside
-          className={`fixed inset-y-0 left-0 z-20 w-64 transform border-r border-slate-200 bg-white pt-20 transition-transform lg:static lg:z-auto lg:translate-x-0 lg:pt-0 ${
+          className={`fixed inset-y-0 left-0 z-20 flex w-64 transform flex-col border-r border-slate-200 bg-white pt-20 transition-transform lg:static lg:z-auto lg:translate-x-0 lg:pt-0 ${
             menuAbierto ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
-          <nav className="flex flex-col gap-1 p-4">
+          <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
             {enlaces.map(({ ruta, texto, icono: Icono }, indice) => {
               // Rotulo separador al pasar de la operacion diaria a la administracion
               const abreAdministracion = indice > 0
@@ -180,7 +180,7 @@ export const Layout = () => {
             })}
           </nav>
 
-          <div className="mx-4 mt-4 rounded-md border border-slate-200 bg-slate-50 p-3">
+          <div className="mx-4 mb-4 mt-auto rounded-lg border border-slate-200 bg-slate-50 p-3">
             <p className="flex items-center gap-2 text-xs font-semibold text-institucional-900">
               <UserCog className="h-4 w-4 text-institucional-700" />
               Permisos activos

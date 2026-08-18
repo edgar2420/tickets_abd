@@ -71,12 +71,32 @@ npm start                  # Expo; configurar la IP de la API en app.json
 
 ## Acceso inicial
 
+La carga inicial crea unicamente la cuenta administradora:
+
 | Usuario | Contrasena | Rol | Area |
 |---|---|---|---|
 | `admin` | `Admin123*` | admin | Tecnologias de la Informacion |
 
 Cambie esta contrasena en el primer ingreso, junto con `JWT_SECRET` y la clave de la base de
 datos, antes de publicar el sistema en produccion.
+
+### Cuentas de demostracion
+
+Para recorrer el ciclo completo del ticket hace falta al menos un solicitante y un tecnico.
+Puede crearlos desde **Usuarios** en el panel, o generarlos con:
+
+```bash
+cd backend
+npm run demo
+```
+
+| Usuario | Contrasena | Rol | Alcance |
+|---|---|---|---|
+| `solicitante` | `Solicitante123*` | cliente | Registra y consulta unicamente sus propios tickets |
+| `tecnico` | `Tecnico123*` | tecnico_l1 | Atiende, asigna y resuelve tickets de toda la organizacion |
+
+Estas credenciales son conocidas y por eso **no** forman parte de la carga inicial: el script
+es de ejecucion manual y las cuentas deben desactivarse antes de publicar el sistema.
 
 ## Control de acceso (RBAC)
 
