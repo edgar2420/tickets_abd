@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    @apply bg-slate-100 text-slate-800 antialiased;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply bg-white rounded-lg border border-slate-200 shadow-panel;
+  }
+  .campo {
+    @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none
+           transition focus:border-institucional-700 focus:ring-2 focus:ring-institucional-700/20
+           disabled:bg-slate-100 disabled:text-slate-500;
+  }
+  .etiqueta {
+    @apply block text-xs font-semibold uppercase tracking-wide text-slate-500 mb-1;
+  }
+  .boton {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold
+           transition focus:outline-none focus:ring-2 focus:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed;
+  }
+  .boton-primario {
+    @apply boton bg-institucional-900 text-white hover:bg-institucional-800 focus:ring-institucional-700;
+  }
+  .boton-secundario {
+    @apply boton border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-slate-300;
+  }
+  .boton-acento {
+    @apply boton bg-institucional-700 text-white hover:bg-institucional-600 focus:ring-institucional-700;
+  }
+  .boton-peligro {
+    @apply boton bg-rose-700 text-white hover:bg-rose-800 focus:ring-rose-400;
+  }
+  .tabla {
+    @apply w-full text-sm;
+  }
+  .tabla thead th {
+    @apply bg-institucional-900 text-white text-left text-xs font-semibold uppercase tracking-wide px-4 py-3;
+  }
+  .tabla tbody td {
+    @apply border-b border-slate-100 px-4 py-3 align-middle;
+  }
+  .tabla tbody tr:hover {
+    @apply bg-institucional-50;
+  }
+}
