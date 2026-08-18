@@ -25,8 +25,9 @@ export const estiloEstado: Record<EstadoTicket, string> = {
 };
 
 export const estiloPrioridad: Record<PrioridadTicket, string> = {
-  'Baja': 'bg-slate-100 text-slate-600 border-slate-200',
-  'Media': 'bg-blue-100 text-blue-800 border-blue-200',
-  'Alta': 'bg-orange-100 text-orange-800 border-orange-200',
-  'Critica': 'bg-rose-100 text-rose-800 border-rose-200'
+  'Baja': 'bg-green-100 text-green-800 border-green-300',
+  'Media': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  'Alta': 'bg-orange-100 text-orange-800 border-orange-300',
+  // La prioridad critica parpadea para destacar sobre el resto del listado
+  'Critica': 'bg-red-100 text-red-800 border-red-300 animate-pulse'
 };

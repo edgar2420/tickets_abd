@@ -15,9 +15,9 @@ export const colorEstado = (estado) => ({
 }[estado] ?? PALETA.texto);
 
 export const colorPrioridad = (prioridad) => ({
-  'Baja': PALETA.suave,
-  'Media': PALETA.acento,
-  'Alta': PALETA.advertencia,
+  'Baja': PALETA.ok,
+  'Media': '#A16207',
+  'Alta': '#C2410C',
   'Critica': PALETA.critico
 }[prioridad] ?? PALETA.texto);
 
