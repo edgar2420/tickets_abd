@@ -1,0 +1,61 @@
+import jwt from 'jsonwebtoken';
+import { env } from '../config/env.js';
+import { query } from '../config/db.js';
+import { HttpError } from '../utils/httpError.js';
+import { permisosDeRol } from '../services/permisos.cache.js';
+
+const extraerToken = (req) => {
+  const header = req.headers.authorization ?? '';
+  if (header.startsWith('Bearer ')) return header.slice(7).trim();
+  return null;
+};
+
+/** Verifica el JWT y carga req.usuario con su rol, area y permisos vigentes. */
+export const autenticar = async (req, _res, next) => {
+  try {
+    const token = extraerToken(req);
+    if (!token) throw HttpError.unauthorized('Token de autenticacion no proporcionado');
+
+    const payload = jwt.verify(token, env.jwt.secret);
+    const { rows } = await query(
+      `SELECT u.id, u.nombre, u.usuario, u.email, u.activo,
+              u.rol_id, r.nombre AS rol, u.area_id, a.nombre AS area
+         FROM usuarios u
+         JOIN roles r ON r.id = u.rol_id
+         JOIN areas a ON a.id = u.area_id
+        WHERE u.id = $1`,
+      [payload.sub]
+    );
+    const usuario = rows[0];
+    if (!usuario) throw HttpError.unauthorized('El usuario del token ya no existe');
+    if (!usuario.activo) throw HttpError.forbidden('El usuario se encuentra desactivado');
+
+    usuario.permisos = [...(await permisosDeRol(usuario.rol_id))];
+    req.usuario = usuario;
+    return next();
+  } catch (error) {
+    if (error instanceof HttpError) return next(error);
+    if (error?.name === 'TokenExpiredError') return next(HttpError.unauthorized('La sesion ha expirado'));
+    return next(HttpError.unauthorized('Token de autenticacion invalido'));
+  }
+};
+
+/** Autenticacion de sockets: valida el JWT recibido en el handshake. */
+export const autenticarSocket = async (socket, next) => {
+  try {
+    const token = socket.handshake.auth?.token ?? socket.handshake.query?.token;
+    if (!token) return next(new Error('Token no proporcionado'));
+    const payload = jwt.verify(token, env.jwt.secret);
+    const { rows } = await query(
+      `SELECT u.id, u.nombre, u.usuario, u.rol_id, u.area_id, r.nombre AS rol
+         FROM usuarios u JOIN roles r ON r.id = u.rol_id
+        WHERE u.id = $1 AND u.activo = TRUE`,
+      [payload.sub]
+    );
+    if (!rows[0]) return next(new Error('Usuario invalido o desactivado'));
+    socket.data.usuario = { ...rows[0], permisos: [...(await permisosDeRol(rows[0].rol_id))] };
+    return next();
+  } catch {
+    return next(new Error('Autenticacion de socket fallida'));
+  }
+};
