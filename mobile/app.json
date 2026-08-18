@@ -1,0 +1,24 @@
+{
+  "expo": {
+    "name": "Tickets TI",
+    "slug": "tickets-ti",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#0F2A47",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0F2A47"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": { "supportsTablet": true, "bundleIdentifier": "bo.empresa.ticketsti" },
+    "android": {
+      "package": "bo.empresa.ticketsti",
+      "adaptiveIcon": { "backgroundColor": "#0F2A47" }
+    },
+    "extra": {
+      "apiUrl": "http://10.0.2.2:4000/api/v1",
+      "socketUrl": "http://10.0.2.2:4000"
+    }
+  }
+}
