@@ -129,21 +129,7 @@ export const AdminCategorias = () => {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {(categorias ?? []).map((categoria) => (
-          <article
-            key={categoria.id}
-            className="panel-interactivo animar-entrada cursor-pointer overflow-hidden focus:outline-none
-                       focus-visible:ring-2 focus-visible:ring-institucional-600"
-            role="button"
-            tabIndex={0}
-            title="Editar la categoria"
-            onClick={() => abrirEdicion(categoria)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                abrirEdicion(categoria);
-              }
-            }}
-          >
+          <article key={categoria.id} className="panel-interactivo animar-entrada overflow-hidden">
             <div className={`h-1.5 ${fondoCategoria[categoria.color] ?? fondoCategoria.pizarra}`} />
             <div className="p-5">
               <div className="flex items-start justify-between gap-3">

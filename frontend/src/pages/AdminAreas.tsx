@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, Building2, CheckCircle2, PencilLine, PlusCircle } from 'lucide-react';
 import { api } from '../lib/api';
 import {
-  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio, filaAccionable
+  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio
 } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaCorta } from '../lib/formato';
@@ -102,13 +102,7 @@ export const AdminAreas = () => {
               </thead>
               <tbody>
                 {areas.map((area) => (
-                  <tr
-                    key={area.id}
-                    {...filaAccionable(
-                      () => { setFormulario({ id: area.id, nombre: area.nombre, activo: area.activo }); setModalAbierto(true); },
-                      'Editar el area'
-                    )}
-                  >
+                  <tr key={area.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{area.nombre}</td>
                     <td className="text-slate-600 dark:text-slate-200">{area.total_usuarios ?? 0}</td>
                     <td>
