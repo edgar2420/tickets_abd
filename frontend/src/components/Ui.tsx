@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import {
   AlertTriangle, Code2, Info, KeyRound, Loader2, Monitor, Network, Phone,
   Server, Tag, Wrench, type LucideIcon
@@ -210,7 +210,38 @@ export const BotonAccion = ({ icono: Icono, rotulo, alPulsar, tono = 'neutro', d
   );
 };
 
-/** Contenedor uniforme de la columna de acciones. */
+/**
+ * Contenedor uniforme de la columna de acciones.
+ * Detiene la propagacion del clic para que pulsar un boton no dispare
+ * ademas la apertura de la fila que lo contiene.
+ */
 export const Acciones = ({ children }: { children: ReactNode }) => (
-  <div className="flex items-center justify-end gap-1.5">{children}</div>
+  <div
+    className="flex items-center justify-end gap-1.5"
+    onClick={(e) => e.stopPropagation()}
+    onKeyDown={(e) => e.stopPropagation()}
+    role="presentation"
+  >
+    {children}
+  </div>
 );
+
+/**
+ * Propiedades que vuelven accionable una fila completa de tabla.
+ * Se abre con un clic en cualquier parte y tambien desde el teclado,
+ * en lugar de exigir el clic exacto sobre el titulo.
+ */
+export const filaAccionable = (alAbrir: () => void, rotulo = 'Abrir detalle') => ({
+  onClick: alAbrir,
+  onKeyDown: (evento: KeyboardEvent<HTMLTableRowElement>) => {
+    if (evento.key === 'Enter' || evento.key === ' ') {
+      evento.preventDefault();
+      alAbrir();
+    }
+  },
+  role: 'button' as const,
+  tabIndex: 0,
+  title: rotulo,
+  className: 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-inset '
+    + 'focus-visible:ring-institucional-600 dark:focus-visible:ring-institucional-400'
+});

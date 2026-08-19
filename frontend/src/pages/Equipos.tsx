@@ -6,7 +6,8 @@ import {
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import {
-  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal, Panel, Vacio
+  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal,
+  Panel, Vacio, filaAccionable
 } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
@@ -56,6 +57,14 @@ const EQUIPO_VACIO: FormularioEquipo = {
   estado: 'Operativo', observaciones: '', fecha_asignacion: '', activo: true
 };
 
+/** Par etiqueta/valor de la ficha del equipo. */
+const Dato = ({ etiqueta, valor }: { etiqueta: string; valor?: string | null }) => (
+  <div>
+    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{etiqueta}</p>
+    <p className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">{valor || 'No registrado'}</p>
+  </div>
+);
+
 export const Equipos = () => {
   const { puede } = usarAuth();
   const { confirmar, dialogo } = usarConfirmacion();
@@ -75,6 +84,7 @@ export const Equipos = () => {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [credencial, setCredencial] = useState<{ equipo: Equipo; anydesk_id: string; password: string } | null>(null);
+  const [ficha, setFicha] = useState<Equipo | null>(null);
 
   const cargar = useCallback(async () => {
     try {
@@ -312,7 +322,7 @@ export const Equipos = () => {
               </thead>
               <tbody>
                 {equipos.map((equipo) => (
-                  <tr key={equipo.id}>
+                  <tr key={equipo.id} {...filaAccionable(() => setFicha(equipo), 'Ver la ficha del equipo')}>
                     <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
                       {equipo.codigo}
                     </td>
@@ -526,6 +536,84 @@ export const Equipos = () => {
             <button type="submit" className="boton-primario" disabled={guardando}>Guardar equipo</button>
           </div>
         </form>
+      </Modal>
+
+      <Modal
+        titulo="Ficha del equipo"
+        icono={Monitor}
+        abierto={ficha !== null}
+        alCerrar={() => setFicha(null)}
+        ancho="max-w-2xl"
+      >
+        {ficha && (
+          <div className="space-y-5">
+            <div className="superficie flex flex-wrap items-center justify-between gap-3 p-4">
+              <div>
+                <p className="font-mono text-xs font-semibold text-institucional-700 dark:text-institucional-300">
+                  {ficha.codigo}
+                </p>
+                <p className="text-lg font-bold text-institucional-900 dark:text-slate-100">{ficha.nombre_equipo}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {[ficha.marca, ficha.modelo].filter(Boolean).join(' ') || ficha.tipo}
+                </p>
+              </div>
+              <Etiqueta texto={ficha.estado} clase={ESTILO_ESTADO[ficha.estado]} />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Dato etiqueta="Asignado a" valor={ficha.usuario_nombre ?? 'Sin asignar'} />
+              <Dato etiqueta="Area" valor={ficha.area_nombre} />
+              <Dato etiqueta="Ubicacion" valor={ficha.ubicacion} />
+              <Dato etiqueta="Fecha de asignacion" valor={ficha.fecha_asignacion?.slice(0, 10)} />
+              <Dato etiqueta="Sistema operativo" valor={ficha.sistema_operativo} />
+              <Dato etiqueta="Procesador" valor={ficha.procesador} />
+              <Dato etiqueta="Memoria RAM" valor={ficha.ram_gb ? `${ficha.ram_gb} GB` : null} />
+              <Dato etiqueta="Almacenamiento" valor={ficha.almacenamiento} />
+              <Dato etiqueta="Direccion IP" valor={ficha.direccion_ip} />
+              <Dato etiqueta="Direccion MAC" valor={ficha.direccion_mac} />
+              <Dato etiqueta="Numero de serie" valor={ficha.numero_serie} />
+              <Dato etiqueta="Identificador AnyDesk" valor={ficha.anydesk_id} />
+            </div>
+
+            {ficha.observaciones && (
+              <div>
+                <p className="etiqueta">Observaciones</p>
+                <p className="text-sm text-slate-600 dark:text-slate-200">{ficha.observaciones}</p>
+              </div>
+            )}
+
+            <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
+              {puede('equipos.credenciales') && ficha.tiene_password && (
+                <button
+                  type="button"
+                  className="boton-secundario"
+                  onClick={() => { const objetivo = ficha; setFicha(null); void revelarCredencial(objetivo); }}
+                >
+                  <KeyRound className="h-4 w-4" />
+                  Ver acceso remoto
+                </button>
+              )}
+              <button
+                type="button"
+                className="boton-secundario"
+                onClick={() => void descargarPdf(`/equipos/${ficha.id}/ficha/pdf`, {}, `equipo-${ficha.codigo}.pdf`)}
+              >
+                <FileDown className="h-4 w-4" />
+                Ficha en PDF
+              </button>
+              {puede('equipos.gestionar') && (
+                <button
+                  type="button"
+                  className="boton-primario"
+                  onClick={() => { const objetivo = ficha; setFicha(null); abrirEdicion(objetivo); }}
+                >
+                  <PencilLine className="h-4 w-4" />
+                  Editar equipo
+                </button>
+              )}
+            </div>
+          </div>
+        )}
       </Modal>
 
       <Modal
