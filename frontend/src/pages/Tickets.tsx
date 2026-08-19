@@ -106,7 +106,7 @@ export const Tickets = () => {
           <div>
             <label className="etiqueta">Busqueda</label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />
+              <Search className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-400" />
               <input
                 className="campo pl-9"
                 placeholder="Titulo o descripcion"
@@ -154,12 +154,12 @@ export const Tickets = () => {
                         {ticket.titulo}
                       </Link>
                     </td>
-                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{ticket.categoria}</td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.categoria}</td>
                     <td><Etiqueta texto={ticket.prioridad} clase={estiloPrioridad[ticket.prioridad]} /></td>
                     <td><Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} /></td>
-                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{ticket.solicitante_nombre}</td>
-                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{ticket.asignado_nombre ?? 'Sin asignar'}</td>
-                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{fechaHora(ticket.fecha_creacion)}</td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.solicitante_nombre}</td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.asignado_nombre ?? 'Sin asignar'}</td>
+                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-300">{fechaHora(ticket.fecha_creacion)}</td>
                   </tr>
                 ))}
               </tbody>

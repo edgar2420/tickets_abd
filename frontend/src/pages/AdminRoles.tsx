@@ -162,8 +162,8 @@ export const AdminRoles = () => {
               </Acciones>
             }
           >
-            <p className="text-sm text-slate-600 dark:text-slate-300">{rol.descripcion ?? 'Sin descripcion registrada'}</p>
-            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-600 dark:text-slate-200">{rol.descripcion ?? 'Sin descripcion registrada'}</p>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-300">
               {rol.total_usuarios} usuarios asignados - {rol.permisos.length} permisos concedidos
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -206,7 +206,7 @@ export const AdminRoles = () => {
                   </legend>
                   <div className="grid gap-2 sm:grid-cols-2">
                     {lista.map((permiso) => (
-                      <label key={permiso.id} className="flex items-start gap-2 rounded-md p-1.5 text-sm transition hover:bg-slate-50">
+                      <label key={permiso.id} className="flex items-start gap-2 rounded-md p-1.5 text-sm transition hover:bg-slate-50 dark:hover:bg-noche-800">
                         <input
                           type="checkbox"
                           className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-noche-700"
@@ -215,7 +215,7 @@ export const AdminRoles = () => {
                         />
                         <span>
                           <span className="font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">{permiso.codigo}</span>
-                          <span className="block text-xs text-slate-500 dark:text-slate-400">{permiso.descripcion}</span>
+                          <span className="block text-xs text-slate-500 dark:text-slate-300">{permiso.descripcion}</span>
                         </span>
                       </label>
                     ))}

@@ -17,10 +17,10 @@ export const RutaProtegida = ({ permisos = [], children }: { permisos?: string[]
       <div className="panel mx-auto max-w-lg p-8 text-center">
         <ShieldAlert className="mx-auto h-10 w-10 text-rose-600" />
         <h2 className="mt-3 text-lg font-bold text-institucional-900 dark:text-slate-100">Acceso restringido</h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-200">
           Su rol no cuenta con el permiso requerido para consultar esta seccion.
         </p>
-        <p className="mt-3 text-xs text-slate-400 dark:text-slate-500">Permiso requerido: {permisos.join(' o ')}</p>
+        <p className="mt-3 text-xs text-slate-400 dark:text-slate-400">Permiso requerido: {permisos.join(' o ')}</p>
       </div>
     );
   }

@@ -30,7 +30,7 @@ const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
       {filas.map((fila) => (
         <li key={fila.etiqueta}>
           <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700 dark:text-slate-300">{fila.etiqueta}</span>
+            <span className="font-medium text-slate-700 dark:text-slate-200">{fila.etiqueta}</span>
             <span className="font-semibold text-institucional-900 dark:text-institucional-200">{fila.total}</span>
           </div>
           <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-noche-700">
@@ -41,7 +41,7 @@ const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
           </div>
         </li>
       ))}
-      {filas.length === 0 && <li className="text-xs text-slate-500 dark:text-slate-400">Sin datos disponibles</li>}
+      {filas.length === 0 && <li className="text-xs text-slate-500 dark:text-slate-300">Sin datos disponibles</li>}
     </ul>
   );
 };
@@ -57,7 +57,7 @@ const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
           <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
             indice === 0
               ? 'bg-institucional-900 text-white'
-              : 'bg-slate-100 text-slate-600 dark:bg-noche-700 dark:text-slate-300'
+              : 'bg-slate-100 text-slate-600 dark:bg-noche-700 dark:text-slate-200'
           }`}>
             {indice + 1}
           </span>
@@ -66,7 +66,7 @@ const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
               <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{fila.etiqueta}</p>
               <p className="shrink-0 text-sm font-bold text-institucional-900 dark:text-institucional-200">{fila.total}</p>
             </div>
-            {fila.detalle && <p className="truncate text-xs text-slate-400 dark:text-slate-500">{fila.detalle}</p>}
+            {fila.detalle && <p className="truncate text-xs text-slate-400 dark:text-slate-400">{fila.detalle}</p>}
             <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-noche-700">
               <div className="h-full rounded-full bg-institucional-600" style={{ width: `${(fila.total / maximo) * 100}%` }} />
             </div>

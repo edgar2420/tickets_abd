@@ -90,7 +90,7 @@ export const Auditoria = () => {
               <tbody>
                 {registros.map((registro) => (
                   <tr key={registro.id}>
-                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{fechaHora(registro.fecha)}</td>
+                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-300">{fechaHora(registro.fecha)}</td>
                     <td className="whitespace-nowrap text-slate-700 dark:text-slate-200">{registro.usuario_nombre ?? 'Sistema'}</td>
                     <td>
                       <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-institucional-800 dark:text-institucional-200">
@@ -98,7 +98,7 @@ export const Auditoria = () => {
                         {registro.entidad}
                       </span>
                     </td>
-                    <td className="font-mono text-xs text-slate-600 dark:text-slate-300">{registro.entidad_id ?? '-'}</td>
+                    <td className="font-mono text-xs text-slate-600 dark:text-slate-200">{registro.entidad_id ?? '-'}</td>
                     <td className="text-slate-700 dark:text-slate-200">{registro.accion}</td>
                   </tr>
                 ))}

@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  Bell, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Menu, ScrollText,
-  Boxes, Monitor, Moon, ShieldCheck, Sun, Tags, Ticket, UserCog, Users, X, type LucideIcon
+  Bell, Boxes, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Monitor, Moon,
+  PanelLeftClose, PanelLeftOpen, ScrollText, ShieldCheck, Sun, Tags, Ticket,
+  UserCog, Users, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
@@ -71,7 +72,7 @@ const PanelNotificaciones = () => {
           </header>
           <ul className="max-h-96 divide-y divide-slate-100 overflow-y-auto">
             {notificaciones.length === 0 && (
-              <li className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-400">Sin notificaciones registradas</li>
+              <li className="px-4 py-6 text-center text-xs text-slate-500 dark:text-slate-300">Sin notificaciones registradas</li>
             )}
             {notificaciones.map((n) => (
               <li key={n.id}>
@@ -82,11 +83,11 @@ const PanelNotificaciones = () => {
                     setAbierto(false);
                     if (n.ticket_id) navegar(`/tickets/${n.ticket_id}`);
                   }}
-                  className={`w-full px-4 py-3 text-left transition hover:bg-slate-50 ${n.leida ? '' : 'bg-institucional-50/60'}`}
+                  className={`w-full px-4 py-3 text-left transition hover:bg-slate-50 dark:hover:bg-noche-800 ${n.leida ? '' : 'bg-institucional-50/60 dark:bg-institucional-500/10'}`}
                 >
                   <p className="text-sm font-semibold text-institucional-900 dark:text-slate-100">{n.titulo}</p>
-                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">{n.mensaje}</p>
-                  <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-500">{tiempoRelativo(n.fecha)}</p>
+                  <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-200">{n.mensaje}</p>
+                  <p className="mt-1 text-[11px] text-slate-400 dark:text-slate-400">{tiempoRelativo(n.fecha)}</p>
                 </button>
               </li>
             ))}
@@ -113,10 +114,17 @@ const InterruptorTema = () => {
   );
 };
 
+const CLAVE_MENU = 'tickets_ti_menu_visible';
+
 export const Layout = () => {
   const { usuario, cerrarSesion, puede } = usarAuth();
-  const [menuAbierto, setMenuAbierto] = useState(false);
+  // El menu se oculta tambien en escritorio, para ganar area de trabajo
+  const [menuAbierto, setMenuAbierto] = useState(() => localStorage.getItem(CLAVE_MENU) !== 'oculto');
   const navegar = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem(CLAVE_MENU, menuAbierto ? 'visible' : 'oculto');
+  }, [menuAbierto]);
 
   const enlaces = ENLACES.filter((enlace) => puede(...enlace.permisos));
 
@@ -132,11 +140,12 @@ export const Layout = () => {
           <div className="flex items-center gap-3">
             <button
               type="button"
-              className="rounded-md p-2 text-white/80 transition hover:bg-white/10 lg:hidden"
+              className="rounded-md p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
               onClick={() => setMenuAbierto((v) => !v)}
-              aria-label="Abrir menu"
+              aria-label={menuAbierto ? 'Ocultar menu' : 'Mostrar menu'}
+              title={menuAbierto ? 'Ocultar menu' : 'Mostrar menu'}
             >
-              {menuAbierto ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {menuAbierto ? <PanelLeftClose className="h-5 w-5" /> : <PanelLeftOpen className="h-5 w-5" />}
             </button>
             <LayoutGrid className="h-6 w-6 text-institucional-200" />
             <div className="leading-tight">
@@ -169,8 +178,10 @@ export const Layout = () => {
 
       <div className="flex flex-1 overflow-hidden">
         <aside
-          className={`fixed inset-y-0 left-0 z-20 flex w-64 transform flex-col border-r border-slate-200 bg-white pt-20 transition-transform lg:static lg:z-auto lg:translate-x-0 lg:pt-0 ${
-            menuAbierto ? 'translate-x-0' : '-translate-x-full'
+          className={`fixed inset-y-0 left-0 z-20 flex w-64 shrink-0 transform flex-col overflow-hidden
+                      border-r border-slate-200 bg-white pt-20 transition-all duration-300
+                      dark:border-noche-700 dark:bg-noche-850 lg:static lg:z-auto lg:pt-0 ${
+            menuAbierto ? 'translate-x-0 lg:w-64' : '-translate-x-full lg:w-0 lg:translate-x-0 lg:border-r-0'
           }`}
         >
           <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
@@ -181,7 +192,7 @@ export const Layout = () => {
               return (
                 <div key={ruta} className="contents">
                   {abreGrupo && (
-                    <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                    <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
                       {grupo}
                     </p>
                   )}
@@ -204,7 +215,7 @@ export const Layout = () => {
               <UserCog className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />
               Permisos activos
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-300">
               {usuario?.permisos.length} permisos atomicos concedidos por el rol <strong>{usuario?.rol}</strong>.
             </p>
           </div>

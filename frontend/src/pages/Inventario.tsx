@@ -259,7 +259,7 @@ export const Inventario = () => {
               <div>
                 <label className="etiqueta">Busqueda</label>
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-500" />
+                  <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-400" />
                   <input
                     className="campo pl-9"
                     placeholder="Codigo o nombre"
@@ -279,7 +279,7 @@ export const Inventario = () => {
                   {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
                 </select>
               </div>
-              <label className="flex items-end gap-2 pb-2.5 text-sm text-slate-700 dark:text-slate-300">
+              <label className="flex items-end gap-2 pb-2.5 text-sm text-slate-700 dark:text-slate-200">
                 <input
                   type="checkbox"
                   className="h-4 w-4 rounded border-slate-300 dark:border-noche-700"
@@ -320,19 +320,19 @@ export const Inventario = () => {
                         <td>
                           <p className="font-medium text-slate-800 dark:text-slate-100">{articulo.nombre}</p>
                           {articulo.descripcion && (
-                            <p className="text-xs text-slate-400 dark:text-slate-500">{articulo.descripcion}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-400">{articulo.descripcion}</p>
                           )}
                         </td>
-                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{articulo.tipo}</td>
-                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{articulo.ubicacion ?? '-'}</td>
-                        <td className="text-right text-slate-500 dark:text-slate-400">{articulo.stock_minimo}</td>
+                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{articulo.tipo}</td>
+                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{articulo.ubicacion ?? '-'}</td>
+                        <td className="text-right text-slate-500 dark:text-slate-300">{articulo.stock_minimo}</td>
                         <td className={`text-right font-bold ${articulo.bajo_minimo ? 'text-rose-600' : 'text-emerald-700'}`}>
                           {articulo.stock_actual}
-                          <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-500">{articulo.unidad}</span>
+                          <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-400">{articulo.unidad}</span>
                         </td>
                         <td>
                           {!articulo.activo
-                            ? <Etiqueta texto="Inactivo" clase="bg-slate-100 text-slate-600 border-slate-300" />
+                            ? <Etiqueta texto="Inactivo" clase="bg-slate-100 text-slate-600 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
                             : articulo.stock_actual === 0
                               ? <Etiqueta texto="Agotado" clase="bg-red-100 text-red-800 border-red-300 animate-pulse" />
                               : articulo.bajo_minimo
@@ -444,7 +444,7 @@ export const Inventario = () => {
                   <tbody>
                     {movimientos.map((m) => (
                       <tr key={m.id}>
-                        <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{fechaHora(m.fecha)}</td>
+                        <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-300">{fechaHora(m.fecha)}</td>
                         <td><Etiqueta texto={m.tipo} clase={ESTILO_MOVIMIENTO[m.tipo]} /></td>
                         <td>
                           <span className="font-mono text-xs text-institucional-700 dark:text-institucional-300">{m.articulo_codigo}</span>
@@ -453,10 +453,10 @@ export const Inventario = () => {
                         <td className={`text-right font-bold ${m.tipo === 'Salida' ? 'text-rose-600' : 'text-emerald-700'}`}>
                           {m.tipo === 'Salida' ? '-' : m.tipo === 'Entrada' ? '+' : ''}{m.cantidad}
                         </td>
-                        <td className="text-right text-slate-500 dark:text-slate-400">{m.stock_anterior}</td>
+                        <td className="text-right text-slate-500 dark:text-slate-300">{m.stock_anterior}</td>
                         <td className="text-right font-semibold text-slate-700 dark:text-slate-200">{m.stock_resultante}</td>
-                        <td className="max-w-xs truncate text-slate-600 dark:text-slate-300">{m.motivo ?? '-'}</td>
-                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{m.usuario_nombre}</td>
+                        <td className="max-w-xs truncate text-slate-600 dark:text-slate-200">{m.motivo ?? '-'}</td>
+                        <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{m.usuario_nombre}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -529,7 +529,7 @@ export const Inventario = () => {
           </div>
 
           {formulario.id === null && (
-            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-400">
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-300">
               El articulo se crea con stock cero. El saldo solo cambia mediante entradas, salidas o ajustes.
             </p>
           )}
@@ -552,7 +552,7 @@ export const Inventario = () => {
           <form onSubmit={registrarMovimiento} className="space-y-4">
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-noche-700 dark:bg-noche-800">
               <p className="font-semibold text-institucional-900 dark:text-slate-100">{movimiento.articulo.nombre}</p>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">
                 Codigo {movimiento.articulo.codigo} - Stock actual:{' '}
                 <strong>{movimiento.articulo.stock_actual} {movimiento.articulo.unidad}</strong>
               </p>
@@ -571,7 +571,7 @@ export const Inventario = () => {
                 onChange={(e) => setDatosMovimiento((d) => ({ ...d, cantidad: e.target.value }))}
               />
               {movimiento.tipo === 'Salida' && (
-                <p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
+                <p className="mt-1 text-xs text-slate-400 dark:text-slate-400">
                   Maximo disponible: {movimiento.articulo.stock_actual} {movimiento.articulo.unidad}
                 </p>
               )}
