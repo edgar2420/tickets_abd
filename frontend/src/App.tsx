@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { ProveedorAuth } from './context/AuthContext';
+import { ProveedorTema } from './context/TemaContext';
 import { ProveedorNotificaciones } from './context/NotificacionesContext';
 import { Layout } from './components/Layout';
 import { RutaProtegida } from './components/RutaProtegida';
@@ -13,13 +14,15 @@ import { AdminRoles } from './pages/AdminRoles';
 import { AdminAreas } from './pages/AdminAreas';
 import { AdminCategorias } from './pages/AdminCategorias';
 import { Auditoria } from './pages/Auditoria';
+import { Inventario } from './pages/Inventario';
 
 const Privado = ({ permisos, elemento }: { permisos?: string[]; elemento: JSX.Element }) => (
   <RutaProtegida permisos={permisos}>{elemento}</RutaProtegida>
 );
 
 export const App = () => (
-  <ProveedorAuth>
+  <ProveedorTema>
+    <ProveedorAuth>
     <ProveedorNotificaciones>
       <Routes>
         <Route path="/login" element={<Login />} />
@@ -39,10 +42,12 @@ export const App = () => (
           <Route path="/admin/roles" element={<Privado permisos={['admin.roles']} elemento={<AdminRoles />} />} />
           <Route path="/admin/areas" element={<Privado permisos={['admin.areas']} elemento={<AdminAreas />} />} />
           <Route path="/admin/categorias" element={<Privado permisos={['admin.categorias']} elemento={<AdminCategorias />} />} />
+          <Route path="/inventario" element={<Privado permisos={['inventario.ver']} elemento={<Inventario />} />} />
           <Route path="/auditoria" element={<Privado permisos={['reportes.ver', 'admin.usuarios']} elemento={<Auditoria />} />} />
         </Route>
         <Route path="*" element={<Navigate to="/tablero" replace />} />
       </Routes>
-    </ProveedorNotificaciones>
-  </ProveedorAuth>
+      </ProveedorNotificaciones>
+    </ProveedorAuth>
+  </ProveedorTema>
 );

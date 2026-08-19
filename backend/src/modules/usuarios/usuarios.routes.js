@@ -7,6 +7,7 @@ import { requierePermiso } from '../../middleware/rbac.js';
 import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
+import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 
 const crearUsuarioSchema = z.object({
   nombre: z.string().min(4).max(150),
@@ -32,17 +33,21 @@ export const usuariosRouter = Router();
 usuariosRouter.use(autenticar);
 
 usuariosRouter.get('/', requierePermiso('admin.usuarios'), asyncHandler(async (req, res) => {
+  const { limite, pagina, desplazamiento } = paginacion(req.query);
   const { busqueda = null, area_id = null, rol_id = null, activo = null } = req.query;
-  const { rows } = await query(
-    `${SELECT_USUARIO}
+  const condiciones = `
       WHERE ($1::text IS NULL OR u.nombre ILIKE '%' || $1 || '%' OR u.usuario ILIKE '%' || $1 || '%')
         AND ($2::int  IS NULL OR u.area_id = $2)
         AND ($3::int  IS NULL OR u.rol_id = $3)
-        AND ($4::bool IS NULL OR u.activo = $4)
-      ORDER BY u.nombre`,
-    [busqueda, area_id, rol_id, activo === null ? null : activo === 'true']
+        AND ($4::bool IS NULL OR u.activo = $4)`;
+  const parametros = [busqueda, area_id, rol_id, activo === null ? null : activo === 'true'];
+
+  const { rows: total } = await query(`SELECT COUNT(*)::int AS total FROM usuarios u ${condiciones}`, parametros);
+  const { rows } = await query(
+    `${SELECT_USUARIO} ${condiciones} ORDER BY u.nombre LIMIT $5 OFFSET $6`,
+    [...parametros, limite, desplazamiento]
   );
-  res.json({ ok: true, datos: rows });
+  res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
 }));
 
 /** Tecnicos disponibles para asignacion manual de tickets. */

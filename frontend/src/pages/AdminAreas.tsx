@@ -101,8 +101,8 @@ export const AdminAreas = () => {
               <tbody>
                 {areas.map((area) => (
                   <tr key={area.id}>
-                    <td className="font-medium text-slate-800">{area.nombre}</td>
-                    <td className="text-slate-600">{area.total_usuarios ?? 0}</td>
+                    <td className="font-medium text-slate-800 dark:text-slate-100">{area.nombre}</td>
+                    <td className="text-slate-600 dark:text-slate-300">{area.total_usuarios ?? 0}</td>
                     <td>
                       <Etiqueta
                         texto={area.activo ? 'Activa' : 'Inactiva'}
@@ -111,7 +111,7 @@ export const AdminAreas = () => {
                           : 'bg-slate-200 text-slate-600 border-slate-300'}
                       />
                     </td>
-                    <td className="text-xs text-slate-500">{fechaCorta(area.fecha_creacion)}</td>
+                    <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(area.fecha_creacion)}</td>
                     <td>
                       <div className="flex justify-end gap-2">
                         <button
@@ -154,8 +154,8 @@ export const AdminAreas = () => {
             <input className="campo" required minLength={3} value={formulario.nombre}
               onChange={(e) => setFormulario((f) => ({ ...f, nombre: e.target.value }))} />
           </div>
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300" checked={formulario.activo}
+          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-700" checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))} />
             Area activa
           </label>

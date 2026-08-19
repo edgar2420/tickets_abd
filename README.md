@@ -130,6 +130,9 @@ Permisos precargados:
 | ADMIN | `admin.categorias` | Gestion del catalogo de categorias de tickets |
 | REPORTES | `reportes.ver` | Consultar tablero de indicadores |
 | REPORTES | `reportes.exportar` | Exportar reportes y documentacion en PDF |
+| INVENTARIO | `inventario.ver` | Consultar el catalogo y el kardex |
+| INVENTARIO | `inventario.articulos` | Gestion CRUD de articulos |
+| INVENTARIO | `inventario.movimientos` | Registrar entradas y salidas |
 
 Los permisos vigentes de cada rol se resuelven contra la base de datos y se mantienen en una
 cache de corta duracion que se invalida al modificar la matriz de un rol, de modo que un
@@ -162,6 +165,7 @@ personal y los perfiles con `tickets.ver_todos` se incorporan a la sala del equi
 | `ticket:resuelto` | Servidor a cliente | Registro de la solucion tecnica |
 | `notificacion:nueva` | Servidor a cliente | Notificacion personal para el destinatario |
 | `comentario:nuevo` | Servidor a cliente | Mensaje nuevo en la conversacion del ticket |
+| `inventario:movimiento` | Servidor a cliente | Entrada o salida registrada en el inventario |
 
 ## Documentacion en PDF
 
@@ -173,6 +177,8 @@ en ninguna salida del sistema.**
 | Documento | Origen | Emision |
 |---|---|---|
 | Acta de ticket | `GET /tickets/:id/pdf` | Bajo demanda y automatica en cada transicion |
+| Inventario | `GET /inventario/reporte/pdf` | Bajo demanda desde el modulo |
+| Kardex de articulo | `GET /inventario/articulos/:id/kardex/pdf` | Bajo demanda desde el listado |
 | Reporte de gestion | `GET /tickets/reporte/pdf` | Bajo demanda con los filtros vigentes |
 | Bitacora de auditoria | `GET /auditoria/pdf` | Bajo demanda por periodo y entidad |
 | Matriz de roles y permisos | `GET /auditoria/matriz-rbac/pdf` | Bajo demanda desde el panel de roles |
@@ -209,9 +215,46 @@ Prefijo base: `/api/v1`
 | GET/POST/PUT/DELETE | `/roles` | `admin.roles` |
 | GET/POST/PUT/DELETE | `/areas` | `admin.areas` |
 | GET/POST/PUT/DELETE | `/categorias` | `admin.categorias` (lectura: autenticado) |
+| GET | `/inventario/articulos` | `inventario.ver` |
+| POST/PUT/DELETE | `/inventario/articulos` | `inventario.articulos` |
+| POST | `/inventario/articulos/:id/movimientos` | `inventario.movimientos` |
+| GET | `/inventario/movimientos` | `inventario.ver` |
 | GET | `/permisos` | `admin.roles` |
 | GET | `/notificaciones` | Autenticado |
 | GET | `/auditoria` | `reportes.ver` / `admin.usuarios` |
+
+## Inventario de sistemas
+
+Catalogo de articulos con kardex de movimientos. El saldo **nunca se edita a mano**: resulta
+exclusivamente de los movimientos registrados, cada uno con su saldo anterior y resultante.
+
+| Movimiento | Efecto |
+|---|---|
+| Entrada | Incrementa el saldo (compras, devoluciones al deposito) |
+| Salida | Descuenta el saldo; se rechaza si no alcanza el stock disponible |
+| Ajuste | Fija el saldo en la cantidad indicada, para recuentos fisicos |
+
+La fila del articulo se bloquea durante la transaccion (`SELECT ... FOR UPDATE`), de modo que
+dos movimientos simultaneos no dejan un saldo erroneo. Un movimiento puede asociarse a un
+ticket, dejando trazabilidad del consumo, y al caer por debajo del minimo definido se avisa al
+equipo tecnico. La baja de un articulo es logica: conserva su kardex historico.
+
+Para cargar un catalogo inicial de ejemplo: `cd backend && npm run demo`.
+
+## Limites de carga
+
+Todos los listados extensos responden paginados: tickets, usuarios, auditoria, articulos y
+movimientos. El limite por defecto es de **25 registros** y el maximo admitido es de **200**,
+acotado en el servidor mediante `backend/src/utils/paginacion.js`. Un cliente no puede pedir la
+tabla completa, ni siquiera manipulando la consulta.
+
+Cada respuesta paginada incluye el bloque `paginacion` con el total, la pagina vigente, la
+cantidad de paginas y el rango mostrado.
+
+## Tema claro y oscuro
+
+La interfaz admite ambos temas. El interruptor esta en la cabecera y la preferencia queda
+guardada en el navegador; sin preferencia previa se respeta la del sistema operativo.
 
 ## Conversacion y adjuntos
 

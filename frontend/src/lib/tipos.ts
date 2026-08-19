@@ -1,3 +1,62 @@
+export interface InfoPaginacion {
+  total: number;
+  limite: number;
+  pagina: number;
+  paginas: number;
+  desde: number;
+  hasta: number;
+}
+
+export interface RespuestaPaginada<T> {
+  ok: boolean;
+  datos: T[];
+  paginacion: InfoPaginacion;
+}
+
+export type TipoArticulo = 'Equipo' | 'Consumible' | 'Repuesto' | 'Licencia' | 'Accesorio';
+export type TipoMovimiento = 'Entrada' | 'Salida' | 'Ajuste';
+
+export interface Articulo {
+  id: number;
+  codigo: string;
+  nombre: string;
+  descripcion: string | null;
+  tipo: TipoArticulo;
+  unidad: string;
+  stock_actual: number;
+  stock_minimo: number;
+  ubicacion: string | null;
+  activo: boolean;
+  fecha_creacion: string;
+  bajo_minimo: boolean;
+  ultimo_movimiento: string | null;
+}
+
+export interface Movimiento {
+  id: number;
+  tipo: TipoMovimiento;
+  cantidad: number;
+  stock_anterior: number;
+  stock_resultante: number;
+  motivo: string | null;
+  ticket_id: number | null;
+  fecha: string;
+  articulo_id: number;
+  articulo_codigo: string;
+  articulo_nombre: string;
+  unidad: string;
+  usuario_nombre: string;
+}
+
+export interface ResumenInventario {
+  articulos: number;
+  unidades: number;
+  bajo_minimo: number;
+  agotados: number;
+  entradas_mes: number;
+  salidas_mes: number;
+}
+
 export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
 /** La categoria proviene del catalogo administrable, no de una lista fija. */

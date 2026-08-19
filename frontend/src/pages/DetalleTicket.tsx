@@ -20,8 +20,8 @@ interface Tecnico {
 
 const Dato = ({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) => (
   <div>
-    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{etiqueta}</p>
-    <p className="mt-0.5 text-sm font-medium text-slate-800">{valor ?? 'No registrado'}</p>
+    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{etiqueta}</p>
+    <p className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">{valor ?? 'No registrado'}</p>
   </div>
 );
 
@@ -110,15 +110,15 @@ export const DetalleTicket = () => {
           <button
             type="button"
             onClick={() => navegar('/tickets')}
-            className="group mb-2.5 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800"
+            className="group mb-2.5 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800 dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300"
           >
-            <span className="rounded-md bg-slate-100 p-1 transition group-hover:bg-institucional-100">
+            <span className="rounded-md bg-slate-100 p-1 transition group-hover:bg-institucional-100 dark:bg-slate-800">
               <ArrowLeft className="h-3.5 w-3.5" />
             </span>
             Volver al listado
           </button>
-          <h1 className="text-xl font-bold text-institucional-900">
-            <span className="font-mono text-base text-institucional-700">{codigoTicket(ticket.id)}</span>
+          <h1 className="text-xl font-bold text-institucional-900 dark:text-slate-100">
+            <span className="font-mono text-base text-institucional-700 dark:text-institucional-300">{codigoTicket(ticket.id)}</span>
             {'  '}
             {ticket.titulo}
           </h1>
@@ -170,14 +170,14 @@ export const DetalleTicket = () => {
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
           <Panel titulo="Descripcion reportada" icono={ClipboardCheck}>
-            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{ticket.descripcion}</p>
+            <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ticket.descripcion}</p>
           </Panel>
 
           <Panel titulo="Solucion tecnica" icono={CheckCircle2}>
             {ticket.solucion_detalle ? (
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{ticket.solucion_detalle}</p>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ticket.solucion_detalle}</p>
             ) : (
-              <p className="text-sm text-slate-500">Aun no se ha registrado una solucion para este requerimiento.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Aun no se ha registrado una solucion para este requerimiento.</p>
             )}
           </Panel>
 
@@ -188,15 +188,15 @@ export const DetalleTicket = () => {
               {(ticket.bitacora ?? []).map((registro, indice) => (
                 <li key={indice} className="flex gap-3 border-l-2 border-institucional-200 pl-4">
                   <div>
-                    <p className="text-sm font-semibold text-institucional-900">{registro.accion}</p>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-institucional-900 dark:text-slate-100">{registro.accion}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {registro.usuario_nombre ?? 'Sistema'} - {fechaHora(registro.fecha)}
                     </p>
                   </div>
                 </li>
               ))}
               {(ticket.bitacora ?? []).length === 0 && (
-                <li className="text-sm text-slate-500">Sin registros en la bitacora.</li>
+                <li className="text-sm text-slate-500 dark:text-slate-400">Sin registros en la bitacora.</li>
               )}
             </ol>
           </Panel>
