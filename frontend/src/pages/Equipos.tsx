@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
-  Ban, Cpu, Eye, FileDown, Filter, HardDrive, KeyRound, Laptop, MemoryStick, Monitor,
+  Ban, Cpu, Eye, FileDown, Filter, HardDrive, Info, KeyRound, Laptop, MemoryStick, Monitor,
   Network, PencilLine, PlusCircle, RotateCcw, Search, ShieldAlert, Users, Wrench
 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal,
-  Panel, Vacio, filaAccionable
+  Panel, Vacio
 } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
@@ -322,7 +322,7 @@ export const Equipos = () => {
               </thead>
               <tbody>
                 {equipos.map((equipo) => (
-                  <tr key={equipo.id} {...filaAccionable(() => setFicha(equipo), 'Ver la ficha del equipo')}>
+                  <tr key={equipo.id}>
                     <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
                       {equipo.codigo}
                     </td>
@@ -371,6 +371,7 @@ export const Equipos = () => {
                             alPulsar={() => void revelarCredencial(equipo)}
                           />
                         )}
+                        <BotonAccion icono={Info} rotulo="Ver ficha del equipo" alPulsar={() => setFicha(equipo)} />
                         <BotonAccion
                           icono={FileDown}
                           rotulo="Ficha en PDF"
