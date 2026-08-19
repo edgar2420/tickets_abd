@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import {
-  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio, filaAccionable
+  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio
 } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { Paginacion } from '../components/Paginacion';
@@ -156,7 +156,7 @@ export const AdminUsuarios = () => {
               </thead>
               <tbody>
                 {usuarios.map((usuario) => (
-                  <tr key={usuario.id} {...filaAccionable(() => abrirEdicion(usuario), 'Editar el usuario')}>
+                  <tr key={usuario.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{usuario.nombre}</td>
                     <td className="font-mono text-xs text-slate-600 dark:text-slate-200">{usuario.usuario}</td>
                     <td className="text-slate-600 dark:text-slate-200">{usuario.area}</td>
