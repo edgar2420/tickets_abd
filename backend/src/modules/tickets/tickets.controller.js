@@ -6,9 +6,10 @@ import { notificarUsuario, notificarEquipoTecnico } from '../../services/notific
 import { emitir, salaTicket, salaUsuario, SALA_TECNICOS } from '../../realtime/socket.js';
 import { construirActaTicket, construirReporteTickets, codigoTicket } from '../../services/pdf/documentos.service.js';
 import {
-  SELECT_TICKET, obtenerTicket, listarTickets, indicadores, distribuciones,
+  SELECT_TICKET, obtenerTicket, listarTickets, contarTickets, indicadores, distribuciones,
   bitacoraTicket, archivarActaTicket
 } from './tickets.service.js';
+import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
 
@@ -42,8 +43,13 @@ const difundirTicket = (ticket, evento) => {
 };
 
 export const listar = asyncHandler(async (req, res) => {
-  const datos = await listarTickets(req.query, req.usuario);
-  res.json({ ok: true, datos });
+  const { limite, pagina, desplazamiento } = paginacion(req.query);
+  const filtros = { ...req.query, limite, desplazamiento };
+  const [datos, total] = await Promise.all([
+    listarTickets(filtros, req.usuario),
+    contarTickets(req.query, req.usuario)
+  ]);
+  res.json(respuestaPaginada(datos, total, limite, pagina));
 });
 
 export const detalle = asyncHandler(async (req, res) => {
@@ -217,7 +223,7 @@ export const actaPdf = asyncHandler(async (req, res) => {
 
 /** Reporte consolidado en PDF con los filtros vigentes del listado. */
 export const reportePdf = asyncHandler(async (req, res) => {
-  const filas = await listarTickets({ ...req.query, limite: 2000 }, req.usuario);
+  const filas = await listarTickets({ ...req.query, limite: 2000, desplazamiento: 0 }, req.usuario);
   const resumen = await indicadores(req.query, req.usuario);
   const documento = construirReporteTickets({ filas, indicadores: resumen, filtros: req.query });
   const buffer = await documento.aBuffer();

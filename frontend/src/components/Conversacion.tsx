@@ -37,12 +37,12 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
       <button
         type="button"
         onClick={() => void urlAdjunto(adjunto.id).then((generada) => window.open(generada, '_blank'))}
-        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs transition hover:border-institucional-300 hover:bg-institucional-50"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs transition hover:border-institucional-300 hover:bg-institucional-50 dark:bg-slate-900 dark:border-slate-700"
       >
-        <FileText className="h-4 w-4 shrink-0 text-institucional-700" />
+        <FileText className="h-4 w-4 shrink-0 text-institucional-700 dark:text-institucional-300" />
         <span className="min-w-0">
-          <span className="block truncate font-medium text-slate-700">{adjunto.nombre}</span>
-          <span className="text-slate-400">{pesoLegible(adjunto.tamano)}</span>
+          <span className="block truncate font-medium text-slate-700 dark:text-slate-200">{adjunto.nombre}</span>
+          <span className="text-slate-400 dark:text-slate-500">{pesoLegible(adjunto.tamano)}</span>
         </span>
       </button>
     );
@@ -52,14 +52,14 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
     <button
       type="button"
       onClick={() => url && alAmpliar(url, adjunto.nombre)}
-      className="group relative h-28 w-36 overflow-hidden rounded-lg border border-slate-200 bg-slate-100"
+      className="group relative h-28 w-36 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:bg-slate-800 dark:border-slate-700"
       title={adjunto.nombre}
     >
       {url ? (
         <img src={url} alt={adjunto.nombre} className="h-full w-full object-cover transition group-hover:scale-105" />
       ) : (
         <span className="flex h-full items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin text-slate-400" />
+          <Loader2 className="h-4 w-4 animate-spin text-slate-400 dark:text-slate-500" />
         </span>
       )}
       <span className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
@@ -142,13 +142,13 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
 
   return (
     <section className="panel animar-entrada flex flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900">
-          <MessagesSquare className="h-4 w-4 text-institucional-700" />
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-slate-700">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
+          <MessagesSquare className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />
           Conversacion
         </h2>
         {comentarios && comentarios.length > 0 && (
-          <span className="text-xs text-slate-400">{comentarios.length} mensajes</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{comentarios.length} mensajes</span>
         )}
       </header>
 
@@ -183,8 +183,8 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
               </span>
 
               <div className={`max-w-[80%] ${propio ? 'items-end text-right' : ''}`}>
-                <p className="mb-1 text-xs text-slate-400">
-                  <span className="font-semibold text-slate-600">
+                <p className="mb-1 text-xs text-slate-400 dark:text-slate-500">
+                  <span className="font-semibold text-slate-600 dark:text-slate-300">
                     {propio ? 'Usted' : comentario.usuario_nombre}
                   </span>
                   <span className="mx-1.5">-</span>
@@ -221,7 +221,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
         <div ref={finHilo} />
       </div>
 
-      <footer className="border-t border-slate-200 bg-slate-50 p-4">
+      <footer className="border-t border-slate-200 bg-slate-50 p-4 dark:bg-slate-800 dark:border-slate-700">
         {error && <div className="mb-3"><Alerta mensaje={error} /></div>}
 
         {archivos.length > 0 && (
@@ -229,15 +229,15 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
             {archivos.map((archivo, indice) => (
               <li
                 key={`${archivo.name}-${indice}`}
-                className="flex items-center gap-2 rounded-full border border-slate-300 bg-white py-1 pl-3 pr-1.5 text-xs"
+                className="flex items-center gap-2 rounded-full border border-slate-300 bg-white py-1 pl-3 pr-1.5 text-xs dark:bg-slate-900 dark:border-slate-700"
               >
-                <Paperclip className="h-3 w-3 text-slate-400" />
-                <span className="max-w-40 truncate text-slate-600">{archivo.name}</span>
-                <span className="text-slate-400">{pesoLegible(archivo.size)}</span>
+                <Paperclip className="h-3 w-3 text-slate-400 dark:text-slate-500" />
+                <span className="max-w-40 truncate text-slate-600 dark:text-slate-300">{archivo.name}</span>
+                <span className="text-slate-400 dark:text-slate-500">{pesoLegible(archivo.size)}</span>
                 <button
                   type="button"
                   onClick={() => setArchivos((previos) => previos.filter((_, i) => i !== indice))}
-                  className="rounded-full p-0.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+                  className="rounded-full p-0.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-500"
                   aria-label={`Quitar ${archivo.name}`}
                 >
                   <X className="h-3 w-3" />

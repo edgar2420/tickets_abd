@@ -16,7 +16,19 @@ export const registrarAuditoria = async ({ usuarioId, entidad, entidadId = null,
   }
 };
 
-export const listarAuditoria = async ({ desde = null, hasta = null, entidad = null, usuarioId = null, limite = 500 }) => {
+export const contarAuditoria = async ({ desde = null, hasta = null, entidad = null, usuarioId = null }) => {
+  const { rows } = await query(
+    `SELECT COUNT(*)::int AS total FROM auditoria a
+      WHERE ($1::timestamp IS NULL OR a.fecha >= $1)
+        AND ($2::timestamp IS NULL OR a.fecha <= $2)
+        AND ($3::varchar   IS NULL OR a.entidad = $3)
+        AND ($4::int       IS NULL OR a.usuario_id = $4)`,
+    [desde, hasta, entidad, usuarioId]
+  );
+  return rows[0].total;
+};
+
+export const listarAuditoria = async ({ desde = null, hasta = null, entidad = null, usuarioId = null, limite = 25, desplazamiento = 0 }) => {
   const { rows } = await query(
     `SELECT a.id, a.entidad, a.entidad_id, a.accion, a.detalle, a.ip, a.fecha,
             u.nombre AS usuario_nombre, u.usuario AS usuario_login
@@ -27,8 +39,8 @@ export const listarAuditoria = async ({ desde = null, hasta = null, entidad = nu
         AND ($3::varchar   IS NULL OR a.entidad = $3)
         AND ($4::int       IS NULL OR a.usuario_id = $4)
       ORDER BY a.fecha DESC
-      LIMIT $5`,
-    [desde, hasta, entidad, usuarioId, limite]
+      LIMIT $5 OFFSET $6`,
+    [desde, hasta, entidad, usuarioId, limite, desplazamiento]
   );
   return rows;
 };

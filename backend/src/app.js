@@ -14,6 +14,7 @@ import { usuariosRouter } from './modules/usuarios/usuarios.routes.js';
 import { ticketsRouter } from './modules/tickets/tickets.routes.js';
 import { adjuntosRouter } from './modules/comentarios/comentarios.routes.js';
 import { auditoriaRouter } from './modules/auditoria/auditoria.routes.js';
+import { inventarioRouter } from './modules/inventario/inventario.routes.js';
 import { notificacionesRouter } from './modules/notificaciones/notificaciones.routes.js';
 
 export const crearApp = () => {
@@ -45,6 +46,7 @@ export const crearApp = () => {
   api.use('/tickets', ticketsRouter);
   api.use('/adjuntos', adjuntosRouter);
   api.use('/auditoria', auditoriaRouter);
+  api.use('/inventario', inventarioRouter);
   api.use('/notificaciones', notificacionesRouter);
 
   app.use(env.apiPrefix, api);

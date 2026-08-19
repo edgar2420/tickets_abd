@@ -166,8 +166,8 @@ export const AdminRoles = () => {
               </div>
             }
           >
-            <p className="text-sm text-slate-600">{rol.descripcion ?? 'Sin descripcion registrada'}</p>
-            <p className="mt-3 text-xs text-slate-500">
+            <p className="text-sm text-slate-600 dark:text-slate-300">{rol.descripcion ?? 'Sin descripcion registrada'}</p>
+            <p className="mt-3 text-xs text-slate-500 dark:text-slate-400">
               {rol.total_usuarios} usuarios asignados - {rol.permisos.length} permisos concedidos
             </p>
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -204,8 +204,8 @@ export const AdminRoles = () => {
             <p className="etiqueta">Permisos del sistema</p>
             <div className="space-y-4">
               {Object.entries(porModulo).map(([modulo, lista]) => (
-                <fieldset key={modulo} className="rounded-md border border-slate-200 p-4">
-                  <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-institucional-800">
+                <fieldset key={modulo} className="rounded-md border border-slate-200 p-4 dark:border-slate-700">
+                  <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-institucional-800 dark:text-institucional-200">
                     {NOMBRE_MODULO[modulo] ?? modulo}
                   </legend>
                   <div className="grid gap-2 sm:grid-cols-2">
@@ -213,13 +213,13 @@ export const AdminRoles = () => {
                       <label key={permiso.id} className="flex items-start gap-2 rounded-md p-1.5 text-sm transition hover:bg-slate-50">
                         <input
                           type="checkbox"
-                          className="mt-0.5 h-4 w-4 rounded border-slate-300"
+                          className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-700"
                           checked={formulario.permisos.includes(permiso.id)}
                           onChange={() => alternarPermiso(permiso.id)}
                         />
                         <span>
-                          <span className="font-mono text-xs font-semibold text-institucional-800">{permiso.codigo}</span>
-                          <span className="block text-xs text-slate-500">{permiso.descripcion}</span>
+                          <span className="font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">{permiso.codigo}</span>
+                          <span className="block text-xs text-slate-500 dark:text-slate-400">{permiso.descripcion}</span>
                         </span>
                       </label>
                     ))}
@@ -229,8 +229,8 @@ export const AdminRoles = () => {
             </div>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300" checked={formulario.activo}
+          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
+            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-700" checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))} />
             Rol activo
           </label>

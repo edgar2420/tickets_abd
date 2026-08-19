@@ -137,8 +137,8 @@ export const AdminCategorias = () => {
                     <IconoCategoria icono={categoria.icono} color={categoria.color} clase="h-5 w-5" />
                   </span>
                   <div>
-                    <h3 className="font-bold text-institucional-900">{categoria.nombre}</h3>
-                    <p className="text-xs text-slate-400">Alta: {fechaCorta(categoria.fecha_creacion)}</p>
+                    <h3 className="font-bold text-institucional-900 dark:text-slate-100">{categoria.nombre}</h3>
+                    <p className="text-xs text-slate-400 dark:text-slate-500">Alta: {fechaCorta(categoria.fecha_creacion)}</p>
                   </div>
                 </div>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
@@ -150,12 +150,12 @@ export const AdminCategorias = () => {
                 </span>
               </div>
 
-              <p className="mt-3 min-h-10 text-sm leading-relaxed text-slate-600">
+              <p className="mt-3 min-h-10 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                 {categoria.descripcion ?? 'Sin descripcion registrada.'}
               </p>
 
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4">
-                <p className="text-xs font-medium text-slate-500">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   {categoria.total_tickets} ticket{categoria.total_tickets === 1 ? '' : 's'} clasificados
                 </p>
                 <div className="flex gap-2">
@@ -254,7 +254,7 @@ export const AdminCategorias = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:bg-slate-800 dark:border-slate-700">
             <p className="etiqueta">Vista previa</p>
             <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold border ${
               estiloCategoria[formulario.color] ?? estiloCategoria.pizarra
@@ -264,17 +264,17 @@ export const AdminCategorias = () => {
             </span>
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-300"
+              className="h-4 w-4 rounded border-slate-300 dark:border-slate-700"
               checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))}
             />
             Categoria disponible al registrar tickets
           </label>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4">
+          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
             <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
             <button type="submit" className="boton-primario" disabled={guardando}>
               <CheckCircle2 className="h-4 w-4" />
