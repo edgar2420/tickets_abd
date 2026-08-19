@@ -274,3 +274,96 @@ export const construirKardex = ({ articulo, movimientos }) => {
 
   return doc;
 };
+
+/** Reporte del parque informatico. No incluye credenciales de acceso remoto. */
+export const construirReporteEquipos = ({ filas, resumen }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Parque de Equipos',
+    subtitulo: 'Inventario de equipos de la empresa y su asignacion',
+    codigo: 'REP-EQUIPOS',
+    icono: 'engranaje',
+    orientacion: 'landscape'
+  });
+
+  doc.titulo1('Situacion del parque', 'grafico');
+  doc.indicadores([
+    { etiqueta: 'Equipos', valor: resumen.total, icono: 'engranaje', color: PALETA.primario },
+    { etiqueta: 'Operativos', valor: resumen.operativos, icono: 'check', color: PALETA.ok },
+    { etiqueta: 'En reparacion', valor: resumen.en_reparacion, icono: 'alerta', color: PALETA.advertencia },
+    { etiqueta: 'Sin asignar', valor: resumen.sin_asignar, icono: 'usuario', color: PALETA.suave }
+  ]);
+
+  doc.titulo1('Detalle de equipos', 'documento');
+  doc.tabla([
+    { titulo: 'Codigo', campo: 'codigo', ancho: 0.09 },
+    { titulo: 'Equipo', campo: 'nombre_equipo', ancho: 0.15 },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.08 },
+    { titulo: 'Asignado a', ancho: 0.15, render: (f) => f.usuario_nombre ?? 'Sin asignar' },
+    { titulo: 'Area', ancho: 0.13, render: (f) => f.area_nombre ?? '-' },
+    { titulo: 'Sistema operativo', campo: 'sistema_operativo', ancho: 0.14 },
+    { titulo: 'RAM', ancho: 0.06, alineacion: 'right', render: (f) => (f.ram_gb ? f.ram_gb + ' GB' : '-') },
+    { titulo: 'Direccion IP', campo: 'direccion_ip', ancho: 0.1 },
+    { titulo: 'Estado', campo: 'estado', ancho: 0.1,
+      color: (f) => (f.estado === 'Operativo' ? PALETA.ok : f.estado === 'En reparacion' ? PALETA.advertencia : PALETA.suave) }
+  ], filas, { alturaFila: 15 });
+
+  doc.nota('Por seguridad, las contrasenas de acceso remoto no se incluyen en ningun documento exportable. '
+    + 'Se consultan unicamente desde el sistema, con permiso propio y registro en la bitacora.', { icono: 'escudo' });
+
+  return doc;
+};
+
+/** Ficha tecnica individual del equipo. */
+export const construirFichaEquipo = ({ equipo }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Equipo ' + equipo.codigo,
+    subtitulo: equipo.nombre_equipo,
+    codigo: 'FICHA-' + equipo.codigo,
+    icono: 'engranaje'
+  });
+
+  doc.titulo1('Identificacion', 'documento');
+  doc.camposClaveValor([
+    { etiqueta: 'Codigo', valor: equipo.codigo },
+    { etiqueta: 'Nombre del equipo', valor: equipo.nombre_equipo },
+    { etiqueta: 'Tipo', valor: equipo.tipo },
+    { etiqueta: 'Estado', valor: equipo.estado },
+    { etiqueta: 'Marca', valor: equipo.marca },
+    { etiqueta: 'Modelo', valor: equipo.modelo },
+    { etiqueta: 'Numero de serie', valor: equipo.numero_serie },
+    { etiqueta: 'Ubicacion', valor: equipo.ubicacion }
+  ], 4);
+
+  doc.titulo1('Caracteristicas tecnicas', 'baseDatos');
+  doc.camposClaveValor([
+    { etiqueta: 'Sistema operativo', valor: equipo.sistema_operativo },
+    { etiqueta: 'Procesador', valor: equipo.procesador },
+    { etiqueta: 'Memoria RAM', valor: equipo.ram_gb ? equipo.ram_gb + ' GB' : null },
+    { etiqueta: 'Almacenamiento', valor: equipo.almacenamiento }
+  ], 4);
+
+  doc.titulo1('Conectividad y acceso remoto', 'red');
+  doc.camposClaveValor([
+    { etiqueta: 'Direccion IP', valor: equipo.direccion_ip },
+    { etiqueta: 'Direccion MAC', valor: equipo.direccion_mac },
+    { etiqueta: 'Identificador AnyDesk', valor: equipo.anydesk_id },
+    { etiqueta: 'Contrasena remota', valor: equipo.tiene_password ? 'Registrada (no se imprime)' : 'No registrada' }
+  ], 4);
+
+  doc.titulo1('Asignacion', 'usuario');
+  doc.camposClaveValor([
+    { etiqueta: 'Asignado a', valor: equipo.usuario_nombre ?? 'Sin asignar' },
+    { etiqueta: 'Area', valor: equipo.area_nombre },
+    { etiqueta: 'Fecha de asignacion', valor: soloFecha(equipo.fecha_asignacion) },
+    { etiqueta: 'Alta en el sistema', valor: soloFecha(equipo.fecha_creacion) }
+  ], 4);
+
+  if (equipo.observaciones) {
+    doc.titulo1('Observaciones', 'documento');
+    doc.parrafo(equipo.observaciones);
+  }
+
+  doc.nota('La contrasena de acceso remoto se guarda cifrada y no se incluye en este documento.', { icono: 'escudo' });
+
+  return doc;
+};

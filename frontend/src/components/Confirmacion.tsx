@@ -40,7 +40,7 @@ export const usarConfirmacion = () => {
 
   const dialogo = solicitud ? (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-slate-900">
+      <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-noche-850">
         <header className="flex items-start gap-4 p-6">
           <span className={`shrink-0 rounded-full p-3 ${tonoPeligro ? 'bg-rose-100 text-rose-700' : 'bg-institucional-50 text-institucional-700'}`}>
             <Icono className="h-6 w-6" />
@@ -58,7 +58,7 @@ export const usarConfirmacion = () => {
             <X className="h-4 w-4" />
           </button>
         </header>
-        <footer className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:bg-slate-800 dark:border-slate-700">
+        <footer className="flex justify-end gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 dark:bg-noche-800 dark:border-noche-700">
           <button type="button" className="boton-secundario" onClick={cerrar} disabled={procesando}>
             Cancelar
           </button>

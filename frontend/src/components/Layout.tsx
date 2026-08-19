@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   Bell, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Menu, ScrollText,
-  Boxes, Moon, ShieldCheck, Sun, Tags, Ticket, UserCog, Users, X, type LucideIcon
+  Boxes, Monitor, Moon, ShieldCheck, Sun, Tags, Ticket, UserCog, Users, X, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
@@ -23,6 +23,7 @@ const ENLACES: Enlace[] = [
   { ruta: '/tickets', texto: 'Tickets', icono: Ticket, permisos: ['tickets.ver_propios', 'tickets.ver_todos'], grupo: 'Operacion' },
   { ruta: '/tickets/nuevo', texto: 'Nuevo ticket', icono: ClipboardList, permisos: ['tickets.crear'], grupo: 'Operacion' },
   { ruta: '/inventario', texto: 'Inventario', icono: Boxes, permisos: ['inventario.ver'], grupo: 'Operacion' },
+  { ruta: '/equipos', texto: 'Equipos', icono: Monitor, permisos: ['equipos.ver'], grupo: 'Operacion' },
   { ruta: '/admin/usuarios', texto: 'Usuarios', icono: Users, permisos: ['admin.usuarios'], grupo: 'Administracion' },
   { ruta: '/admin/roles', texto: 'Roles y permisos', icono: ShieldCheck, permisos: ['admin.roles'], grupo: 'Administracion' },
   { ruta: '/admin/areas', texto: 'Areas', icono: Building2, permisos: ['admin.areas'], grupo: 'Administracion' },
@@ -61,8 +62,8 @@ const PanelNotificaciones = () => {
       </button>
 
       {abierto && (
-        <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl dark:bg-slate-900 dark:border-slate-700">
-          <header className="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-slate-700">
+        <div className="absolute right-0 z-40 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-xl dark:bg-noche-850 dark:border-noche-700">
+          <header className="flex items-center justify-between border-b border-slate-200 px-4 py-2 dark:border-noche-700">
             <span className="text-xs font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">Notificaciones</span>
             <button type="button" onClick={() => void marcarTodas()} className="text-xs text-institucional-700 hover:underline dark:text-institucional-300">
               Marcar todas
@@ -126,7 +127,7 @@ export const Layout = () => {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
-      <header className="z-30 shrink-0 bg-institucional-900 text-white shadow dark:bg-slate-900 dark:border-b dark:border-slate-800">
+      <header className="z-30 shrink-0 bg-institucional-900 text-white shadow dark:bg-noche-850 dark:border-b dark:border-noche-700">
         <div className="flex items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
             <button
@@ -198,7 +199,7 @@ export const Layout = () => {
             })}
           </nav>
 
-          <div className="mx-4 mb-4 mt-auto rounded-lg border border-slate-200 bg-slate-50 p-3 dark:bg-slate-800 dark:border-slate-700">
+          <div className="mx-4 mb-4 mt-auto rounded-lg border border-slate-200 bg-slate-50 p-3 dark:bg-noche-800 dark:border-noche-700">
             <p className="flex items-center gap-2 text-xs font-semibold text-institucional-900 dark:text-slate-100">
               <UserCog className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />
               Permisos activos
@@ -209,7 +210,7 @@ export const Layout = () => {
           </div>
         </aside>
 
-        <main className="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6 dark:bg-slate-950">
+        <main className="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6 dark:bg-noche-950">
           <Outlet />
         </main>
       </div>

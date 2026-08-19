@@ -6,19 +6,22 @@
   html, body, #root { height: 100%; }
   body {
     @apply bg-slate-100 text-slate-800 antialiased transition-colors duration-200
-           dark:bg-slate-950 dark:text-slate-200;
+           dark:bg-noche-900 dark:text-slate-300;
   }
+  /* Los titulos ganan peso visual sobre el fondo oscuro */
+  .dark h1, .dark h2, .dark h3 { @apply text-slate-100; }
   /* Barra de desplazamiento discreta y acorde a la paleta institucional */
   ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-slate-900; }
-  ::-webkit-scrollbar-thumb { @apply rounded-full bg-slate-300 dark:bg-slate-700; }
+  ::-webkit-scrollbar-track { @apply bg-slate-100 dark:bg-noche-850; }
+  ::-webkit-scrollbar-thumb { @apply rounded-full bg-slate-300 dark:bg-noche-700; }
   ::-webkit-scrollbar-thumb:hover { @apply bg-slate-400 dark:bg-slate-600; }
 }
 
 @layer components {
   .panel {
     @apply rounded-xl border border-slate-200 bg-white shadow-panel
-           dark:border-slate-800 dark:bg-slate-900 dark:shadow-none;
+           dark:border-noche-700 dark:bg-noche-850
+           dark:shadow-[0_1px_2px_rgba(0,0,0,0.4),0_8px_24px_rgba(0,0,0,0.25)];
   }
   .panel-interactivo {
     @apply panel transition duration-200 hover:-translate-y-0.5 hover:border-institucional-300 hover:shadow-lg
@@ -30,7 +33,7 @@
            transition placeholder:text-slate-400
            focus:border-institucional-700 focus:ring-4 focus:ring-institucional-700/10
            disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500
-           dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder:text-slate-500
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-100 dark:placeholder:text-slate-500
            dark:focus:border-institucional-400 dark:focus:ring-institucional-400/20
            dark:disabled:bg-slate-800/60 dark:disabled:text-slate-500;
   }
@@ -58,13 +61,15 @@
   }
   .boton-secundario {
     @apply boton border border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50 focus:ring-slate-300/40
-           dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-700;
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200 dark:hover:border-noche-600 dark:hover:bg-noche-700;
   }
   .boton-acento {
-    @apply boton bg-institucional-700 text-white shadow-sm hover:bg-institucional-600 focus:ring-institucional-700/25;
+    @apply boton bg-institucional-700 text-white shadow-sm hover:bg-institucional-600 focus:ring-institucional-700/25
+           dark:bg-institucional-600 dark:hover:bg-institucional-500;
   }
   .boton-peligro {
-    @apply boton bg-rose-700 text-white shadow-sm hover:bg-rose-800 focus:ring-rose-400/30;
+    @apply boton bg-rose-700 text-white shadow-sm hover:bg-rose-800 focus:ring-rose-400/30
+           dark:bg-rose-800 dark:hover:bg-rose-700;
   }
   /* Boton compacto de las columnas de acciones */
   .boton-icono {
@@ -72,8 +77,8 @@
            transition hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800
            disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-300
            disabled:hover:bg-white disabled:hover:text-slate-600
-           dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300
-           dark:hover:border-institucional-500 dark:hover:bg-slate-700 dark:hover:text-institucional-200
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-300
+           dark:hover:border-institucional-500 dark:hover:bg-noche-700 dark:hover:text-institucional-200
            dark:disabled:hover:border-slate-700 dark:disabled:hover:bg-slate-800;
   }
   .boton-icono-peligro {
@@ -86,16 +91,17 @@
   }
   .tabla thead th {
     @apply sticky top-0 z-10 whitespace-nowrap bg-institucional-900 px-4 py-3 text-left text-xs
-           font-semibold uppercase tracking-wide text-white dark:bg-slate-800 dark:text-slate-200;
+           font-semibold uppercase tracking-wide text-white
+           dark:border-b dark:border-noche-700 dark:bg-noche-800 dark:text-institucional-200;
   }
   .tabla tbody td {
-    @apply border-b border-slate-100 px-4 py-3 align-middle dark:border-slate-800;
+    @apply border-b border-slate-100 px-4 py-3 align-middle dark:border-noche-700;
   }
   .tabla tbody tr {
     @apply transition-colors;
   }
   .tabla tbody tr:hover {
-    @apply bg-institucional-50/70 dark:bg-slate-800/60;
+    @apply bg-institucional-50/70 dark:bg-noche-800/70;
   }
   .tabla tbody tr:last-child td {
     @apply border-b-0;
@@ -108,7 +114,7 @@
   }
   .ficha-inactiva {
     @apply ficha border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50
-           dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700;
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-300 dark:hover:border-noche-600 dark:hover:bg-noche-700;
   }
   .ficha-activa {
     @apply ficha border-institucional-700 bg-institucional-900 text-white shadow-md
@@ -123,12 +129,16 @@
   }
   .enlace-menu-inactivo {
     @apply enlace-menu text-slate-600 hover:bg-institucional-50 hover:text-institucional-900
-           dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100;
+           dark:text-slate-400 dark:hover:bg-noche-800 dark:hover:text-slate-100;
   }
 
   /* Superficies secundarias reutilizadas en formularios y resumenes */
   .superficie {
-    @apply border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800;
+    @apply rounded-lg border border-slate-200 bg-slate-50 dark:border-noche-700 dark:bg-noche-800/70;
+  }
+  /* Insignia neutra reutilizable */
+  .insignia {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold;
   }
   .titulo-seccion {
     @apply text-institucional-900 dark:text-slate-100;

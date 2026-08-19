@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, Building2, CheckCircle2, PencilLine, PlusCircle } from 'lucide-react';
 import { api } from '../lib/api';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { Acciones, BotonAccion, Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaCorta } from '../lib/formato';
 import type { Area } from '../lib/tipos';
@@ -113,25 +113,20 @@ export const AdminAreas = () => {
                     </td>
                     <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(area.fecha_creacion)}</td>
                     <td>
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          className="boton-icono"
-                          title="Editar"
-                          onClick={() => { setFormulario({ id: area.id, nombre: area.nombre, activo: area.activo }); setModalAbierto(true); }}
-                        >
-                          <PencilLine className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          className="boton-icono-peligro"
-                          title="Desactivar"
-                          disabled={!area.activo}
-                          onClick={() => desactivar(area)}
-                        >
-                          <Ban className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <Acciones>
+                        <BotonAccion
+                          icono={PencilLine}
+                          rotulo="Editar area"
+                          alPulsar={() => { setFormulario({ id: area.id, nombre: area.nombre, activo: area.activo }); setModalAbierto(true); }}
+                        />
+                        <BotonAccion
+                          icono={Ban}
+                          rotulo="Desactivar area"
+                          tono="peligro"
+                          deshabilitado={!area.activo}
+                          alPulsar={() => desactivar(area)}
+                        />
+                      </Acciones>
                     </td>
                   </tr>
                 ))}
@@ -155,7 +150,7 @@ export const AdminAreas = () => {
               onChange={(e) => setFormulario((f) => ({ ...f, nombre: e.target.value }))} />
           </div>
           <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-700" checked={formulario.activo}
+            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-noche-700" checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))} />
             Area activa
           </label>
