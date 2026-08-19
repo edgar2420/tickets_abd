@@ -5,7 +5,10 @@ import {
 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
-import { Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal, Panel, Vacio } from '../components/Ui';
+import {
+  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal,
+  Panel, Vacio, filaAccionable
+} from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaHora } from '../lib/formato';
@@ -198,6 +201,13 @@ export const Inventario = () => {
     }
   });
 
+  /** Abrir un articulo lleva a su kardex, ya filtrado por ese articulo. */
+  const abrirKardex = (articulo: Articulo) => {
+    setFiltroMovimiento({ tipo: '', articulo_id: String(articulo.id) });
+    setPaginaMovimientos(1);
+    setVista('movimientos');
+  };
+
   const activar = async (articulo: Articulo) => {
     await api(`/inventario/articulos/${articulo.id}/activar`, { metodo: 'PUT' });
     await recargar();
@@ -243,7 +253,10 @@ export const Inventario = () => {
           <button
             key={opcion}
             type="button"
-            onClick={() => setVista(opcion)}
+            onClick={() => {
+              if (opcion === 'articulos') setFiltroMovimiento({ tipo: '', articulo_id: '' });
+              setVista(opcion);
+            }}
             className={vista === opcion ? 'ficha-activa' : 'ficha-inactiva'}
           >
             {opcion === 'articulos' ? <Package className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />}
@@ -313,7 +326,10 @@ export const Inventario = () => {
                   </thead>
                   <tbody>
                     {articulos.map((articulo) => (
-                      <tr key={articulo.id}>
+                      <tr
+                        key={articulo.id}
+                        {...filaAccionable(() => abrirKardex(articulo), 'Ver el kardex del articulo')}
+                      >
                         <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
                           {articulo.codigo}
                         </td>

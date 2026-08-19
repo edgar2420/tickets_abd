@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FileDown, Filter, PlusCircle, RefreshCcw, Search, Ticket as IconoTicket } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAccionable } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
 import type { Categoria, InfoPaginacion, RespuestaPaginada, Ticket } from '../lib/tipos';
@@ -15,6 +15,7 @@ const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
 export const Tickets = () => {
   const { puede } = usarAuth();
   const { ultimoEventoTicket } = usarNotificaciones();
+  const navegar = useNavigate();
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [pagina, setPagina] = useState(1);
@@ -142,17 +143,20 @@ export const Tickets = () => {
               </thead>
               <tbody>
                 {tickets.map((ticket) => (
-                  <tr key={ticket.id}>
+                  <tr
+                    key={ticket.id}
+                    {...filaAccionable(() => navegar(`/tickets/${ticket.id}`), 'Abrir el ticket')}
+                  >
                     <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
-                      <Link to={`/tickets/${ticket.id}`} className="inline-flex items-center gap-1.5 hover:underline">
+                      <span className="inline-flex items-center gap-1.5">
                         <IconoTicket className="h-3.5 w-3.5" />
                         {codigoTicket(ticket.id)}
-                      </Link>
+                      </span>
                     </td>
                     <td className="max-w-xs">
-                      <Link to={`/tickets/${ticket.id}`} className="font-medium text-slate-800 hover:text-institucional-700 dark:text-slate-100">
+                      <span className="font-medium text-slate-800 dark:text-slate-100">
                         {ticket.titulo}
-                      </Link>
+                      </span>
                     </td>
                     <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.categoria}</td>
                     <td><Etiqueta texto={ticket.prioridad} clase={estiloPrioridad[ticket.prioridad]} /></td>
