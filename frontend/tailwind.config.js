@@ -5,6 +5,16 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Paleta del tema oscuro: azul profundo institucional, no gris neutro
+        noche: {
+          950: '#060B14',
+          900: '#0B1421',
+          850: '#111C2D',
+          800: '#16243A',
+          700: '#1F3352',
+          600: '#2B456B',
+          500: '#3A5A87'
+        },
         institucional: {
           50: '#F2F6FA',
           100: '#E1EAF4',

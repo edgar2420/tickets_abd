@@ -33,7 +33,7 @@ const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
             <span className="font-medium text-slate-700 dark:text-slate-300">{fila.etiqueta}</span>
             <span className="font-semibold text-institucional-900 dark:text-institucional-200">{fila.total}</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-noche-700">
             <div
               className="h-full rounded-full bg-institucional-700 transition-all duration-500"
               style={{ width: `${(fila.total / maximo) * 100}%` }}
@@ -57,7 +57,7 @@ const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
           <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
             indice === 0
               ? 'bg-institucional-900 text-white'
-              : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+              : 'bg-slate-100 text-slate-600 dark:bg-noche-700 dark:text-slate-300'
           }`}>
             {indice + 1}
           </span>
@@ -67,7 +67,7 @@ const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
               <p className="shrink-0 text-sm font-bold text-institucional-900 dark:text-institucional-200">{fila.total}</p>
             </div>
             {fila.detalle && <p className="truncate text-xs text-slate-400 dark:text-slate-500">{fila.detalle}</p>}
-            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-noche-700">
               <div className="h-full rounded-full bg-institucional-600" style={{ width: `${(fila.total / maximo) * 100}%` }} />
             </div>
           </div>
@@ -124,10 +124,10 @@ export const Tablero = () => {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Indicador etiqueta="Total tickets" valor={resumen.total} icono={Ticket} />
-        <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} color="text-sky-700" fondo="bg-sky-50" />
-        <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} color="text-amber-600" fondo="bg-amber-50" />
-        <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} color="text-emerald-700" fondo="bg-emerald-50" />
-        <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} color="text-rose-700" fondo="bg-rose-50" />
+        <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} tono="info" />
+        <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} tono="advertencia" />
+        <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} tono="exito" />
+        <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} tono="critico" />
       </div>
 
       {graficos && (

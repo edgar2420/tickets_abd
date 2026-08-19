@@ -39,7 +39,10 @@ const PERMISOS = [
   { modulo: 'REPORTES', codigo: 'reportes.exportar', descripcion: 'Permite exportar reportes y documentacion en formato PDF.' },
   { modulo: 'INVENTARIO', codigo: 'inventario.ver', descripcion: 'Consultar el catalogo de articulos y el kardex de movimientos.' },
   { modulo: 'INVENTARIO', codigo: 'inventario.articulos', descripcion: 'Gestion CRUD de los articulos del inventario.' },
-  { modulo: 'INVENTARIO', codigo: 'inventario.movimientos', descripcion: 'Registrar entradas y salidas de inventario.' }
+  { modulo: 'INVENTARIO', codigo: 'inventario.movimientos', descripcion: 'Registrar entradas y salidas de inventario.' },
+  { modulo: 'EQUIPOS', codigo: 'equipos.ver', descripcion: 'Consultar el parque de equipos y sus caracteristicas.' },
+  { modulo: 'EQUIPOS', codigo: 'equipos.gestionar', descripcion: 'Alta, edicion y baja de equipos y su asignacion.' },
+  { modulo: 'EQUIPOS', codigo: 'equipos.credenciales', descripcion: 'Revelar la contrasena de acceso remoto de un equipo.' }
 ];
 
 const ENDPOINTS = [
@@ -68,6 +71,13 @@ const ENDPOINTS = [
   { metodo: 'GET', ruta: '/inventario/movimientos', permiso: 'inventario.ver', descripcion: 'Kardex paginado' },
   { metodo: 'GET', ruta: '/inventario/reporte/pdf', permiso: 'inventario.ver', descripcion: 'Reporte del catalogo en PDF' },
   { metodo: 'GET', ruta: '/inventario/articulos/:id/kardex/pdf', permiso: 'inventario.ver', descripcion: 'Kardex del articulo en PDF' },
+  { metodo: 'GET', ruta: '/equipos', permiso: 'equipos.ver', descripcion: 'Parque informatico paginado con filtros' },
+  { metodo: 'POST', ruta: '/equipos', permiso: 'equipos.gestionar', descripcion: 'Alta de equipo y su asignacion' },
+  { metodo: 'PUT', ruta: '/equipos/:id', permiso: 'equipos.gestionar', descripcion: 'Edicion del equipo' },
+  { metodo: 'DELETE', ruta: '/equipos/:id', permiso: 'equipos.gestionar', descripcion: 'Baja logica del equipo' },
+  { metodo: 'GET', ruta: '/equipos/:id/credenciales', permiso: 'equipos.credenciales', descripcion: 'Revela la contrasena remota, con registro en bitacora' },
+  { metodo: 'GET', ruta: '/equipos/reporte/pdf', permiso: 'equipos.ver', descripcion: 'Reporte del parque en PDF' },
+  { metodo: 'GET', ruta: '/equipos/:id/ficha/pdf', permiso: 'equipos.ver', descripcion: 'Ficha tecnica del equipo en PDF' },
   { metodo: 'GET', ruta: '/areas', permiso: 'Autenticado', descripcion: 'Catalogo de areas' },
   { metodo: 'POST', ruta: '/areas', permiso: 'admin.areas', descripcion: 'Alta de area' },
   { metodo: 'PUT', ruta: '/areas/:id', permiso: 'admin.areas', descripcion: 'Edicion de area' },
@@ -111,6 +121,9 @@ const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/03_categorias.sql', descripcion: 'Catalogo administrable de categorias' },
   { componente: 'Base de datos', ruta: 'db/04_comentarios.sql', descripcion: 'Conversacion y adjuntos del ticket' },
   { componente: 'Base de datos', ruta: 'db/05_inventario.sql', descripcion: 'Articulos y kardex de movimientos' },
+  { componente: 'Base de datos', ruta: 'db/06_equipos.sql', descripcion: 'Parque de equipos de la empresa' },
+  { componente: 'API', ruta: 'backend/src/modules/equipos/', descripcion: 'Parque informatico y credenciales de acceso remoto' },
+  { componente: 'API', ruta: 'backend/src/utils/cifrado.js', descripcion: 'Cifrado AES-256-GCM de credenciales' },
   { componente: 'API', ruta: 'backend/src/modules/inventario/', descripcion: 'Catalogo, movimientos y reportes de inventario' },
   { componente: 'API', ruta: 'backend/src/utils/paginacion.js', descripcion: 'Limites de carga uniformes de los listados' },
   { componente: 'API', ruta: 'backend/src/app.js', descripcion: 'Composicion de middlewares y montaje de rutas' },
@@ -191,7 +204,8 @@ const construir = async () => {
     { tabla: 'comentarios', proposito: 'Conversacion entre solicitante y tecnico sobre el ticket' },
     { tabla: 'adjuntos', proposito: 'Capturas de pantalla y documentos asociados al ticket' },
     { tabla: 'inventario_articulos', proposito: 'Catalogo de articulos con su saldo vigente' },
-    { tabla: 'inventario_movimientos', proposito: 'Kardex de entradas, salidas y ajustes' }
+    { tabla: 'inventario_movimientos', proposito: 'Kardex de entradas, salidas y ajustes' },
+    { tabla: 'equipos', proposito: 'Parque informatico, asignacion y acceso remoto cifrado' }
   ]);
   doc.nota('La categoria del ticket dejo de ser una lista fija en el codigo: ahora se valida contra el '
     + 'catalogo administrable de la tabla categorias, mantenible desde el panel de administracion. '
@@ -342,9 +356,39 @@ const construir = async () => {
     + '25 registros y el maximo admitido es de 200, acotado en el servidor: un cliente no puede solicitar '
     + 'la tabla completa y saturar la memoria del navegador ni la del servidor.');
 
-  // 11. Despliegue
+  // 10 bis. Equipos
   doc.saltoPagina();
-  doc.titulo1('11. Despliegue en servidor', 'engranaje');
+  doc.titulo1('11. Modulo de equipos de la empresa', 'engranaje');
+  doc.parrafo('Registra el parque informatico con su asignacion por usuario y area, las caracteristicas '
+    + 'tecnicas de cada maquina y los datos de acceso remoto empleados por la mesa de ayuda.');
+  doc.tabla([
+    { titulo: 'Grupo de datos', campo: 'grupo', ancho: 0.28 },
+    { titulo: 'Contenido', campo: 'contenido', ancho: 0.72 }
+  ], [
+    { grupo: 'Identificacion', contenido: 'Codigo, nombre del equipo, tipo, marca, modelo y numero de serie' },
+    { grupo: 'Caracteristicas', contenido: 'Sistema operativo, procesador, memoria RAM y almacenamiento' },
+    { grupo: 'Conectividad', contenido: 'Direccion IP y direccion MAC, ambas validadas por formato' },
+    { grupo: 'Acceso remoto', contenido: 'Identificador de AnyDesk y contrasena cifrada' },
+    { grupo: 'Asignacion', contenido: 'Usuario responsable, area, ubicacion, estado y fecha de asignacion' }
+  ], { alturaFila: 20 });
+
+  doc.titulo2('Tratamiento de la contrasena de acceso remoto');
+  doc.lista([
+    'Se almacena cifrada con AES-256-GCM, nunca en texto plano.',
+    'La clave se deriva por scrypt de la semilla definida en la variable CLAVE_CIFRADO.',
+    'La etiqueta de autenticidad permite detectar cualquier alteracion del dato guardado.',
+    'No viaja en los listados: la respuesta solo informa si existe contrasena registrada.',
+    'Revelarla exige el permiso equipos.credenciales y queda asentado en la bitacora con usuario y fecha.',
+    'Ningun documento PDF exportable incluye contrasenas.'
+  ], 'escudo');
+
+  doc.nota('Al perder la semilla CLAVE_CIFRADO las contrasenas guardadas dejan de poder descifrarse y '
+    + 'deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.',
+  { icono: 'alerta', color: PALETA.critico });
+
+  // 12. Despliegue
+  doc.saltoPagina();
+  doc.titulo1('12. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -378,7 +422,7 @@ const construir = async () => {
   ].join('\n'));
 
   // 11. Inventario
-  doc.titulo1('12. Inventario de componentes', 'baseDatos');
+  doc.titulo1('13. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
@@ -386,7 +430,7 @@ const construir = async () => {
   ], ARCHIVOS);
 
   // 12. Credenciales y control de versiones
-  doc.titulo1('13. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('14. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Admin123*' },

@@ -37,28 +37,28 @@ export const tiempoRelativo = (valor: string) => {
 };
 
 export const estiloEstado: Record<EstadoTicket, string> = {
-  'Abierto': 'bg-sky-100 text-sky-800 border-sky-200',
-  'En Proceso': 'bg-amber-100 text-amber-800 border-amber-200',
-  'Resuelto': 'bg-emerald-100 text-emerald-800 border-emerald-200',
-  'Cerrado': 'bg-slate-200 text-slate-700 border-slate-300'
+  'Abierto': 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
+  'En Proceso': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
+  'Resuelto': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30',
+  'Cerrado': 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-300 dark:border-noche-600'
 };
 
 export const estiloPrioridad: Record<PrioridadTicket, string> = {
-  'Baja': 'bg-green-100 text-green-800 border-green-300',
-  'Media': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'Alta': 'bg-orange-100 text-orange-800 border-orange-300',
+  'Baja': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30',
+  'Media': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/30',
+  'Alta': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/30',
   // La prioridad critica parpadea para destacar sobre el resto del listado
-  'Critica': 'bg-red-100 text-red-800 border-red-300 animate-pulse'
+  'Critica': 'bg-red-100 text-red-800 border-red-300 animate-pulse dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/40'
 };
 
 /** Paleta de las categorias administrables, resuelta desde el token guardado en la base. */
 export const estiloCategoria: Record<string, string> = {
-  celeste: 'bg-sky-100 text-sky-800 border-sky-300',
-  violeta: 'bg-violet-100 text-violet-800 border-violet-300',
-  esmeralda: 'bg-emerald-100 text-emerald-800 border-emerald-300',
-  ambar: 'bg-amber-100 text-amber-800 border-amber-300',
-  rosa: 'bg-rose-100 text-rose-800 border-rose-300',
-  pizarra: 'bg-slate-100 text-slate-700 border-slate-300'
+  celeste: 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
+  violeta: 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30',
+  esmeralda: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30',
+  ambar: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
+  rosa: 'bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30',
+  pizarra: 'bg-slate-100 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-300 dark:border-noche-600'
 };
 
 export const fondoCategoria: Record<string, string> = {
@@ -71,10 +71,10 @@ export const fondoCategoria: Record<string, string> = {
 };
 
 export const textoCategoria: Record<string, string> = {
-  celeste: 'text-sky-600',
-  violeta: 'text-violet-600',
-  esmeralda: 'text-emerald-600',
-  ambar: 'text-amber-600',
-  rosa: 'text-rose-600',
-  pizarra: 'text-slate-600'
+  celeste: 'text-sky-600 dark:text-sky-400',
+  violeta: 'text-violet-600 dark:text-violet-400',
+  esmeralda: 'text-emerald-600 dark:text-emerald-400',
+  ambar: 'text-amber-600 dark:text-amber-400',
+  rosa: 'text-rose-600 dark:text-rose-400',
+  pizarra: 'text-slate-600 dark:text-slate-400'
 };

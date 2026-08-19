@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { CheckCircle2, FileDown, PencilLine, PlusCircle, ShieldCheck, Trash2 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Panel, Vacio } from '../components/Ui';
+import { Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Panel, Vacio } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import type { Permiso, Rol } from '../lib/tipos';
 
@@ -156,14 +156,10 @@ export const AdminRoles = () => {
             titulo={rol.nombre}
             icono={ShieldCheck}
             acciones={
-              <div className="flex gap-2">
-                <button type="button" onClick={() => abrirEdicion(rol)} className="boton-icono" title="Editar">
-                  <PencilLine className="h-4 w-4" />
-                </button>
-                <button type="button" onClick={() => eliminar(rol)} className="boton-icono-peligro" title="Eliminar">
-                  <Trash2 className="h-4 w-4" />
-                </button>
-              </div>
+              <Acciones>
+                <BotonAccion icono={PencilLine} rotulo="Editar rol" alPulsar={() => abrirEdicion(rol)} />
+                <BotonAccion icono={Trash2} rotulo="Eliminar rol" tono="peligro" alPulsar={() => eliminar(rol)} />
+              </Acciones>
             }
           >
             <p className="text-sm text-slate-600 dark:text-slate-300">{rol.descripcion ?? 'Sin descripcion registrada'}</p>
@@ -204,7 +200,7 @@ export const AdminRoles = () => {
             <p className="etiqueta">Permisos del sistema</p>
             <div className="space-y-4">
               {Object.entries(porModulo).map(([modulo, lista]) => (
-                <fieldset key={modulo} className="rounded-md border border-slate-200 p-4 dark:border-slate-700">
+                <fieldset key={modulo} className="rounded-md border border-slate-200 p-4 dark:border-noche-700">
                   <legend className="px-1 text-xs font-semibold uppercase tracking-wide text-institucional-800 dark:text-institucional-200">
                     {NOMBRE_MODULO[modulo] ?? modulo}
                   </legend>
@@ -213,7 +209,7 @@ export const AdminRoles = () => {
                       <label key={permiso.id} className="flex items-start gap-2 rounded-md p-1.5 text-sm transition hover:bg-slate-50">
                         <input
                           type="checkbox"
-                          className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-slate-700"
+                          className="mt-0.5 h-4 w-4 rounded border-slate-300 dark:border-noche-700"
                           checked={formulario.permisos.includes(permiso.id)}
                           onChange={() => alternarPermiso(permiso.id)}
                         />
@@ -230,7 +226,7 @@ export const AdminRoles = () => {
           </div>
 
           <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
-            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-slate-700" checked={formulario.activo}
+            <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-noche-700" checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))} />
             Rol activo
           </label>

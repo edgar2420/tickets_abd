@@ -15,6 +15,7 @@ import { AdminAreas } from './pages/AdminAreas';
 import { AdminCategorias } from './pages/AdminCategorias';
 import { Auditoria } from './pages/Auditoria';
 import { Inventario } from './pages/Inventario';
+import { Equipos } from './pages/Equipos';
 
 const Privado = ({ permisos, elemento }: { permisos?: string[]; elemento: JSX.Element }) => (
   <RutaProtegida permisos={permisos}>{elemento}</RutaProtegida>
@@ -43,6 +44,7 @@ export const App = () => (
           <Route path="/admin/areas" element={<Privado permisos={['admin.areas']} elemento={<AdminAreas />} />} />
           <Route path="/admin/categorias" element={<Privado permisos={['admin.categorias']} elemento={<AdminCategorias />} />} />
           <Route path="/inventario" element={<Privado permisos={['inventario.ver']} elemento={<Inventario />} />} />
+          <Route path="/equipos" element={<Privado permisos={['equipos.ver']} elemento={<Equipos />} />} />
           <Route path="/auditoria" element={<Privado permisos={['reportes.ver', 'admin.usuarios']} elemento={<Auditoria />} />} />
         </Route>
         <Route path="*" element={<Navigate to="/tablero" replace />} />

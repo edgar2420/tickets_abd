@@ -57,6 +57,46 @@ export interface ResumenInventario {
   salidas_mes: number;
 }
 
+export type TipoEquipo = 'Escritorio' | 'Laptop' | 'Servidor' | 'Impresora' | 'Monitor' | 'Red' | 'Otro';
+export type EstadoEquipo = 'Operativo' | 'En reparacion' | 'En resguardo' | 'De baja';
+
+export interface Equipo {
+  id: number;
+  codigo: string;
+  nombre_equipo: string;
+  tipo: TipoEquipo;
+  marca: string | null;
+  modelo: string | null;
+  numero_serie: string | null;
+  sistema_operativo: string | null;
+  procesador: string | null;
+  ram_gb: number | null;
+  almacenamiento: string | null;
+  direccion_ip: string | null;
+  direccion_mac: string | null;
+  anydesk_id: string | null;
+  /** Indica si hay contrasena guardada; el valor nunca viaja en los listados. */
+  tiene_password: boolean;
+  usuario_id: number | null;
+  usuario_nombre: string | null;
+  area_id: number | null;
+  area_nombre: string | null;
+  ubicacion: string | null;
+  estado: EstadoEquipo;
+  observaciones: string | null;
+  fecha_asignacion: string | null;
+  activo: boolean;
+  fecha_creacion: string;
+}
+
+export interface ResumenEquipos {
+  total: number;
+  operativos: number;
+  en_reparacion: number;
+  sin_asignar: number;
+  con_acceso_remoto: number;
+}
+
 export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
 /** La categoria proviene del catalogo administrable, no de una lista fija. */
