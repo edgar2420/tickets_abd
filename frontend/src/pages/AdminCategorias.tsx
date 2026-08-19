@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, RotateCcw, Tags } from 'lucide-react';
 import { api } from '../lib/api';
 import {
-  Alerta, Cargando, EncabezadoPagina, IconoCategoria, Modal, Panel, Vacio, nombresIconos
+  Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, IconoCategoria, Modal, Panel,
+  Vacio, nombresIconos
 } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { estiloCategoria, fondoCategoria, fechaCorta } from '../lib/formato';
@@ -154,24 +155,16 @@ export const AdminCategorias = () => {
                 {categoria.descripcion ?? 'Sin descripcion registrada.'}
               </p>
 
-              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-noche-700">
                 <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                   {categoria.total_tickets} ticket{categoria.total_tickets === 1 ? '' : 's'} clasificados
                 </p>
-                <div className="flex gap-2">
-                  <button type="button" className="boton-icono" title="Editar" onClick={() => abrirEdicion(categoria)}>
-                    <PencilLine className="h-4 w-4" />
-                  </button>
-                  {categoria.activo ? (
-                    <button type="button" className="boton-icono-peligro" title="Desactivar" onClick={() => desactivar(categoria)}>
-                      <Ban className="h-4 w-4" />
-                    </button>
-                  ) : (
-                    <button type="button" className="boton-icono" title="Reactivar" onClick={() => void activar(categoria)}>
-                      <RotateCcw className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+                <Acciones>
+                  <BotonAccion icono={PencilLine} rotulo="Editar categoria" alPulsar={() => abrirEdicion(categoria)} />
+                  {categoria.activo
+                    ? <BotonAccion icono={Ban} rotulo="Desactivar" tono="peligro" alPulsar={() => desactivar(categoria)} />
+                    : <BotonAccion icono={RotateCcw} rotulo="Reactivar" alPulsar={() => void activar(categoria)} />}
+                </Acciones>
               </div>
             </div>
           </article>
@@ -254,7 +247,7 @@ export const AdminCategorias = () => {
             </div>
           </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:bg-slate-800 dark:border-slate-700">
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:bg-noche-800 dark:border-noche-700">
             <p className="etiqueta">Vista previa</p>
             <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold border ${
               estiloCategoria[formulario.color] ?? estiloCategoria.pizarra
@@ -267,14 +260,14 @@ export const AdminCategorias = () => {
           <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
             <input
               type="checkbox"
-              className="h-4 w-4 rounded border-slate-300 dark:border-slate-700"
+              className="h-4 w-4 rounded border-slate-300 dark:border-noche-700"
               checked={formulario.activo}
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))}
             />
             Categoria disponible al registrar tickets
           </label>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
             <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
             <button type="submit" className="boton-primario" disabled={guardando}>
               <CheckCircle2 className="h-4 w-4" />

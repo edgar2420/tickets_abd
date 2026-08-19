@@ -29,6 +29,10 @@ export const env = {
       .map((o) => o.trim())
       .filter(Boolean)
   },
+  cifrado: {
+    // Semilla del cifrado de credenciales de acceso remoto
+    semilla: required('CLAVE_CIFRADO', 'cambiar-esta-semilla-de-cifrado-en-produccion')
+  },
   docs: {
     outputDir: process.env.DOCS_OUTPUT_DIR ?? 'storage/documentos'
   },

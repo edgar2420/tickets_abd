@@ -37,7 +37,7 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
       <button
         type="button"
         onClick={() => void urlAdjunto(adjunto.id).then((generada) => window.open(generada, '_blank'))}
-        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs transition hover:border-institucional-300 hover:bg-institucional-50 dark:bg-slate-900 dark:border-slate-700"
+        className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-xs transition hover:border-institucional-300 hover:bg-institucional-50 dark:bg-noche-850 dark:border-noche-700"
       >
         <FileText className="h-4 w-4 shrink-0 text-institucional-700 dark:text-institucional-300" />
         <span className="min-w-0">
@@ -52,7 +52,7 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
     <button
       type="button"
       onClick={() => url && alAmpliar(url, adjunto.nombre)}
-      className="group relative h-28 w-36 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:bg-slate-800 dark:border-slate-700"
+      className="group relative h-28 w-36 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:bg-noche-800 dark:border-noche-700"
       title={adjunto.nombre}
     >
       {url ? (
@@ -142,7 +142,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
 
   return (
     <section className="panel animar-entrada flex flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-slate-700">
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-noche-700">
         <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
           <MessagesSquare className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />
           Conversacion
@@ -221,7 +221,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
         <div ref={finHilo} />
       </div>
 
-      <footer className="border-t border-slate-200 bg-slate-50 p-4 dark:bg-slate-800 dark:border-slate-700">
+      <footer className="border-t border-slate-200 bg-slate-50 p-4 dark:bg-noche-800 dark:border-noche-700">
         {error && <div className="mb-3"><Alerta mensaje={error} /></div>}
 
         {archivos.length > 0 && (
@@ -229,7 +229,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
             {archivos.map((archivo, indice) => (
               <li
                 key={`${archivo.name}-${indice}`}
-                className="flex items-center gap-2 rounded-full border border-slate-300 bg-white py-1 pl-3 pr-1.5 text-xs dark:bg-slate-900 dark:border-slate-700"
+                className="flex items-center gap-2 rounded-full border border-slate-300 bg-white py-1 pl-3 pr-1.5 text-xs dark:bg-noche-850 dark:border-noche-700"
               >
                 <Paperclip className="h-3 w-3 text-slate-400 dark:text-slate-500" />
                 <span className="max-w-40 truncate text-slate-600 dark:text-slate-300">{archivo.name}</span>

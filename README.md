@@ -133,6 +133,9 @@ Permisos precargados:
 | INVENTARIO | `inventario.ver` | Consultar el catalogo y el kardex |
 | INVENTARIO | `inventario.articulos` | Gestion CRUD de articulos |
 | INVENTARIO | `inventario.movimientos` | Registrar entradas y salidas |
+| EQUIPOS | `equipos.ver` | Consultar el parque informatico |
+| EQUIPOS | `equipos.gestionar` | Alta, edicion y baja de equipos |
+| EQUIPOS | `equipos.credenciales` | Revelar la contrasena de acceso remoto |
 
 Los permisos vigentes de cada rol se resuelven contra la base de datos y se mantienen en una
 cache de corta duracion que se invalida al modificar la matriz de un rol, de modo que un
@@ -179,6 +182,8 @@ en ninguna salida del sistema.**
 | Acta de ticket | `GET /tickets/:id/pdf` | Bajo demanda y automatica en cada transicion |
 | Inventario | `GET /inventario/reporte/pdf` | Bajo demanda desde el modulo |
 | Kardex de articulo | `GET /inventario/articulos/:id/kardex/pdf` | Bajo demanda desde el listado |
+| Parque de equipos | `GET /equipos/reporte/pdf` | Bajo demanda desde el modulo |
+| Ficha de equipo | `GET /equipos/:id/ficha/pdf` | Bajo demanda desde el listado |
 | Reporte de gestion | `GET /tickets/reporte/pdf` | Bajo demanda con los filtros vigentes |
 | Bitacora de auditoria | `GET /auditoria/pdf` | Bajo demanda por periodo y entidad |
 | Matriz de roles y permisos | `GET /auditoria/matriz-rbac/pdf` | Bajo demanda desde el panel de roles |
@@ -219,9 +224,40 @@ Prefijo base: `/api/v1`
 | POST/PUT/DELETE | `/inventario/articulos` | `inventario.articulos` |
 | POST | `/inventario/articulos/:id/movimientos` | `inventario.movimientos` |
 | GET | `/inventario/movimientos` | `inventario.ver` |
+| GET | `/equipos` | `equipos.ver` |
+| POST/PUT/DELETE | `/equipos` | `equipos.gestionar` |
+| GET | `/equipos/:id/credenciales` | `equipos.credenciales` |
 | GET | `/permisos` | `admin.roles` |
 | GET | `/notificaciones` | Autenticado |
 | GET | `/auditoria` | `reportes.ver` / `admin.usuarios` |
+
+## Equipos de la empresa
+
+Parque informatico con la asignacion de cada maquina y sus datos de acceso remoto:
+
+| Grupo | Datos registrados |
+|---|---|
+| Identificacion | Codigo, nombre, tipo, marca, modelo y numero de serie |
+| Caracteristicas | Sistema operativo, procesador, memoria RAM y almacenamiento |
+| Conectividad | Direccion IP y MAC, ambas validadas por formato |
+| Acceso remoto | Identificador de AnyDesk y contrasena |
+| Asignacion | Usuario responsable, area, ubicacion, estado y fecha |
+
+### Tratamiento de la contrasena de acceso remoto
+
+La contrasena de AnyDesk **no se guarda en texto plano**. Se cifra con AES-256-GCM y una clave
+derivada por scrypt de la variable `CLAVE_CIFRADO`; la etiqueta de autenticidad permite detectar
+cualquier alteracion del dato almacenado.
+
+- No viaja en los listados: la respuesta solo informa si existe contrasena registrada.
+- Revelarla exige el permiso `equipos.credenciales` y **queda asentada en la bitacora** con el
+  usuario que la consulto y la fecha.
+- Ningun PDF exportable incluye contrasenas.
+
+Si se pierde la semilla `CLAVE_CIFRADO`, las contrasenas guardadas dejan de poder descifrarse y
+deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.
+
+Para cargar un parque de ejemplo: `cd backend && npm run demo`.
 
 ## Inventario de sistemas
 

@@ -13,7 +13,7 @@ export const Paginacion = ({ info, alCambiarPagina, alCambiarLimite }: {
   alCambiarPagina: (pagina: number) => void;
   alCambiarLimite: (limite: number) => void;
 }) => (
-  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-xs dark:border-slate-700">
+  <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-xs dark:border-noche-700">
     <p className="text-slate-500 dark:text-slate-400">
       {info.total === 0
         ? 'Sin registros'

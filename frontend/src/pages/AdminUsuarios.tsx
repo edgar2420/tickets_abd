@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
 import { api } from '../lib/api';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
+import { Acciones, BotonAccion, Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { Paginacion } from '../components/Paginacion';
 import { CampoPassword } from '../components/CampoPassword';
@@ -169,25 +169,16 @@ export const AdminUsuarios = () => {
                     </td>
                     <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(usuario.fecha_creacion)}</td>
                     <td>
-                      <div className="flex justify-end gap-2">
-                        <button
-                          type="button"
-                          onClick={() => abrirEdicion(usuario)}
-                          className="boton-icono"
-                          title="Editar"
-                        >
-                          <PencilLine className="h-4 w-4" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => desactivar(usuario)}
-                          disabled={!usuario.activo}
-                          className="boton-icono-peligro"
-                          title="Desactivar"
-                        >
-                          <Ban className="h-4 w-4" />
-                        </button>
-                      </div>
+                      <Acciones>
+                        <BotonAccion icono={PencilLine} rotulo="Editar usuario" alPulsar={() => abrirEdicion(usuario)} />
+                        <BotonAccion
+                          icono={Ban}
+                          rotulo="Desactivar usuario"
+                          tono="peligro"
+                          deshabilitado={!usuario.activo}
+                          alPulsar={() => desactivar(usuario)}
+                        />
+                      </Acciones>
                     </td>
                   </tr>
                 ))}
@@ -259,7 +250,7 @@ export const AdminUsuarios = () => {
               <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2 dark:text-slate-200">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-700"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-noche-700"
                   checked={formulario.activo}
                   onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))}
                 />

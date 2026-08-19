@@ -54,7 +54,7 @@ export const Panel = ({ titulo, icono: Icono, acciones, children, clase = '' }:
   { titulo?: string; icono?: LucideIcon; acciones?: ReactNode; children: ReactNode; clase?: string }) => (
   <section className={`panel animar-entrada ${clase}`}>
     {titulo && (
-      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-slate-700">
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-noche-700">
         <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
           {Icono && <Icono className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />}
           {titulo}
@@ -66,10 +66,21 @@ export const Panel = ({ titulo, icono: Icono, acciones, children, clase = '' }:
   </section>
 );
 
-export const Indicador = ({ etiqueta, valor, icono: Icono, color = 'text-institucional-700', fondo = 'bg-institucional-50', pie }:
-  { etiqueta: string; valor: number | string; icono: LucideIcon; color?: string; fondo?: string; pie?: string }) => (
+type Tono = 'neutro' | 'info' | 'advertencia' | 'exito' | 'critico';
+
+/** Tonos semanticos resueltos para tema claro y oscuro. */
+const TONOS: Record<Tono, { fondo: string; icono: string }> = {
+  neutro: { fondo: 'bg-institucional-50 dark:bg-institucional-500/15', icono: 'text-institucional-700 dark:text-institucional-300' },
+  info: { fondo: 'bg-sky-50 dark:bg-sky-500/15', icono: 'text-sky-700 dark:text-sky-300' },
+  advertencia: { fondo: 'bg-amber-50 dark:bg-amber-500/15', icono: 'text-amber-600 dark:text-amber-300' },
+  exito: { fondo: 'bg-emerald-50 dark:bg-emerald-500/15', icono: 'text-emerald-700 dark:text-emerald-300' },
+  critico: { fondo: 'bg-rose-50 dark:bg-rose-500/15', icono: 'text-rose-700 dark:text-rose-300' }
+};
+
+export const Indicador = ({ etiqueta, valor, icono: Icono, tono = 'neutro', pie }:
+  { etiqueta: string; valor: number | string; icono: LucideIcon; tono?: Tono; pie?: string }) => (
   <div className="panel-interactivo animar-entrada flex items-center gap-4 p-4">
-    <span className={`rounded-xl p-3 ${fondo} ${color}`}>
+    <span className={`rounded-xl p-3 ${TONOS[tono].fondo} ${TONOS[tono].icono}`}>
       <Icono className="h-6 w-6" />
     </span>
     <div className="min-w-0">
@@ -90,7 +101,7 @@ export const Cargando = ({ texto = 'Cargando informacion' }: { texto?: string })
 export const Vacio = ({ texto, icono: Icono = Info, accion }:
   { texto: string; icono?: LucideIcon; accion?: ReactNode }) => (
   <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-    <span className="rounded-full bg-slate-100 p-4 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
+    <span className="rounded-full bg-slate-100 p-4 text-slate-400 dark:bg-noche-800 dark:text-slate-500">
       <Icono className="h-7 w-7" />
     </span>
     <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">{texto}</p>
@@ -111,7 +122,7 @@ export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, ancho
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm sm:p-8">
       <div className={`animar-entrada w-full ${ancho} overflow-hidden rounded-xl bg-white shadow-2xl`}>
-        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 dark:bg-slate-800 dark:border-slate-700">
+        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 dark:bg-noche-800 dark:border-noche-700">
           <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
             {Icono && <Icono className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />}
             {titulo}
@@ -153,4 +164,53 @@ export const Fichas = <T extends string>({ opciones, valor, alElegir, render }: 
       );
     })}
   </div>
+);
+
+
+/**
+ * Boton de accion de una fila, con rotulo emergente propio.
+ * El atributo title del navegador tarda en aparecer y no respeta el tema,
+ * por eso el rotulo se dibuja aqui.
+ */
+export const BotonAccion = ({ icono: Icono, rotulo, alPulsar, tono = 'neutro', deshabilitado = false }: {
+  icono: LucideIcon;
+  rotulo: string;
+  alPulsar: () => void;
+  tono?: 'neutro' | 'peligro' | 'exito';
+  deshabilitado?: boolean;
+}) => {
+  const estilos = {
+    neutro: 'boton-icono',
+    peligro: 'boton-icono-peligro',
+    exito: 'boton-icono border-emerald-200 text-emerald-700 hover:border-emerald-300 hover:bg-emerald-50 '
+      + 'dark:border-emerald-800 dark:text-emerald-400 dark:hover:border-emerald-600 dark:hover:bg-emerald-950'
+  };
+
+  return (
+    <div className="group/accion relative">
+      <button
+        type="button"
+        onClick={alPulsar}
+        disabled={deshabilitado}
+        aria-label={rotulo}
+        className={estilos[tono]}
+      >
+        <Icono className="h-4 w-4" />
+      </button>
+      <span
+        role="tooltip"
+        className="pointer-events-none absolute -top-8 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-md
+                   bg-institucional-900 px-2 py-1 text-[11px] font-medium text-white opacity-0 shadow-lg
+                   transition-opacity duration-150 group-hover/accion:opacity-100
+                   dark:bg-noche-700 dark:text-slate-100"
+      >
+        {rotulo}
+      </span>
+    </div>
+  );
+};
+
+/** Contenedor uniforme de la columna de acciones. */
+export const Acciones = ({ children }: { children: ReactNode }) => (
+  <div className="flex items-center justify-end gap-1.5">{children}</div>
 );

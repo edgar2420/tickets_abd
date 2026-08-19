@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal, Panel, Vacio } from '../components/Ui';
+import { Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal, Panel, Vacio } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaHora } from '../lib/formato';
@@ -231,10 +231,10 @@ export const Inventario = () => {
       {resumen && (
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
           <Indicador etiqueta="Articulos activos" valor={resumen.articulos} icono={Package} />
-          <Indicador etiqueta="Unidades en stock" valor={resumen.unidades} icono={Boxes} color="text-sky-700" fondo="bg-sky-50" />
-          <Indicador etiqueta="Bajo minimo" valor={resumen.bajo_minimo} icono={AlertTriangle} color="text-amber-600" fondo="bg-amber-50" />
-          <Indicador etiqueta="Entradas (30 dias)" valor={resumen.entradas_mes} icono={TrendingUp} color="text-emerald-700" fondo="bg-emerald-50" />
-          <Indicador etiqueta="Salidas (30 dias)" valor={resumen.salidas_mes} icono={TrendingDown} color="text-rose-700" fondo="bg-rose-50" />
+          <Indicador etiqueta="Unidades en stock" valor={resumen.unidades} icono={Boxes} tono="info" />
+          <Indicador etiqueta="Bajo minimo" valor={resumen.bajo_minimo} icono={AlertTriangle} tono="advertencia" />
+          <Indicador etiqueta="Entradas (30 dias)" valor={resumen.entradas_mes} icono={TrendingUp} tono="exito" />
+          <Indicador etiqueta="Salidas (30 dias)" valor={resumen.salidas_mes} icono={TrendingDown} tono="critico" />
         </div>
       )}
 
@@ -282,7 +282,7 @@ export const Inventario = () => {
               <label className="flex items-end gap-2 pb-2.5 text-sm text-slate-700 dark:text-slate-300">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-700"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-noche-700"
                   checked={filtros.solo_criticos}
                   onChange={(e) => { setFiltros((f) => ({ ...f, solo_criticos: e.target.checked })); setPaginaArticulos(1); }}
                 />
@@ -340,53 +340,38 @@ export const Inventario = () => {
                                 : <Etiqueta texto="Disponible" clase="bg-green-100 text-green-800 border-green-300" />}
                         </td>
                         <td>
-                          <div className="flex justify-end gap-2">
+                          <Acciones>
                             {puede('inventario.movimientos') && articulo.activo && (
                               <>
-                                <button
-                                  type="button"
-                                  className="boton-icono border-emerald-200 text-emerald-700 hover:bg-emerald-50"
-                                  title="Registrar entrada"
-                                  onClick={() => { setMovimiento({ articulo, tipo: 'Entrada' }); setDatosMovimiento({ cantidad: '1', motivo: '' }); }}
-                                >
-                                  <PackagePlus className="h-4 w-4" />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="boton-icono border-rose-200 text-rose-700 hover:bg-rose-50"
-                                  title="Registrar salida"
-                                  disabled={articulo.stock_actual === 0}
-                                  onClick={() => { setMovimiento({ articulo, tipo: 'Salida' }); setDatosMovimiento({ cantidad: '1', motivo: '' }); }}
-                                >
-                                  <PackageMinus className="h-4 w-4" />
-                                </button>
+                                <BotonAccion
+                                  icono={PackagePlus}
+                                  rotulo="Registrar entrada"
+                                  tono="exito"
+                                  alPulsar={() => { setMovimiento({ articulo, tipo: 'Entrada' }); setDatosMovimiento({ cantidad: '1', motivo: '' }); }}
+                                />
+                                <BotonAccion
+                                  icono={PackageMinus}
+                                  rotulo="Registrar salida"
+                                  tono="peligro"
+                                  deshabilitado={articulo.stock_actual === 0}
+                                  alPulsar={() => { setMovimiento({ articulo, tipo: 'Salida' }); setDatosMovimiento({ cantidad: '1', motivo: '' }); }}
+                                />
                               </>
                             )}
-                            <button
-                              type="button"
-                              className="boton-icono"
-                              title="Kardex PDF"
-                              onClick={() => void descargarPdf(`/inventario/articulos/${articulo.id}/kardex/pdf`, {}, `kardex-${articulo.codigo}.pdf`)}
-                            >
-                              <FileDown className="h-4 w-4" />
-                            </button>
+                            <BotonAccion
+                              icono={FileDown}
+                              rotulo="Kardex en PDF"
+                              alPulsar={() => void descargarPdf(`/inventario/articulos/${articulo.id}/kardex/pdf`, {}, `kardex-${articulo.codigo}.pdf`)}
+                            />
                             {puede('inventario.articulos') && (
                               <>
-                                <button type="button" className="boton-icono" title="Editar" onClick={() => abrirEdicion(articulo)}>
-                                  <PencilLine className="h-4 w-4" />
-                                </button>
-                                {articulo.activo ? (
-                                  <button type="button" className="boton-icono-peligro" title="Desactivar" onClick={() => desactivar(articulo)}>
-                                    <Ban className="h-4 w-4" />
-                                  </button>
-                                ) : (
-                                  <button type="button" className="boton-icono" title="Reactivar" onClick={() => void activar(articulo)}>
-                                    <RotateCcw className="h-4 w-4" />
-                                  </button>
-                                )}
+                                <BotonAccion icono={PencilLine} rotulo="Editar articulo" alPulsar={() => abrirEdicion(articulo)} />
+                                {articulo.activo
+                                  ? <BotonAccion icono={Ban} rotulo="Desactivar" tono="peligro" alPulsar={() => desactivar(articulo)} />
+                                  : <BotonAccion icono={RotateCcw} rotulo="Reactivar" alPulsar={() => void activar(articulo)} />}
                               </>
                             )}
-                          </div>
+                          </Acciones>
                         </td>
                       </tr>
                     ))}
@@ -544,12 +529,12 @@ export const Inventario = () => {
           </div>
 
           {formulario.id === null && (
-            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400">
+            <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-400">
               El articulo se crea con stock cero. El saldo solo cambia mediante entradas, salidas o ajustes.
             </p>
           )}
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
             <button type="button" className="boton-secundario" onClick={() => setModalArticulo(false)}>Cancelar</button>
             <button type="submit" className="boton-primario" disabled={guardando}>Guardar articulo</button>
           </div>
@@ -565,7 +550,7 @@ export const Inventario = () => {
       >
         {movimiento && (
           <form onSubmit={registrarMovimiento} className="space-y-4">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-noche-700 dark:bg-noche-800">
               <p className="font-semibold text-institucional-900 dark:text-slate-100">{movimiento.articulo.nombre}</p>
               <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
                 Codigo {movimiento.articulo.codigo} - Stock actual:{' '}
@@ -603,7 +588,7 @@ export const Inventario = () => {
               />
             </div>
 
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs dark:border-slate-700 dark:bg-slate-800">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs dark:border-noche-700 dark:bg-noche-800">
               Saldo resultante:{' '}
               <strong className="text-institucional-900 dark:text-slate-100">
                 {movimiento.tipo === 'Salida'
@@ -613,7 +598,7 @@ export const Inventario = () => {
               </strong>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
               <button type="button" className="boton-secundario" onClick={() => setMovimiento(null)}>Cancelar</button>
               <button type="submit" className="boton-primario" disabled={guardando}>
                 Registrar {movimiento.tipo.toLowerCase()}
