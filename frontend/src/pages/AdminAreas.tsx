@@ -102,7 +102,7 @@ export const AdminAreas = () => {
                 {areas.map((area) => (
                   <tr key={area.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{area.nombre}</td>
-                    <td className="text-slate-600 dark:text-slate-300">{area.total_usuarios ?? 0}</td>
+                    <td className="text-slate-600 dark:text-slate-200">{area.total_usuarios ?? 0}</td>
                     <td>
                       <Etiqueta
                         texto={area.activo ? 'Activa' : 'Inactiva'}
@@ -111,7 +111,7 @@ export const AdminAreas = () => {
                           : 'bg-slate-200 text-slate-600 border-slate-300'}
                       />
                     </td>
-                    <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(area.fecha_creacion)}</td>
+                    <td className="text-xs text-slate-500 dark:text-slate-300">{fechaCorta(area.fecha_creacion)}</td>
                     <td>
                       <Acciones>
                         <BotonAccion

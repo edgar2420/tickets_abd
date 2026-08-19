@@ -156,9 +156,9 @@ export const AdminUsuarios = () => {
                 {usuarios.map((usuario) => (
                   <tr key={usuario.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{usuario.nombre}</td>
-                    <td className="font-mono text-xs text-slate-600 dark:text-slate-300">{usuario.usuario}</td>
-                    <td className="text-slate-600 dark:text-slate-300">{usuario.area}</td>
-                    <td className="text-slate-600 dark:text-slate-300">{usuario.rol}</td>
+                    <td className="font-mono text-xs text-slate-600 dark:text-slate-200">{usuario.usuario}</td>
+                    <td className="text-slate-600 dark:text-slate-200">{usuario.area}</td>
+                    <td className="text-slate-600 dark:text-slate-200">{usuario.rol}</td>
                     <td>
                       <Etiqueta
                         texto={usuario.activo ? 'Activo' : 'Inactivo'}
@@ -167,7 +167,7 @@ export const AdminUsuarios = () => {
                           : 'bg-slate-200 text-slate-600 border-slate-300'}
                       />
                     </td>
-                    <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(usuario.fecha_creacion)}</td>
+                    <td className="text-xs text-slate-500 dark:text-slate-300">{fechaCorta(usuario.fecha_creacion)}</td>
                     <td>
                       <Acciones>
                         <BotonAccion icono={PencilLine} rotulo="Editar usuario" alPulsar={() => abrirEdicion(usuario)} />

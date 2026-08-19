@@ -139,24 +139,24 @@ export const AdminCategorias = () => {
                   </span>
                   <div>
                     <h3 className="font-bold text-institucional-900 dark:text-slate-100">{categoria.nombre}</h3>
-                    <p className="text-xs text-slate-400 dark:text-slate-500">Alta: {fechaCorta(categoria.fecha_creacion)}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-400">Alta: {fechaCorta(categoria.fecha_creacion)}</p>
                   </div>
                 </div>
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${
                   categoria.activo
                     ? 'bg-green-100 text-green-800 border-green-300'
-                    : 'bg-slate-100 text-slate-600 border-slate-300'
+                    : 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600'
                 }`}>
                   {categoria.activo ? 'Activa' : 'Inactiva'}
                 </span>
               </div>
 
-              <p className="mt-3 min-h-10 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+              <p className="mt-3 min-h-10 text-sm leading-relaxed text-slate-600 dark:text-slate-200">
                 {categoria.descripcion ?? 'Sin descripcion registrada.'}
               </p>
 
               <div className="mt-4 flex items-center justify-between border-t border-slate-100 pt-4 dark:border-noche-700">
-                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-300">
                   {categoria.total_tickets} ticket{categoria.total_tickets === 1 ? '' : 's'} clasificados
                 </p>
                 <Acciones>
@@ -238,7 +238,7 @@ export const AdminCategorias = () => {
                   className={`rounded-lg border-2 p-2.5 transition ${
                     formulario.icono === icono
                       ? 'border-institucional-700 bg-institucional-50'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
+                      : 'border-slate-200 bg-white hover:border-slate-300 dark:border-noche-700 dark:bg-noche-800 dark:hover:border-noche-600'
                   }`}
                 >
                   <IconoCategoria icono={icono} color={formulario.color} clase="h-5 w-5" />

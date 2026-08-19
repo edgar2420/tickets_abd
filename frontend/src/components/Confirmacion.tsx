@@ -42,17 +42,17 @@ export const usarConfirmacion = () => {
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
       <div className="w-full max-w-md overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-noche-850">
         <header className="flex items-start gap-4 p-6">
-          <span className={`shrink-0 rounded-full p-3 ${tonoPeligro ? 'bg-rose-100 text-rose-700' : 'bg-institucional-50 text-institucional-700'}`}>
+          <span className={`shrink-0 rounded-full p-3 ${tonoPeligro ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300' : 'bg-institucional-50 text-institucional-700 dark:bg-institucional-500/15 dark:text-institucional-200'}`}>
             <Icono className="h-6 w-6" />
           </span>
           <div className="flex-1">
             <h3 className="text-base font-bold text-institucional-900 dark:text-slate-100">{solicitud.titulo}</h3>
-            <div className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-300">{solicitud.mensaje}</div>
+            <div className="mt-1 text-sm leading-relaxed text-slate-600 dark:text-slate-200">{solicitud.mensaje}</div>
           </div>
           <button
             type="button"
             onClick={cerrar}
-            className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-500"
+            className="rounded-md p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-noche-700 dark:hover:text-slate-100"
             aria-label="Cerrar"
           >
             <X className="h-4 w-4" />

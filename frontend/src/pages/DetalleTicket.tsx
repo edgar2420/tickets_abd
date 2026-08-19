@@ -20,7 +20,7 @@ interface Tecnico {
 
 const Dato = ({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) => (
   <div>
-    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{etiqueta}</p>
+    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">{etiqueta}</p>
     <p className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">{valor ?? 'No registrado'}</p>
   </div>
 );
@@ -110,7 +110,7 @@ export const DetalleTicket = () => {
           <button
             type="button"
             onClick={() => navegar('/tickets')}
-            className="group mb-2.5 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800 dark:bg-noche-850 dark:border-noche-700 dark:text-slate-300"
+            className="group mb-2.5 inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-3.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:-translate-x-0.5 hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800 dark:bg-noche-850 dark:border-noche-700 dark:text-slate-200"
           >
             <span className="rounded-md bg-slate-100 p-1 transition group-hover:bg-institucional-100 dark:bg-noche-800">
               <ArrowLeft className="h-3.5 w-3.5" />
@@ -125,7 +125,7 @@ export const DetalleTicket = () => {
           <div className="mt-2 flex flex-wrap gap-2">
             <Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} />
             <Etiqueta texto={`Prioridad ${ticket.prioridad}`} clase={estiloPrioridad[ticket.prioridad]} />
-            <Etiqueta texto={ticket.categoria} clase="bg-slate-100 text-slate-700 border-slate-200" />
+            <Etiqueta texto={ticket.categoria} clase="bg-slate-100 text-slate-700 border-slate-200 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
           </div>
         </div>
 
@@ -177,7 +177,7 @@ export const DetalleTicket = () => {
             {ticket.solucion_detalle ? (
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ticket.solucion_detalle}</p>
             ) : (
-              <p className="text-sm text-slate-500 dark:text-slate-400">Aun no se ha registrado una solucion para este requerimiento.</p>
+              <p className="text-sm text-slate-500 dark:text-slate-300">Aun no se ha registrado una solucion para este requerimiento.</p>
             )}
           </Panel>
 
@@ -189,14 +189,14 @@ export const DetalleTicket = () => {
                 <li key={indice} className="flex gap-3 border-l-2 border-institucional-200 pl-4">
                   <div>
                     <p className="text-sm font-semibold text-institucional-900 dark:text-slate-100">{registro.accion}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                    <p className="text-xs text-slate-500 dark:text-slate-300">
                       {registro.usuario_nombre ?? 'Sistema'} - {fechaHora(registro.fecha)}
                     </p>
                   </div>
                 </li>
               ))}
               {(ticket.bitacora ?? []).length === 0 && (
-                <li className="text-sm text-slate-500 dark:text-slate-400">Sin registros en la bitacora.</li>
+                <li className="text-sm text-slate-500 dark:text-slate-300">Sin registros en la bitacora.</li>
               )}
             </ol>
           </Panel>

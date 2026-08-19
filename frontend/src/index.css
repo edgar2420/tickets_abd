@@ -6,7 +6,7 @@
   html, body, #root { height: 100%; }
   body {
     @apply bg-slate-100 text-slate-800 antialiased transition-colors duration-200
-           dark:bg-noche-900 dark:text-slate-300;
+           dark:bg-noche-900 dark:text-slate-200;
   }
   /* Los titulos ganan peso visual sobre el fondo oscuro */
   .dark h1, .dark h2, .dark h3 { @apply text-slate-100; }
@@ -47,7 +47,7 @@
   textarea.campo { @apply leading-relaxed; }
 
   .etiqueta {
-    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400;
+    @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300;
   }
 
   .boton {
@@ -77,7 +77,7 @@
            transition hover:border-institucional-300 hover:bg-institucional-50 hover:text-institucional-800
            disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-300
            disabled:hover:bg-white disabled:hover:text-slate-600
-           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-300
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200
            dark:hover:border-institucional-500 dark:hover:bg-noche-700 dark:hover:text-institucional-200
            dark:disabled:hover:border-slate-700 dark:disabled:hover:bg-slate-800;
   }
@@ -114,7 +114,7 @@
   }
   .ficha-inactiva {
     @apply ficha border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50
-           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-300 dark:hover:border-noche-600 dark:hover:bg-noche-700;
+           dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200 dark:hover:border-noche-600 dark:hover:bg-noche-700;
   }
   .ficha-activa {
     @apply ficha border-institucional-700 bg-institucional-900 text-white shadow-md
@@ -129,7 +129,7 @@
   }
   .enlace-menu-inactivo {
     @apply enlace-menu text-slate-600 hover:bg-institucional-50 hover:text-institucional-900
-           dark:text-slate-400 dark:hover:bg-noche-800 dark:hover:text-slate-100;
+           dark:text-slate-300 dark:hover:bg-noche-800 dark:hover:text-slate-100;
   }
 
   /* Superficies secundarias reutilizadas en formularios y resumenes */
@@ -144,7 +144,7 @@
     @apply text-institucional-900 dark:text-slate-100;
   }
   .texto-suave {
-    @apply text-slate-500 dark:text-slate-400;
+    @apply text-slate-500 dark:text-slate-300;
   }
 }
 
