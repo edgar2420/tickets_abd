@@ -14,14 +14,14 @@ export const Paginacion = ({ info, alCambiarPagina, alCambiarLimite }: {
   alCambiarLimite: (limite: number) => void;
 }) => (
   <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 px-4 py-3 text-xs dark:border-noche-700">
-    <p className="text-slate-500 dark:text-slate-400">
+    <p className="text-slate-500 dark:text-slate-300">
       {info.total === 0
         ? 'Sin registros'
         : `Mostrando ${info.desde} a ${info.hasta} de ${info.total} registros`}
     </p>
 
     <div className="flex items-center gap-3">
-      <label className="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+      <label className="flex items-center gap-2 text-slate-500 dark:text-slate-300">
         Por pagina
         <select
           className="campo w-20 px-2 py-1 text-xs"
@@ -42,7 +42,7 @@ export const Paginacion = ({ info, alCambiarPagina, alCambiarLimite }: {
         >
           <ChevronLeft className="h-4 w-4" />
         </button>
-        <span className="px-2 font-semibold text-slate-600 dark:text-slate-300">
+        <span className="px-2 font-semibold text-slate-600 dark:text-slate-200">
           {info.pagina} / {info.paginas}
         </span>
         <button

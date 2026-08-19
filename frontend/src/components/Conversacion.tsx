@@ -42,7 +42,7 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
         <FileText className="h-4 w-4 shrink-0 text-institucional-700 dark:text-institucional-300" />
         <span className="min-w-0">
           <span className="block truncate font-medium text-slate-700 dark:text-slate-200">{adjunto.nombre}</span>
-          <span className="text-slate-400 dark:text-slate-500">{pesoLegible(adjunto.tamano)}</span>
+          <span className="text-slate-400 dark:text-slate-400">{pesoLegible(adjunto.tamano)}</span>
         </span>
       </button>
     );
@@ -59,7 +59,7 @@ const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: 
         <img src={url} alt={adjunto.nombre} className="h-full w-full object-cover transition group-hover:scale-105" />
       ) : (
         <span className="flex h-full items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin text-slate-400 dark:text-slate-500" />
+          <Loader2 className="h-4 w-4 animate-spin text-slate-400 dark:text-slate-400" />
         </span>
       )}
       <span className="absolute inset-0 flex items-center justify-center bg-slate-900/0 transition group-hover:bg-slate-900/40">
@@ -148,7 +148,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
           Conversacion
         </h2>
         {comentarios && comentarios.length > 0 && (
-          <span className="text-xs text-slate-400 dark:text-slate-500">{comentarios.length} mensajes</span>
+          <span className="text-xs text-slate-400 dark:text-slate-400">{comentarios.length} mensajes</span>
         )}
       </header>
 
@@ -183,8 +183,8 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
               </span>
 
               <div className={`max-w-[80%] ${propio ? 'items-end text-right' : ''}`}>
-                <p className="mb-1 text-xs text-slate-400 dark:text-slate-500">
-                  <span className="font-semibold text-slate-600 dark:text-slate-300">
+                <p className="mb-1 text-xs text-slate-400 dark:text-slate-400">
+                  <span className="font-semibold text-slate-600 dark:text-slate-200">
                     {propio ? 'Usted' : comentario.usuario_nombre}
                   </span>
                   <span className="mx-1.5">-</span>
@@ -197,7 +197,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
                   className={`inline-block rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
                     propio
                       ? 'rounded-tr-sm bg-institucional-900 text-white'
-                      : 'rounded-tl-sm border border-slate-200 bg-slate-50 text-slate-700'
+                      : 'rounded-tl-sm border border-slate-200 bg-slate-50 text-slate-700 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200'
                   }`}
                 >
                   <p className="whitespace-pre-wrap text-left">{comentario.mensaje}</p>
@@ -231,13 +231,13 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
                 key={`${archivo.name}-${indice}`}
                 className="flex items-center gap-2 rounded-full border border-slate-300 bg-white py-1 pl-3 pr-1.5 text-xs dark:bg-noche-850 dark:border-noche-700"
               >
-                <Paperclip className="h-3 w-3 text-slate-400 dark:text-slate-500" />
-                <span className="max-w-40 truncate text-slate-600 dark:text-slate-300">{archivo.name}</span>
-                <span className="text-slate-400 dark:text-slate-500">{pesoLegible(archivo.size)}</span>
+                <Paperclip className="h-3 w-3 text-slate-400 dark:text-slate-400" />
+                <span className="max-w-40 truncate text-slate-600 dark:text-slate-200">{archivo.name}</span>
+                <span className="text-slate-400 dark:text-slate-400">{pesoLegible(archivo.size)}</span>
                 <button
                   type="button"
                   onClick={() => setArchivos((previos) => previos.filter((_, i) => i !== indice))}
-                  className="rounded-full p-0.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-500"
+                  className="rounded-full p-0.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400"
                   aria-label={`Quitar ${archivo.name}`}
                 >
                   <X className="h-3 w-3" />

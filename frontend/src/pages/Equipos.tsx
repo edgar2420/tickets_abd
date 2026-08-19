@@ -21,7 +21,7 @@ const ESTILO_ESTADO: Record<EstadoEquipo, string> = {
   'Operativo': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30',
   'En reparacion': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/30',
   'En resguardo': 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
-  'De baja': 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-300 dark:border-noche-600'
+  'De baja': 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600'
 };
 
 interface FormularioEquipo {
@@ -261,7 +261,7 @@ export const Equipos = () => {
           <div>
             <label className="etiqueta">Busqueda</label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-500" />
+              <Search className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-400" />
               <input
                 className="campo pl-9"
                 placeholder="Codigo, equipo, IP o responsable"
@@ -318,11 +318,11 @@ export const Equipos = () => {
                     </td>
                     <td>
                       <p className="flex items-center gap-2 font-medium text-slate-800 dark:text-slate-100">
-                        {equipo.tipo === 'Laptop' ? <Laptop className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-                          : <Monitor className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />}
+                        {equipo.tipo === 'Laptop' ? <Laptop className="h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />
+                          : <Monitor className="h-3.5 w-3.5 text-slate-400 dark:text-slate-400" />}
                         {equipo.nombre_equipo}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">
+                      <p className="text-xs text-slate-400 dark:text-slate-400">
                         {[equipo.marca, equipo.modelo].filter(Boolean).join(' ') || equipo.tipo}
                       </p>
                     </td>
@@ -330,26 +330,26 @@ export const Equipos = () => {
                       <p className="whitespace-nowrap text-slate-700 dark:text-slate-200">
                         {equipo.usuario_nombre ?? 'Sin asignar'}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500">{equipo.area_nombre ?? '-'}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-400">{equipo.area_nombre ?? '-'}</p>
                     </td>
-                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{equipo.sistema_operativo ?? '-'}</td>
-                    <td className="whitespace-nowrap text-right text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{equipo.sistema_operativo ?? '-'}</td>
+                    <td className="whitespace-nowrap text-right text-slate-600 dark:text-slate-200">
                       {equipo.ram_gb ? `${equipo.ram_gb} GB` : '-'}
                     </td>
-                    <td className="whitespace-nowrap font-mono text-xs text-slate-600 dark:text-slate-300">
+                    <td className="whitespace-nowrap font-mono text-xs text-slate-600 dark:text-slate-200">
                       {equipo.direccion_ip ?? '-'}
                     </td>
                     <td className="whitespace-nowrap">
                       {equipo.anydesk_id
                         ? (
-                          <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
+                          <span className="font-mono text-xs text-slate-600 dark:text-slate-200">
                             {equipo.anydesk_id}
                             {equipo.tiene_password && (
                               <KeyRound className="ml-1.5 inline h-3 w-3 text-institucional-600 dark:text-institucional-300" />
                             )}
                           </span>
                         )
-                        : <span className="text-xs text-slate-400 dark:text-slate-500">-</span>}
+                        : <span className="text-xs text-slate-400 dark:text-slate-400">-</span>}
                     </td>
                     <td><Etiqueta texto={equipo.estado} clase={ESTILO_ESTADO[equipo.estado]} /></td>
                     <td>
@@ -429,7 +429,7 @@ export const Equipos = () => {
               <div>
                 <label className="etiqueta">Memoria RAM (GB)</label>
                 <div className="relative">
-                  <MemoryStick className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-500" />
+                  <MemoryStick className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-400" />
                   <input
                     type="number" min={1} max={2048} className="campo pl-9" placeholder="16"
                     value={formulario.ram_gb}
@@ -440,7 +440,7 @@ export const Equipos = () => {
               <div>
                 <label className="etiqueta">Almacenamiento</label>
                 <div className="relative">
-                  <HardDrive className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-500" />
+                  <HardDrive className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-400" />
                   <input
                     className="campo pl-9" maxLength={80} placeholder="SSD 512 GB"
                     value={formulario.almacenamiento}
@@ -472,7 +472,7 @@ export const Equipos = () => {
                 />
               </div>
             </div>
-            <p className="superficie mt-3 flex items-start gap-2 p-3 text-xs text-slate-600 dark:text-slate-300">
+            <p className="superficie mt-3 flex items-start gap-2 p-3 text-xs text-slate-600 dark:text-slate-200">
               <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-institucional-700 dark:text-institucional-300" />
               La contrasena se guarda cifrada y nunca se incluye en listados ni documentos. Consultarla
               exige permiso propio y queda registrada en la bitacora de auditoria.
@@ -541,7 +541,7 @@ export const Equipos = () => {
               <p className="font-semibold text-institucional-900 dark:text-slate-100">
                 {credencial.equipo.codigo} - {credencial.equipo.nombre_equipo}
               </p>
-              <p className="text-xs text-slate-500 dark:text-slate-400">
+              <p className="text-xs text-slate-500 dark:text-slate-300">
                 {credencial.equipo.usuario_nombre ?? 'Sin asignar'} - {credencial.equipo.direccion_ip ?? 'sin IP'}
               </p>
             </div>
