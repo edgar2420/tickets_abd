@@ -42,7 +42,7 @@ export const CampoPassword = ({
     <div>
       <label className="etiqueta" htmlFor={id}>{etiqueta}</label>
       <div className="relative">
-        {conIcono && <KeyRound className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400" />}
+        {conIcono && <KeyRound className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-slate-500" />}
         <input
           id={id}
           type={visible ? 'text' : 'password'}
@@ -61,7 +61,7 @@ export const CampoPassword = ({
         <button
           type="button"
           onClick={() => setVisible((v) => !v)}
-          className="absolute right-2 top-1.5 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-institucional-700"
+          className="absolute right-2 top-1.5 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-institucional-700 dark:text-slate-500"
           title={visible ? 'Ocultar contrasena' : 'Mostrar contrasena'}
           aria-label={visible ? 'Ocultar contrasena' : 'Mostrar contrasena'}
           tabIndex={-1}

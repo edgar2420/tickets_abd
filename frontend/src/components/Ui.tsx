@@ -42,8 +42,8 @@ export const EncabezadoPagina = ({ titulo, descripcion, icono: Icono, children }
         </span>
       )}
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-institucional-900">{titulo}</h1>
-        {descripcion && <p className="mt-0.5 text-sm text-slate-500">{descripcion}</p>}
+        <h1 className="text-xl font-bold tracking-tight text-institucional-900 dark:text-slate-100">{titulo}</h1>
+        {descripcion && <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-400">{descripcion}</p>}
       </div>
     </div>
     {children && <div className="flex flex-wrap gap-2">{children}</div>}
@@ -54,9 +54,9 @@ export const Panel = ({ titulo, icono: Icono, acciones, children, clase = '' }:
   { titulo?: string; icono?: LucideIcon; acciones?: ReactNode; children: ReactNode; clase?: string }) => (
   <section className={`panel animar-entrada ${clase}`}>
     {titulo && (
-      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5">
-        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900">
-          {Icono && <Icono className="h-4 w-4 text-institucional-700" />}
+      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3.5 dark:border-slate-700">
+        <h2 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
+          {Icono && <Icono className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />}
           {titulo}
         </h2>
         {acciones}
@@ -73,16 +73,16 @@ export const Indicador = ({ etiqueta, valor, icono: Icono, color = 'text-institu
       <Icono className="h-6 w-6" />
     </span>
     <div className="min-w-0">
-      <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500">{etiqueta}</p>
-      <p className="text-2xl font-bold leading-tight text-institucional-900">{valor}</p>
-      {pie && <p className="truncate text-xs text-slate-400">{pie}</p>}
+      <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{etiqueta}</p>
+      <p className="text-2xl font-bold leading-tight text-institucional-900 dark:text-slate-100">{valor}</p>
+      {pie && <p className="truncate text-xs text-slate-400 dark:text-slate-500">{pie}</p>}
     </div>
   </div>
 );
 
 export const Cargando = ({ texto = 'Cargando informacion' }: { texto?: string }) => (
-  <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500">
-    <Loader2 className="h-4 w-4 animate-spin text-institucional-700" />
+  <div className="flex items-center justify-center gap-2 py-12 text-sm text-slate-500 dark:text-slate-400">
+    <Loader2 className="h-4 w-4 animate-spin text-institucional-700 dark:text-institucional-300" />
     {texto}
   </div>
 );
@@ -90,10 +90,10 @@ export const Cargando = ({ texto = 'Cargando informacion' }: { texto?: string })
 export const Vacio = ({ texto, icono: Icono = Info, accion }:
   { texto: string; icono?: LucideIcon; accion?: ReactNode }) => (
   <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-    <span className="rounded-full bg-slate-100 p-4 text-slate-400">
+    <span className="rounded-full bg-slate-100 p-4 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
       <Icono className="h-7 w-7" />
     </span>
-    <p className="max-w-sm text-sm text-slate-500">{texto}</p>
+    <p className="max-w-sm text-sm text-slate-500 dark:text-slate-400">{texto}</p>
     {accion}
   </div>
 );
@@ -111,15 +111,15 @@ export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, ancho
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm sm:p-8">
       <div className={`animar-entrada w-full ${ancho} overflow-hidden rounded-xl bg-white shadow-2xl`}>
-        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4">
-          <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900">
-            {Icono && <Icono className="h-4 w-4 text-institucional-700" />}
+        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 dark:bg-slate-800 dark:border-slate-700">
+          <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
+            {Icono && <Icono className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />}
             {titulo}
           </h3>
           <button
             type="button"
             onClick={alCerrar}
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+            className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-500"
             aria-label="Cerrar"
           >
             <span className="text-lg leading-none">&times;</span>

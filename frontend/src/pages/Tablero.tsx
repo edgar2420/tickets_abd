@@ -1,10 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Clock, FileDown, Layers, Ticket, Timer } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
-import { Alerta, Cargando, Indicador, Panel } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel, Vacio } from '../components/Ui';
 import type { Distribucion, Indicadores } from '../lib/tipos';
+
+interface Ranking extends Distribucion {
+  detalle?: string;
+}
 
 interface RespuestaTablero {
   datos: {
@@ -13,10 +17,12 @@ interface RespuestaTablero {
       porCategoria: Distribucion[];
       porEstado: Distribucion[];
       porArea: Distribucion[];
+      porSolicitante: Ranking[];
     } | null;
   };
 }
 
+/** Barras horizontales proporcionales al valor mayor de la serie. */
 const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
   const maximo = Math.max(1, ...filas.map((f) => f.total));
   return (
@@ -24,19 +30,50 @@ const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
       {filas.map((fila) => (
         <li key={fila.etiqueta}>
           <div className="mb-1 flex items-center justify-between text-xs">
-            <span className="font-medium text-slate-700">{fila.etiqueta}</span>
-            <span className="font-semibold text-institucional-900">{fila.total}</span>
+            <span className="font-medium text-slate-700 dark:text-slate-300">{fila.etiqueta}</span>
+            <span className="font-semibold text-institucional-900 dark:text-institucional-200">{fila.total}</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
             <div
-              className="h-full rounded-full bg-institucional-700"
+              className="h-full rounded-full bg-institucional-700 transition-all duration-500"
               style={{ width: `${(fila.total / maximo) * 100}%` }}
             />
           </div>
         </li>
       ))}
-      {filas.length === 0 && <li className="text-xs text-slate-500">Sin datos disponibles</li>}
+      {filas.length === 0 && <li className="text-xs text-slate-500 dark:text-slate-400">Sin datos disponibles</li>}
     </ul>
+  );
+};
+
+/** Ranking numerado de quienes generan mas requerimientos. */
+const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
+  if (filas.length === 0) return <Vacio icono={Users} texto="Todavia no hay tickets registrados" />;
+  const maximo = Math.max(1, ...filas.map((f) => f.total));
+  return (
+    <ol className="space-y-3">
+      {filas.map((fila, indice) => (
+        <li key={fila.etiqueta} className="flex items-center gap-3">
+          <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+            indice === 0
+              ? 'bg-institucional-900 text-white'
+              : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'
+          }`}>
+            {indice + 1}
+          </span>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="truncate text-sm font-medium text-slate-700 dark:text-slate-200">{fila.etiqueta}</p>
+              <p className="shrink-0 text-sm font-bold text-institucional-900 dark:text-institucional-200">{fila.total}</p>
+            </div>
+            {fila.detalle && <p className="truncate text-xs text-slate-400 dark:text-slate-500">{fila.detalle}</p>}
+            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+              <div className="h-full rounded-full bg-institucional-600" style={{ width: `${(fila.total / maximo) * 100}%` }} />
+            </div>
+          </div>
+        </li>
+      ))}
+    </ol>
   );
 };
 
@@ -50,12 +87,13 @@ export const Tablero = () => {
     try {
       const respuesta = await api<RespuestaTablero>('/tickets/tablero');
       setDatos(respuesta.datos);
+      setError(null);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'Error al cargar los indicadores');
     }
   }, []);
 
-  // Recarga automatica ante cualquier evento de tiempo real sobre tickets.
+  // Recarga automatica ante cualquier evento de tiempo real sobre tickets
   useEffect(() => {
     void cargar();
   }, [cargar, ultimoEventoTicket]);
@@ -66,12 +104,12 @@ export const Tablero = () => {
   const { resumen, graficos } = datos;
 
   return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">Tablero de control</h1>
-          <p className="text-sm text-slate-500">Estado consolidado de la mesa de ayuda</p>
-        </div>
+    <div className="space-y-5">
+      <EncabezadoPagina
+        titulo="Tablero de control"
+        descripcion="Estado consolidado de la mesa de ayuda"
+        icono={Gauge}
+      >
         {puede('reportes.exportar', 'tickets.ver_todos') && (
           <button
             type="button"
@@ -82,34 +120,30 @@ export const Tablero = () => {
             Exportar reporte PDF
           </button>
         )}
-      </header>
+      </EncabezadoPagina>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <Indicador etiqueta="Total tickets" valor={resumen.total} icono={Ticket} />
-        <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} color="text-sky-700" />
-        <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} color="text-amber-600" />
-        <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} color="text-emerald-700" />
-        <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} color="text-rose-700" />
+        <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} color="text-sky-700" fondo="bg-sky-50" />
+        <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} color="text-amber-600" fondo="bg-amber-50" />
+        <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} color="text-emerald-700" fondo="bg-emerald-50" />
+        <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} color="text-rose-700" fondo="bg-rose-50" />
       </div>
 
-      <Panel titulo="Tiempo promedio de resolucion" icono={Timer}>
-        <p className="text-3xl font-bold text-institucional-900">
-          {Number(resumen.horas_promedio_resolucion ?? 0).toFixed(2)}
-          <span className="ml-2 text-sm font-medium text-slate-500">horas por ticket resuelto</span>
-        </p>
-      </Panel>
-
       {graficos && (
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Panel titulo="Por categoria" icono={Layers}>
-            <BarraDistribucion filas={graficos.porCategoria} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Panel titulo="Quien solicita mas tickets" icono={Users}>
+            <RankingSolicitantes filas={graficos.porSolicitante} />
           </Panel>
-          <Panel titulo="Por estado" icono={Clock}>
-            <BarraDistribucion filas={graficos.porEstado} />
-          </Panel>
-          <Panel titulo="Por area solicitante" icono={Ticket}>
-            <BarraDistribucion filas={graficos.porArea} />
-          </Panel>
+
+          <div className="space-y-4">
+            <Panel titulo="Tickets por categoria" icono={Layers}>
+              <BarraDistribucion filas={graficos.porCategoria} />
+            </Panel>
+            <Panel titulo="Tickets por area solicitante" icono={Ticket}>
+              <BarraDistribucion filas={graficos.porArea} />
+            </Panel>
+          </div>
         </div>
       )}
     </div>

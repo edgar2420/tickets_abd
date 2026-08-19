@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FileDown, Filter, ScrollText } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
-import { Alerta, Cargando, Panel, Vacio } from '../components/Ui';
+import { Alerta, Cargando, EncabezadoPagina, Panel, Vacio } from '../components/Ui';
+import { Paginacion } from '../components/Paginacion';
 import { fechaHora } from '../lib/formato';
-import type { RegistroAuditoria } from '../lib/tipos';
+import type { InfoPaginacion, RegistroAuditoria, RespuestaPaginada } from '../lib/tipos';
 
 const ENTIDADES = ['TICKET', 'USUARIO', 'ROL', 'AREA', 'SESION', 'REPORTE'];
 
@@ -11,16 +12,22 @@ export const Auditoria = () => {
   const [registros, setRegistros] = useState<RegistroAuditoria[] | null>(null);
   const [filtros, setFiltros] = useState({ entidad: '', desde: '', hasta: '' });
   const [error, setError] = useState<string | null>(null);
+  const [pagina, setPagina] = useState(1);
+  const [limite, setLimite] = useState(25);
+  const [info, setInfo] = useState<InfoPaginacion | null>(null);
 
   const cargar = useCallback(async () => {
     try {
-      const { datos } = await api<{ datos: RegistroAuditoria[] }>('/auditoria', { parametros: filtros });
-      setRegistros(datos);
+      const respuesta = await api<RespuestaPaginada<RegistroAuditoria>>('/auditoria', {
+        parametros: { ...filtros, limite, pagina }
+      });
+      setRegistros(respuesta.datos);
+      setInfo(respuesta.paginacion);
       setError(null);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'Error al cargar la bitacora');
     }
-  }, [filtros]);
+  }, [filtros, limite, pagina]);
 
   useEffect(() => {
     void cargar();
@@ -28,11 +35,11 @@ export const Auditoria = () => {
 
   return (
     <div className="space-y-5">
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-institucional-900">Bitacora de auditoria</h1>
-          <p className="text-sm text-slate-500">Trazabilidad de todas las operaciones ejecutadas en el sistema</p>
-        </div>
+      <EncabezadoPagina
+        titulo="Bitacora de auditoria"
+        descripcion="Trazabilidad de todas las operaciones ejecutadas en el sistema"
+        icono={ScrollText}
+      >
         <button
           type="button"
           className="boton-acento"
@@ -41,24 +48,24 @@ export const Auditoria = () => {
           <FileDown className="h-4 w-4" />
           Exportar PDF
         </button>
-      </header>
+      </EncabezadoPagina>
 
       <Panel titulo="Filtros" icono={Filter}>
         <div className="grid gap-3 sm:grid-cols-3">
           <div>
             <label className="etiqueta">Entidad</label>
-            <select className="campo" value={filtros.entidad} onChange={(e) => setFiltros((f) => ({ ...f, entidad: e.target.value }))}>
+            <select className="campo" value={filtros.entidad} onChange={(e) => { setFiltros((f) => ({ ...f, entidad: e.target.value })); setPagina(1); }}>
               <option value="">Todas</option>
               {ENTIDADES.map((entidad) => <option key={entidad} value={entidad}>{entidad}</option>)}
             </select>
           </div>
           <div>
             <label className="etiqueta">Desde</label>
-            <input type="date" className="campo" value={filtros.desde} onChange={(e) => setFiltros((f) => ({ ...f, desde: e.target.value }))} />
+            <input type="date" className="campo" value={filtros.desde} onChange={(e) => { setFiltros((f) => ({ ...f, desde: e.target.value })); setPagina(1); }} />
           </div>
           <div>
             <label className="etiqueta">Hasta</label>
-            <input type="date" className="campo" value={filtros.hasta} onChange={(e) => setFiltros((f) => ({ ...f, hasta: e.target.value }))} />
+            <input type="date" className="campo" value={filtros.hasta} onChange={(e) => { setFiltros((f) => ({ ...f, hasta: e.target.value })); setPagina(1); }} />
           </div>
         </div>
       </Panel>
@@ -83,21 +90,28 @@ export const Auditoria = () => {
               <tbody>
                 {registros.map((registro) => (
                   <tr key={registro.id}>
-                    <td className="whitespace-nowrap text-xs text-slate-500">{fechaHora(registro.fecha)}</td>
-                    <td className="whitespace-nowrap text-slate-700">{registro.usuario_nombre ?? 'Sistema'}</td>
+                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{fechaHora(registro.fecha)}</td>
+                    <td className="whitespace-nowrap text-slate-700 dark:text-slate-200">{registro.usuario_nombre ?? 'Sistema'}</td>
                     <td>
-                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-institucional-800">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-institucional-800 dark:text-institucional-200">
                         <ScrollText className="h-3.5 w-3.5" />
                         {registro.entidad}
                       </span>
                     </td>
-                    <td className="font-mono text-xs text-slate-600">{registro.entidad_id ?? '-'}</td>
-                    <td className="text-slate-700">{registro.accion}</td>
+                    <td className="font-mono text-xs text-slate-600 dark:text-slate-300">{registro.entidad_id ?? '-'}</td>
+                    <td className="text-slate-700 dark:text-slate-200">{registro.accion}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        )}
+        {info && (
+          <Paginacion
+            info={info}
+            alCambiarPagina={setPagina}
+            alCambiarLimite={(nuevo) => { setLimite(nuevo); setPagina(1); }}
+          />
         )}
       </section>
     </div>

@@ -86,7 +86,7 @@ export const NuevoTicket = () => {
             <div>
               <div className="flex items-baseline justify-between">
                 <label className="etiqueta" htmlFor="descripcion">Detalle</label>
-                <span className="text-xs text-slate-400">{formulario.descripcion.length} caracteres</span>
+                <span className="text-xs text-slate-400 dark:text-slate-500">{formulario.descripcion.length} caracteres</span>
               </div>
               <textarea
                 id="descripcion"
@@ -105,7 +105,7 @@ export const NuevoTicket = () => {
               <span className="etiqueta">Categoria</span>
               {!categorias && <Cargando texto="Cargando catalogo" />}
               {categorias && categorias.length === 0 && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   No hay categorias habilitadas. Solicite al administrador que registre al menos una.
                 </p>
               )}
@@ -132,7 +132,7 @@ export const NuevoTicket = () => {
               </div>
               {/* Explicacion de la categoria elegida, para orientar al solicitante */}
               {formulario.categoria && (
-                <p className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+                <p className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
                   {categorias?.find((c) => c.nombre === formulario.categoria)?.descripcion
                     ?? 'Sin descripcion registrada para esta categoria.'}
                 </p>
@@ -160,24 +160,24 @@ export const NuevoTicket = () => {
                   );
                 })}
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-slate-500">
+              <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                 {AYUDA_PRIORIDAD[formulario.prioridad]}
               </p>
             </div>
 
             {/* Resumen de lo que quedara registrado */}
-            <dl className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs">
+            <dl className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs dark:bg-slate-800 dark:border-slate-700">
               <div className="flex justify-between gap-3 py-1">
-                <dt className="font-semibold uppercase tracking-wide text-slate-400">Categoria</dt>
-                <dd className="font-semibold text-institucional-900">{formulario.categoria || 'Sin elegir'}</dd>
+                <dt className="font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Categoria</dt>
+                <dd className="font-semibold text-institucional-900 dark:text-slate-100">{formulario.categoria || 'Sin elegir'}</dd>
               </div>
               <div className="flex justify-between gap-3 py-1">
-                <dt className="font-semibold uppercase tracking-wide text-slate-400">Prioridad</dt>
-                <dd className="font-semibold text-institucional-900">{formulario.prioridad}</dd>
+                <dt className="font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Prioridad</dt>
+                <dd className="font-semibold text-institucional-900 dark:text-slate-100">{formulario.prioridad}</dd>
               </div>
               <div className="flex justify-between gap-3 py-1">
-                <dt className="font-semibold uppercase tracking-wide text-slate-400">Estado inicial</dt>
-                <dd className="font-semibold text-institucional-900">Abierto</dd>
+                <dt className="font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">Estado inicial</dt>
+                <dd className="font-semibold text-institucional-900 dark:text-slate-100">Abierto</dd>
               </div>
             </dl>
           </div>
@@ -185,8 +185,8 @@ export const NuevoTicket = () => {
 
         {error && <div className="px-5 pb-3"><Alerta mensaje={error} /></div>}
 
-        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3.5">
-          <p className="text-xs text-slate-500">
+        <footer className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-200 bg-slate-50 px-5 py-3.5 dark:bg-slate-800 dark:border-slate-700">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
             {listo ? 'Listo para registrar.' : 'Complete el titulo, el detalle y la categoria.'}
           </p>
           <div className="flex gap-2">

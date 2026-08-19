@@ -36,7 +36,10 @@ const PERMISOS = [
   { modulo: 'ADMIN', codigo: 'admin.areas', descripcion: 'Gestion del catalogo de areas de la empresa.' },
   { modulo: 'ADMIN', codigo: 'admin.categorias', descripcion: 'Gestion del catalogo de categorias de tickets.' },
   { modulo: 'REPORTES', codigo: 'reportes.ver', descripcion: 'Permite consultar el tablero de indicadores y reportes.' },
-  { modulo: 'REPORTES', codigo: 'reportes.exportar', descripcion: 'Permite exportar reportes y documentacion en formato PDF.' }
+  { modulo: 'REPORTES', codigo: 'reportes.exportar', descripcion: 'Permite exportar reportes y documentacion en formato PDF.' },
+  { modulo: 'INVENTARIO', codigo: 'inventario.ver', descripcion: 'Consultar el catalogo de articulos y el kardex de movimientos.' },
+  { modulo: 'INVENTARIO', codigo: 'inventario.articulos', descripcion: 'Gestion CRUD de los articulos del inventario.' },
+  { modulo: 'INVENTARIO', codigo: 'inventario.movimientos', descripcion: 'Registrar entradas y salidas de inventario.' }
 ];
 
 const ENDPOINTS = [
@@ -56,6 +59,15 @@ const ENDPOINTS = [
   { metodo: 'GET', ruta: '/tickets/:id/comentarios', permiso: 'Participante del ticket', descripcion: 'Conversacion del ticket' },
   { metodo: 'POST', ruta: '/tickets/:id/comentarios', permiso: 'Participante del ticket', descripcion: 'Mensaje con hasta cinco adjuntos' },
   { metodo: 'GET', ruta: '/adjuntos/:id', permiso: 'Participante del ticket', descripcion: 'Descarga del archivo adjunto' },
+  { metodo: 'GET', ruta: '/inventario/resumen', permiso: 'inventario.ver', descripcion: 'Indicadores del inventario' },
+  { metodo: 'GET', ruta: '/inventario/articulos', permiso: 'inventario.ver', descripcion: 'Catalogo paginado con filtros' },
+  { metodo: 'POST', ruta: '/inventario/articulos', permiso: 'inventario.articulos', descripcion: 'Alta de articulo con stock inicial cero' },
+  { metodo: 'PUT', ruta: '/inventario/articulos/:id', permiso: 'inventario.articulos', descripcion: 'Edicion del articulo' },
+  { metodo: 'DELETE', ruta: '/inventario/articulos/:id', permiso: 'inventario.articulos', descripcion: 'Baja logica del articulo' },
+  { metodo: 'POST', ruta: '/inventario/articulos/:id/movimientos', permiso: 'inventario.movimientos', descripcion: 'Entrada, salida o ajuste' },
+  { metodo: 'GET', ruta: '/inventario/movimientos', permiso: 'inventario.ver', descripcion: 'Kardex paginado' },
+  { metodo: 'GET', ruta: '/inventario/reporte/pdf', permiso: 'inventario.ver', descripcion: 'Reporte del catalogo en PDF' },
+  { metodo: 'GET', ruta: '/inventario/articulos/:id/kardex/pdf', permiso: 'inventario.ver', descripcion: 'Kardex del articulo en PDF' },
   { metodo: 'GET', ruta: '/areas', permiso: 'Autenticado', descripcion: 'Catalogo de areas' },
   { metodo: 'POST', ruta: '/areas', permiso: 'admin.areas', descripcion: 'Alta de area' },
   { metodo: 'PUT', ruta: '/areas/:id', permiso: 'admin.areas', descripcion: 'Edicion de area' },
@@ -89,7 +101,8 @@ const EVENTOS = [
   { evento: 'ticket:actualizado', direccion: 'Servidor a cliente', descripcion: 'Cambio de estado, asignacion o cierre' },
   { evento: 'ticket:resuelto', direccion: 'Servidor a cliente', descripcion: 'Registro de la solucion tecnica' },
   { evento: 'notificacion:nueva', direccion: 'Servidor a cliente', descripcion: 'Notificacion personal para el destinatario' },
-  { evento: 'comentario:nuevo', direccion: 'Servidor a cliente', descripcion: 'Mensaje nuevo en la conversacion del ticket' }
+  { evento: 'comentario:nuevo', direccion: 'Servidor a cliente', descripcion: 'Mensaje nuevo en la conversacion del ticket' },
+  { evento: 'inventario:movimiento', direccion: 'Servidor a cliente', descripcion: 'Entrada o salida registrada en el inventario' }
 ];
 
 const ARCHIVOS = [
@@ -97,6 +110,9 @@ const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/02_seed.sql', descripcion: 'Areas, roles, permisos y usuario administrador' },
   { componente: 'Base de datos', ruta: 'db/03_categorias.sql', descripcion: 'Catalogo administrable de categorias' },
   { componente: 'Base de datos', ruta: 'db/04_comentarios.sql', descripcion: 'Conversacion y adjuntos del ticket' },
+  { componente: 'Base de datos', ruta: 'db/05_inventario.sql', descripcion: 'Articulos y kardex de movimientos' },
+  { componente: 'API', ruta: 'backend/src/modules/inventario/', descripcion: 'Catalogo, movimientos y reportes de inventario' },
+  { componente: 'API', ruta: 'backend/src/utils/paginacion.js', descripcion: 'Limites de carga uniformes de los listados' },
   { componente: 'API', ruta: 'backend/src/app.js', descripcion: 'Composicion de middlewares y montaje de rutas' },
   { componente: 'API', ruta: 'backend/src/server.js', descripcion: 'Servidor HTTP, sockets y apagado ordenado' },
   { componente: 'API', ruta: 'backend/src/middleware/auth.js', descripcion: 'Verificacion JWT para HTTP y para sockets' },
@@ -173,7 +189,9 @@ const construir = async () => {
     { tabla: 'auditoria', proposito: 'Bitacora de cada accion ejecutada, base de los reportes PDF' },
     { tabla: 'notificaciones', proposito: 'Persistencia de los avisos emitidos por WebSockets' },
     { tabla: 'comentarios', proposito: 'Conversacion entre solicitante y tecnico sobre el ticket' },
-    { tabla: 'adjuntos', proposito: 'Capturas de pantalla y documentos asociados al ticket' }
+    { tabla: 'adjuntos', proposito: 'Capturas de pantalla y documentos asociados al ticket' },
+    { tabla: 'inventario_articulos', proposito: 'Catalogo de articulos con su saldo vigente' },
+    { tabla: 'inventario_movimientos', proposito: 'Kardex de entradas, salidas y ajustes' }
   ]);
   doc.nota('La categoria del ticket dejo de ser una lista fija en el codigo: ahora se valida contra el '
     + 'catalogo administrable de la tabla categorias, mantenible desde el panel de administracion. '
@@ -305,9 +323,28 @@ const construir = async () => {
     'documento, grafico, baseDatos, flujo y red para reportes y arquitectura.'
   ], 'check');
 
-  // 10. Despliegue
+  // 9 bis. Inventario
+  doc.titulo1('10. Modulo de inventario de sistemas', 'baseDatos');
+  doc.parrafo('El inventario mantiene el catalogo de articulos y el kardex de movimientos. El saldo de '
+    + 'un articulo nunca se edita de forma directa: resulta exclusivamente de las entradas, salidas y '
+    + 'ajustes registrados, cada uno con su saldo anterior y resultante.');
+  doc.lista([
+    'Entrada: incrementa el saldo. Se emplea en compras y devoluciones al deposito.',
+    'Salida: descuenta el saldo y se rechaza si no alcanza el stock disponible.',
+    'Ajuste: fija el saldo en la cantidad indicada, para recuentos fisicos.',
+    'El movimiento puede asociarse a un ticket, dejando trazabilidad del consumo.',
+    'La fila del articulo se bloquea durante la transaccion, de modo que dos movimientos simultaneos no dejan un saldo erroneo.',
+    'Al caer por debajo del minimo definido se avisa al equipo tecnico.'
+  ]);
+
+  doc.titulo2('Limites de carga de los listados');
+  doc.parrafo('Todos los listados extensos del sistema responden paginados. El limite por defecto es de '
+    + '25 registros y el maximo admitido es de 200, acotado en el servidor: un cliente no puede solicitar '
+    + 'la tabla completa y saturar la memoria del navegador ni la del servidor.');
+
+  // 11. Despliegue
   doc.saltoPagina();
-  doc.titulo1('10. Despliegue en servidor', 'engranaje');
+  doc.titulo1('11. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -341,7 +378,7 @@ const construir = async () => {
   ].join('\n'));
 
   // 11. Inventario
-  doc.titulo1('11. Inventario de componentes', 'baseDatos');
+  doc.titulo1('12. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
@@ -349,7 +386,7 @@ const construir = async () => {
   ], ARCHIVOS);
 
   // 12. Credenciales y control de versiones
-  doc.titulo1('12. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('13. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Admin123*' },

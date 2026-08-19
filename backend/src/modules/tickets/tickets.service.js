@@ -42,16 +42,43 @@ export const listarTickets = async (filtros, usuario) => {
       ORDER BY
         CASE t.prioridad WHEN 'Critica' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Media' THEN 3 ELSE 4 END,
         t.fecha_creacion DESC
-      LIMIT $11`,
+      LIMIT $11 OFFSET $12`,
     [
       verTodos, usuario.id,
       filtros.estado ?? null, filtros.categoria ?? null, filtros.prioridad ?? null,
       filtros.asignado_id ?? null, filtros.area_id ?? null,
       filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
-      filtros.limite ?? 500
+      filtros.limite ?? 25,
+      filtros.desplazamiento ?? 0
     ]
   );
   return rows;
+};
+
+/** Cantidad total de tickets que cumplen los filtros, para la paginacion. */
+export const contarTickets = async (filtros, usuario) => {
+  const verTodos = usuario.permisos.includes('tickets.ver_todos');
+  const { rows } = await query(
+    `SELECT COUNT(*)::int AS total
+       FROM tickets t
+       JOIN usuarios s ON s.id = t.solicitante_id
+      WHERE ($1::bool = TRUE OR t.solicitante_id = $2)
+        AND ($3::varchar   IS NULL OR t.estado = $3)
+        AND ($4::varchar   IS NULL OR t.categoria = $4)
+        AND ($5::varchar   IS NULL OR t.prioridad = $5)
+        AND ($6::int       IS NULL OR t.asignado_id = $6)
+        AND ($7::int       IS NULL OR s.area_id = $7)
+        AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
+        AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
+        AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')`,
+    [
+      verTodos, usuario.id,
+      filtros.estado ?? null, filtros.categoria ?? null, filtros.prioridad ?? null,
+      filtros.asignado_id ?? null, filtros.area_id ?? null,
+      filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null
+    ]
+  );
+  return rows[0].total;
 };
 
 /** Indicadores agregados para el tablero y los reportes. */
@@ -90,7 +117,18 @@ export const distribuciones = async () => {
        FROM tickets t JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id
       GROUP BY a.nombre ORDER BY total DESC LIMIT 10`
   );
-  return { porCategoria: porCategoria.rows, porEstado: porEstado.rows, porArea: porArea.rows };
+  // Ranking de solicitantes: quienes generan mas requerimientos
+  const porSolicitante = await query(
+    `SELECT u.nombre AS etiqueta, a.nombre AS detalle, COUNT(*)::int AS total
+       FROM tickets t JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id
+      GROUP BY u.nombre, a.nombre ORDER BY total DESC LIMIT 10`
+  );
+  return {
+    porCategoria: porCategoria.rows,
+    porEstado: porEstado.rows,
+    porArea: porArea.rows,
+    porSolicitante: porSolicitante.rows
+  };
 };
 
 /** Bitacora de auditoria asociada a un ticket. */

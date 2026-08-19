@@ -3,20 +3,26 @@ import { query } from '../../config/db.js';
 import { autenticar } from '../../middleware/auth.js';
 import { requierePermiso } from '../../middleware/rbac.js';
 import { asyncHandler } from '../../utils/httpError.js';
-import { listarAuditoria, registrarAuditoria } from '../../services/auditoria.service.js';
+import { listarAuditoria, contarAuditoria, registrarAuditoria } from '../../services/auditoria.service.js';
+import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { construirReporteAuditoria, construirMatrizRoles } from '../../services/pdf/documentos.service.js';
 
 export const auditoriaRouter = Router();
 auditoriaRouter.use(autenticar);
 
 auditoriaRouter.get('/', requierePermiso('reportes.ver', 'admin.usuarios'), asyncHandler(async (req, res) => {
-  const datos = await listarAuditoria({
+  const { limite, pagina, desplazamiento } = paginacion(req.query);
+  const filtros = {
     desde: req.query.desde ?? null,
     hasta: req.query.hasta ?? null,
     entidad: req.query.entidad ?? null,
     usuarioId: req.query.usuario_id ?? null
-  });
-  res.json({ ok: true, datos });
+  };
+  const [datos, total] = await Promise.all([
+    listarAuditoria({ ...filtros, limite, desplazamiento }),
+    contarAuditoria(filtros)
+  ]);
+  res.json(respuestaPaginada(datos, total, limite, pagina));
 }));
 
 auditoriaRouter.get('/pdf', requierePermiso('reportes.exportar', 'admin.usuarios'), asyncHandler(async (req, res) => {

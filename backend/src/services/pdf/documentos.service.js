@@ -204,3 +204,73 @@ export const construirMatrizRoles = ({ roles, permisos }) => {
 
   return doc;
 };
+
+/** Reporte del catalogo de inventario vigente. */
+export const construirReporteInventario = ({ filas, resumen }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Inventario de Sistemas',
+    subtitulo: 'Catalogo de articulos y saldos vigentes',
+    codigo: 'REP-INVENTARIO',
+    icono: 'baseDatos',
+    orientacion: 'landscape'
+  });
+
+  doc.titulo1('Situacion del inventario', 'grafico');
+  doc.indicadores([
+    { etiqueta: 'Articulos', valor: resumen.articulos, icono: 'baseDatos', color: PALETA.primario },
+    { etiqueta: 'Unidades', valor: resumen.unidades, icono: 'documento', color: PALETA.acento },
+    { etiqueta: 'Bajo minimo', valor: resumen.bajo_minimo, icono: 'alerta', color: PALETA.advertencia },
+    { etiqueta: 'Agotados', valor: resumen.agotados, icono: 'alerta', color: PALETA.critico }
+  ]);
+
+  doc.titulo1('Detalle de articulos', 'documento');
+  doc.tabla([
+    { titulo: 'Codigo', campo: 'codigo', ancho: 0.12 },
+    { titulo: 'Articulo', campo: 'nombre', ancho: 0.26 },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.12 },
+    { titulo: 'Ubicacion', campo: 'ubicacion', ancho: 0.18 },
+    { titulo: 'Unidad', campo: 'unidad', ancho: 0.1 },
+    { titulo: 'Minimo', campo: 'stock_minimo', ancho: 0.09, alineacion: 'right' },
+    { titulo: 'Stock', campo: 'stock_actual', ancho: 0.13, alineacion: 'right',
+      color: (f) => (f.bajo_minimo ? PALETA.critico : PALETA.ok) }
+  ], filas, { alturaFila: 15 });
+
+  return doc;
+};
+
+/** Kardex de movimientos de un articulo. */
+export const construirKardex = ({ articulo, movimientos }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Kardex de ' + articulo.nombre,
+    subtitulo: 'Codigo ' + articulo.codigo + ' - Movimientos registrados',
+    codigo: 'KARDEX-' + articulo.codigo,
+    icono: 'flujo',
+    orientacion: 'landscape'
+  });
+
+  doc.titulo1('Datos del articulo', 'baseDatos');
+  doc.camposClaveValor([
+    { etiqueta: 'Codigo', valor: articulo.codigo },
+    { etiqueta: 'Tipo', valor: articulo.tipo },
+    { etiqueta: 'Unidad', valor: articulo.unidad },
+    { etiqueta: 'Ubicacion', valor: articulo.ubicacion },
+    { etiqueta: 'Stock actual', valor: articulo.stock_actual },
+    { etiqueta: 'Stock minimo', valor: articulo.stock_minimo },
+    { etiqueta: 'Situacion', valor: articulo.bajo_minimo ? 'Bajo el minimo' : 'Dentro del minimo' },
+    { etiqueta: 'Ultimo movimiento', valor: fecha(articulo.ultimo_movimiento) }
+  ], 4);
+
+  doc.titulo1('Movimientos', 'flujo');
+  doc.tabla([
+    { titulo: 'Fecha', ancho: 0.2, render: (f) => fecha(f.fecha) },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.11,
+      color: (f) => (f.tipo === 'Entrada' ? PALETA.ok : f.tipo === 'Salida' ? PALETA.critico : PALETA.advertencia) },
+    { titulo: 'Cantidad', campo: 'cantidad', ancho: 0.1, alineacion: 'right' },
+    { titulo: 'Anterior', campo: 'stock_anterior', ancho: 0.1, alineacion: 'right' },
+    { titulo: 'Resultante', campo: 'stock_resultante', ancho: 0.11, alineacion: 'right' },
+    { titulo: 'Motivo', campo: 'motivo', ancho: 0.23 },
+    { titulo: 'Registrado por', campo: 'usuario_nombre', ancho: 0.15 }
+  ], movimientos, { alturaFila: 15 });
+
+  return doc;
+};

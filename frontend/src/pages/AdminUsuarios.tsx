@@ -3,9 +3,10 @@ import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
 import { api } from '../lib/api';
 import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio } from '../components/Ui';
 import { usarConfirmacion } from '../components/Confirmacion';
+import { Paginacion } from '../components/Paginacion';
 import { CampoPassword } from '../components/CampoPassword';
 import { fechaCorta } from '../lib/formato';
-import type { Area, Rol, Usuario } from '../lib/tipos';
+import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Usuario } from '../lib/tipos';
 
 interface Formulario {
   id: number | null;
@@ -31,22 +32,26 @@ export const AdminUsuarios = () => {
   const [error, setError] = useState<string | null>(null);
   const [guardando, setGuardando] = useState(false);
   const { confirmar, dialogo } = usarConfirmacion();
+  const [pagina, setPagina] = useState(1);
+  const [limite, setLimite] = useState(25);
+  const [info, setInfo] = useState<InfoPaginacion | null>(null);
 
   const cargar = useCallback(async () => {
     try {
       const [respUsuarios, respAreas, respRoles] = await Promise.all([
-        api<{ datos: Usuario[] }>('/usuarios'),
+        api<RespuestaPaginada<Usuario>>('/usuarios', { parametros: { limite, pagina } }),
         api<{ datos: Area[] }>('/areas', { parametros: { activas: true } }),
         api<{ datos: Rol[] }>('/roles')
       ]);
       setUsuarios(respUsuarios.datos);
+      setInfo(respUsuarios.paginacion);
       setAreas(respAreas.datos);
       setRoles(respRoles.datos);
       setError(null);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'Error al cargar la informacion');
     }
-  }, []);
+  }, [limite, pagina]);
 
   useEffect(() => {
     void cargar();
@@ -150,10 +155,10 @@ export const AdminUsuarios = () => {
               <tbody>
                 {usuarios.map((usuario) => (
                   <tr key={usuario.id}>
-                    <td className="font-medium text-slate-800">{usuario.nombre}</td>
-                    <td className="font-mono text-xs text-slate-600">{usuario.usuario}</td>
-                    <td className="text-slate-600">{usuario.area}</td>
-                    <td className="text-slate-600">{usuario.rol}</td>
+                    <td className="font-medium text-slate-800 dark:text-slate-100">{usuario.nombre}</td>
+                    <td className="font-mono text-xs text-slate-600 dark:text-slate-300">{usuario.usuario}</td>
+                    <td className="text-slate-600 dark:text-slate-300">{usuario.area}</td>
+                    <td className="text-slate-600 dark:text-slate-300">{usuario.rol}</td>
                     <td>
                       <Etiqueta
                         texto={usuario.activo ? 'Activo' : 'Inactivo'}
@@ -162,7 +167,7 @@ export const AdminUsuarios = () => {
                           : 'bg-slate-200 text-slate-600 border-slate-300'}
                       />
                     </td>
-                    <td className="text-xs text-slate-500">{fechaCorta(usuario.fecha_creacion)}</td>
+                    <td className="text-xs text-slate-500 dark:text-slate-400">{fechaCorta(usuario.fecha_creacion)}</td>
                     <td>
                       <div className="flex justify-end gap-2">
                         <button
@@ -189,6 +194,13 @@ export const AdminUsuarios = () => {
               </tbody>
             </table>
           </div>
+        )}
+        {info && (
+          <Paginacion
+            info={info}
+            alCambiarPagina={setPagina}
+            alCambiarLimite={(nuevo) => { setLimite(nuevo); setPagina(1); }}
+          />
         )}
       </section>
 
@@ -244,10 +256,10 @@ export const AdminUsuarios = () => {
               />
             </div>
             {formulario.id && (
-              <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2">
+              <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2 dark:text-slate-200">
                 <input
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-300"
+                  className="h-4 w-4 rounded border-slate-300 dark:border-slate-700"
                   checked={formulario.activo}
                   onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))}
                 />
