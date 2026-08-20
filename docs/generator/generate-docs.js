@@ -144,6 +144,7 @@ const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/07_estado_articulos.sql', descripcion: 'Situacion del articulo de inventario' },
   { componente: 'Base de datos', ruta: 'db/08_sucursales.sql', descripcion: 'Sucursales y ubicacion de usuarios, tickets y equipos' },
   { componente: 'Base de datos', ruta: 'db/09_compras.sql', descripcion: 'Solicitudes de compra con doble aprobacion' },
+  { componente: 'Base de datos', ruta: 'db/10_fabrica.sql', descripcion: 'La sede de Santa Cruz como fabrica' },
   { componente: 'API', ruta: 'backend/src/modules/compras/', descripcion: 'Circuito de adquisiciones de equipos' },
   { componente: 'API', ruta: 'backend/src/modules/equipos/', descripcion: 'Parque informatico y credenciales de acceso remoto' },
   { componente: 'API', ruta: 'backend/src/utils/cifrado.js', descripcion: 'Cifrado AES-256-GCM de credenciales' },
@@ -425,7 +426,7 @@ const construir = async () => {
     { titulo: 'Sucursal', campo: 'nombre', ancho: 0.4 },
     { titulo: 'Tipo', campo: 'tipo', ancho: 0.38 }
   ], [
-    { codigo: 'SCZ', nombre: 'Casa Central', tipo: 'Fabrica, sede del sistema' },
+    { codigo: 'SCZ', nombre: 'Fabrica Santa Cruz', tipo: 'Fabrica, sede del sistema' },
     { codigo: 'SILO', nombre: 'Silos Central de Insumos', tipo: 'Planta' },
     { codigo: 'LP, CBBA, SRE, ORU', nombre: 'La Paz, Cochabamba, Sucre y Oruro', tipo: 'Sucursales' }
   ], { alturaFila: 18 });

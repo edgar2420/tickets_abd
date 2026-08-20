@@ -75,7 +75,7 @@ La carga inicial crea unicamente la cuenta administradora:
 
 | Usuario | Contrasena | Rol | Area |
 |---|---|---|---|
-| `admin` | `Admin123*` | admin | Tecnologias de la Informacion |
+| `admin` | `Admin123*` | admin | Tecnologias de la Informacion, Fabrica Santa Cruz |
 
 Cambie esta contrasena en el primer ingreso, junto con `JWT_SECRET` y la clave de la base de
 datos, antes de publicar el sistema en produccion.
@@ -92,18 +92,28 @@ npm run demo
 
 Todas comparten la contrasena `Prueba123*`:
 
-| Usuario | Nombre | Rol | Area | Para probar |
-|---|---|---|---|---|
-| `solicitante` | Ana Quispe Torrez | cliente | Contabilidad | Alta de tickets y visibilidad restringida a los propios |
-| `solicitante2` | Carlos Vargas Rojas | cliente | Recursos Humanos | Que un solicitante no vea los tickets de otro |
-| `solicitante3` | Maria Flores Colque | cliente | Comercial | Distribucion de tickets por area en el tablero |
-| `tecnico` | Luis Mamani Colque | tecnico_l1 | Tecnologias de la Informacion | Atender, resolver y cerrar |
-| `tecnico2` | Jorge Choque Silva | tecnico_l1 | Tecnologias de la Informacion | Asignacion de un ticket a otro tecnico |
-| `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Tecnologias de la Informacion | Escalamiento a segundo nivel |
-| `gerente` | Ricardo Ayala Pena | gerencia | Casa Central | Aprobacion presupuestaria de las compras |
+**Equipo de Tecnologias de la Informacion**, en la fabrica. Reciben las solicitudes de compra y
+atienden los tickets de todas las sucursales:
 
-Los solicitantes estan repartidos entre Casa Central, La Paz y Cochabamba, de modo que el corte
-por sucursal del tablero muestre datos reales.
+| Usuario | Nombre | Rol | Alcance |
+|---|---|---|---|
+| `admin` | Ing. Edgar Rojas Apaza | admin | Sistema completo (contrasena `Admin123*`) |
+| `wabuawad` | Ing. William Abuawad | admin | Sistema completo |
+| `gerente` | Ricardo Ayala Pena | gerencia | Aprobacion presupuestaria de las compras |
+| `tecnico` | Luis Mamani Colque | tecnico_l1 | Atender, resolver y cerrar tickets |
+| `tecnico2` | Jorge Choque Silva | tecnico_l1 | Asignacion entre tecnicos |
+| `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Escalamiento y gestion del parque |
+
+**Un solicitante por cada sucursal**, para ver el corte por origen:
+
+| Usuario | Nombre | Sucursal | Area |
+|---|---|---|---|
+| `solicitante` | Ana Quispe Torrez | Fabrica Santa Cruz | Contabilidad |
+| `silos` | Mario Cespedes Rivero | Silos Central de Insumos | Operaciones |
+| `lapaz` | Carlos Vargas Rojas | Sucursal La Paz | Recursos Humanos |
+| `cochabamba` | Maria Flores Colque | Sucursal Cochabamba | Comercial |
+| `sucre` | Elena Padilla Vaca | Sucursal Sucre | Comercial |
+| `oruro` | Hugo Mendoza Ticona | Sucursal Oruro | Operaciones |
 
 Estas credenciales son conocidas y por eso **no** forman parte de la carga inicial: el script
 es de ejecucion manual y las cuentas deben desactivarse antes de publicar el sistema.
@@ -253,7 +263,7 @@ catalogo y permite cortar los indicadores por cualquiera de las dos.
 
 | Codigo | Sucursal | Tipo |
 |---|---|---|
-| SCZ | Casa Central | Fabrica, sede del sistema |
+| SCZ | Fabrica Santa Cruz | Fabrica, sede del sistema |
 | SILO | Silos Central de Insumos | Planta |
 | LP, CBBA, SRE, ORU | La Paz, Cochabamba, Sucre y Oruro | Sucursales |
 
