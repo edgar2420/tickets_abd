@@ -371,3 +371,135 @@ export const construirFichaEquipo = ({ equipo }) => {
 
   return doc;
 };
+
+const codigoCompra = (id) => 'SC-' + String(id).padStart(5, '0');
+
+const colorEstadoCompra = (estado) => ({
+  'Solicitada': PALETA.acento,
+  'En revision': PALETA.advertencia,
+  'Aprobada por TI': '#A16207',
+  'Aprobada por Gerencia': PALETA.ok,
+  'Comprada': PALETA.ok,
+  'Entregada': PALETA.primario,
+  'Rechazada': PALETA.critico
+}[estado] ?? PALETA.texto);
+
+/** Reporte consolidado de las solicitudes de compra. */
+export const construirReporteCompras = ({ filas, resumen }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Solicitudes de Compra de Equipos',
+    subtitulo: 'Estado del circuito de adquisiciones',
+    codigo: 'REP-COMPRAS',
+    icono: 'documento',
+    orientacion: 'landscape'
+  });
+
+  doc.titulo1('Situacion del circuito', 'grafico');
+  doc.indicadores([
+    { etiqueta: 'Total', valor: resumen.total, icono: 'documento', color: PALETA.primario },
+    { etiqueta: 'Solicitadas', valor: resumen.solicitadas, icono: 'ticket', color: PALETA.acento },
+    { etiqueta: 'En Gerencia', valor: resumen.esperando_gerencia, icono: 'reloj', color: PALETA.advertencia },
+    { etiqueta: 'Entregadas', valor: resumen.entregadas, icono: 'check', color: PALETA.ok },
+    { etiqueta: 'Rechazadas', valor: resumen.rechazadas, icono: 'alerta', color: PALETA.critico }
+  ]);
+  doc.parrafo('Monto ejecutado en compras concretadas: ' + Number(resumen.monto_ejecutado ?? 0).toFixed(2));
+
+  doc.titulo1('Detalle de solicitudes', 'documento');
+  doc.tabla([
+    { titulo: 'Codigo', ancho: 0.08, render: (f) => codigoCompra(f.id) },
+    { titulo: 'Solicitud', campo: 'titulo', ancho: 0.22 },
+    { titulo: 'Solicitante', campo: 'solicitante_nombre', ancho: 0.15 },
+    { titulo: 'Sucursal', campo: 'sucursal_nombre', ancho: 0.13 },
+    { titulo: 'Tipo', campo: 'tipo_equipo', ancho: 0.09 },
+    { titulo: 'Cant.', campo: 'cantidad', ancho: 0.05, alineacion: 'right' },
+    { titulo: 'Estado', campo: 'estado', ancho: 0.16, color: (f) => colorEstadoCompra(f.estado) },
+    { titulo: 'Registrada', ancho: 0.12, render: (f) => soloFecha(f.fecha_creacion) }
+  ], filas, { alturaFila: 15 });
+
+  return doc;
+};
+
+/** Ficha individual con la trazabilidad completa de la solicitud. */
+export const construirFichaCompra = ({ solicitud }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Solicitud ' + codigoCompra(solicitud.id),
+    subtitulo: solicitud.titulo,
+    codigo: codigoCompra(solicitud.id),
+    icono: 'documento'
+  });
+
+  doc.titulo1('Pedido', 'ticket');
+  doc.camposClaveValor([
+    { etiqueta: 'Codigo', valor: codigoCompra(solicitud.id) },
+    { etiqueta: 'Estado', valor: solicitud.estado },
+    { etiqueta: 'Tipo de equipo', valor: solicitud.tipo_equipo },
+    { etiqueta: 'Cantidad', valor: solicitud.cantidad },
+    { etiqueta: 'Solicitante', valor: solicitud.solicitante_nombre },
+    { etiqueta: 'Sucursal', valor: solicitud.sucursal_nombre },
+    { etiqueta: 'Area', valor: solicitud.area_nombre },
+    { etiqueta: 'Prioridad', valor: solicitud.prioridad }
+  ], 4);
+
+  doc.titulo1('Justificacion', 'documento');
+  doc.parrafo(solicitud.justificacion);
+
+  if (solicitud.especificaciones) {
+    doc.titulo2('Especificaciones sugeridas');
+    doc.parrafo(solicitud.especificaciones);
+  }
+
+  doc.titulo1('Circuito de aprobacion', 'flujo');
+  doc.tabla([
+    { titulo: 'Instancia', campo: 'instancia', ancho: 0.26 },
+    { titulo: 'Responsable', campo: 'responsable', ancho: 0.26 },
+    { titulo: 'Fecha', campo: 'fecha', ancho: 0.24 },
+    { titulo: 'Observacion', campo: 'observacion', ancho: 0.24 }
+  ], [
+    {
+      instancia: 'Registro del pedido',
+      responsable: solicitud.solicitante_nombre,
+      fecha: fecha(solicitud.fecha_creacion),
+      observacion: '-'
+    },
+    {
+      instancia: 'Revision tecnica de TI',
+      responsable: solicitud.revisado_por_nombre ?? 'Pendiente',
+      fecha: fecha(solicitud.fecha_revision) ?? 'Pendiente',
+      observacion: solicitud.observacion_ti ?? '-'
+    },
+    {
+      instancia: 'Aprobacion de Gerencia',
+      responsable: solicitud.aprobado_por_nombre ?? 'Pendiente',
+      fecha: fecha(solicitud.fecha_aprobacion) ?? 'Pendiente',
+      observacion: solicitud.observacion_gerencia ?? '-'
+    },
+    {
+      instancia: 'Compra ejecutada',
+      responsable: solicitud.comprado_por_nombre ?? 'Pendiente',
+      fecha: fecha(solicitud.fecha_compra) ?? 'Pendiente',
+      observacion: solicitud.numero_orden ? 'Orden ' + solicitud.numero_orden : '-'
+    },
+    {
+      instancia: 'Entrega al solicitante',
+      responsable: solicitud.entregado_por_nombre ?? 'Pendiente',
+      fecha: fecha(solicitud.fecha_entrega) ?? 'Pendiente',
+      observacion: solicitud.equipo_codigo ? 'Equipo ' + solicitud.equipo_codigo : '-'
+    }
+  ], { alturaFila: 22 });
+
+  doc.titulo1('Valores', 'grafico');
+  doc.camposClaveValor([
+    { etiqueta: 'Monto estimado', valor: solicitud.monto_estimado },
+    { etiqueta: 'Monto final', valor: solicitud.monto_final },
+    { etiqueta: 'Proveedor sugerido', valor: solicitud.proveedor_sugerido },
+    { etiqueta: 'Orden de compra', valor: solicitud.numero_orden }
+  ], 4);
+
+  if (solicitud.estado === 'Rechazada') {
+    doc.nota('Solicitud rechazada por ' + (solicitud.rechazado_por_nombre ?? 'la organizacion')
+      + ' el ' + (fecha(solicitud.fecha_rechazo) ?? 'sin fecha') + '. Motivo: ' + (solicitud.motivo_rechazo ?? 'no registrado'),
+    { icono: 'alerta', color: PALETA.critico });
+  }
+
+  return doc;
+};

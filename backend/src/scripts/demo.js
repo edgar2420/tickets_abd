@@ -21,28 +21,40 @@ const CUENTAS = [
     nombre: 'Ana Quispe Torrez',
     usuario: 'solicitante',
     area: 'Contabilidad',
+    sucursal: 'Casa Central',
     rol: 'cliente',
-    proposito: 'Solicitante de Contabilidad'
+    proposito: 'Solicitante de Contabilidad, Casa Central'
   },
   {
     nombre: 'Carlos Vargas Rojas',
     usuario: 'solicitante2',
     area: 'Recursos Humanos',
+    sucursal: 'Sucursal La Paz',
     rol: 'cliente',
-    proposito: 'Solicitante de Recursos Humanos'
+    proposito: 'Solicitante de Recursos Humanos, La Paz'
   },
   {
     nombre: 'Maria Flores Colque',
     usuario: 'solicitante3',
     area: 'Comercial',
+    sucursal: 'Sucursal Cochabamba',
     rol: 'cliente',
-    proposito: 'Solicitante de Comercial'
+    proposito: 'Solicitante de Comercial, Cochabamba'
+  },
+  {
+    nombre: 'Ricardo Ayala Pena',
+    usuario: 'gerente',
+    area: 'Gerencia',
+    sucursal: 'Casa Central',
+    rol: 'gerencia',
+    proposito: 'Aprueba presupuestariamente las solicitudes de compra'
   },
   // --- Mesa de ayuda: atienden y resuelven tickets de toda la organizacion ---
   {
     nombre: 'Luis Mamani Colque',
     usuario: 'tecnico',
     area: 'Tecnologias de la Informacion',
+    sucursal: 'Casa Central',
     rol: 'tecnico_l1',
     proposito: 'Tecnico de primer nivel'
   },
@@ -50,6 +62,7 @@ const CUENTAS = [
     nombre: 'Jorge Choque Silva',
     usuario: 'tecnico2',
     area: 'Tecnologias de la Informacion',
+    sucursal: 'Casa Central',
     rol: 'tecnico_l1',
     proposito: 'Tecnico de primer nivel, para probar la asignacion entre tecnicos'
   },
@@ -57,6 +70,7 @@ const CUENTAS = [
     nombre: 'Patricia Nina Alvarez',
     usuario: 'tecnico3',
     area: 'Tecnologias de la Informacion',
+    sucursal: 'Casa Central',
     rol: 'tecnico_l2',
     proposito: 'Tecnico de segundo nivel, para probar el escalamiento'
   }
@@ -157,18 +171,27 @@ const cargarEquipos = async () => {
   for (const equipo of EQUIPOS) {
     let usuarioId = null;
     let areaId = null;
+    let sucursalId = null;
     if (equipo.usuario) {
-      const { rows } = await pool.query('SELECT id, area_id FROM usuarios WHERE usuario = $1', [equipo.usuario]);
+      const { rows } = await pool.query(
+        'SELECT id, area_id, sucursal_id FROM usuarios WHERE usuario = $1', [equipo.usuario]
+      );
       if (rows[0]) {
         usuarioId = rows[0].id;
         areaId = rows[0].area_id;
+        sucursalId = rows[0].sucursal_id;
       }
+    }
+    // Los equipos sin responsable quedan en la casa central
+    if (!sucursalId) {
+      const { rows } = await pool.query("SELECT id FROM sucursales WHERE codigo = 'SCZ'");
+      sucursalId = rows[0]?.id ?? null;
     }
     await pool.query(
       `INSERT INTO equipos (codigo, nombre_equipo, tipo, marca, modelo, sistema_operativo, procesador,
                             ram_gb, almacenamiento, direccion_ip, direccion_mac, anydesk_id, anydesk_password,
-                            usuario_id, area_id, ubicacion, estado)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+                            usuario_id, area_id, sucursal_id, ubicacion, estado)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (codigo) DO UPDATE
          SET nombre_equipo = EXCLUDED.nombre_equipo, tipo = EXCLUDED.tipo, marca = EXCLUDED.marca,
              modelo = EXCLUDED.modelo, sistema_operativo = EXCLUDED.sistema_operativo,
@@ -176,12 +199,12 @@ const cargarEquipos = async () => {
              almacenamiento = EXCLUDED.almacenamiento, direccion_ip = EXCLUDED.direccion_ip,
              direccion_mac = EXCLUDED.direccion_mac, anydesk_id = EXCLUDED.anydesk_id,
              anydesk_password = EXCLUDED.anydesk_password, usuario_id = EXCLUDED.usuario_id,
-             area_id = EXCLUDED.area_id, ubicacion = EXCLUDED.ubicacion, estado = EXCLUDED.estado,
-             activo = TRUE`,
+             area_id = EXCLUDED.area_id, sucursal_id = EXCLUDED.sucursal_id,
+             ubicacion = EXCLUDED.ubicacion, estado = EXCLUDED.estado, activo = TRUE`,
       [equipo.codigo, equipo.nombre_equipo, equipo.tipo, equipo.marca, equipo.modelo,
         equipo.sistema_operativo, equipo.procesador, equipo.ram_gb, equipo.almacenamiento,
         equipo.direccion_ip, equipo.direccion_mac, equipo.anydesk_id, cifrar(equipo.password),
-        usuarioId, areaId, equipo.ubicacion, equipo.estado]
+        usuarioId, areaId, sucursalId, equipo.ubicacion, equipo.estado]
     );
     console.log(`  ${equipo.codigo.padEnd(9)} ${equipo.nombre_equipo.padEnd(16)} ${String(equipo.sistema_operativo).padEnd(26)} ${String(equipo.ram_gb).padStart(3)} GB  ${String(equipo.direccion_ip).padEnd(14)} ${equipo.usuario ?? 'sin asignar'}`);
   }
@@ -197,22 +220,24 @@ const ejecutar = async () => {
   for (const cuenta of CUENTAS) {
     const areaId = await idDe('areas', cuenta.area);
     const rolId = await idDe('roles', cuenta.rol);
+    const sucursalId = await idDe('sucursales', cuenta.sucursal);
 
     await pool.query(
-      `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
-       VALUES ($1, $2, $3, $4, $5, $6)
+      `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, sucursal_id, rol_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        ON CONFLICT (usuario) DO UPDATE
          SET nombre = EXCLUDED.nombre,
              email = EXCLUDED.email,
              password_hash = EXCLUDED.password_hash,
              area_id = EXCLUDED.area_id,
+             sucursal_id = EXCLUDED.sucursal_id,
              rol_id = EXCLUDED.rol_id,
              activo = TRUE`,
-      [cuenta.nombre, cuenta.usuario, `${cuenta.usuario}@empresa.local`, hash, areaId, rolId]
+      [cuenta.nombre, cuenta.usuario, `${cuenta.usuario}@empresa.local`, hash, areaId, sucursalId, rolId]
     );
 
     console.log(
-      `  ${cuenta.usuario.padEnd(15)} ${PASSWORD.padEnd(14)} ${cuenta.rol.padEnd(13)} ${cuenta.area}`
+      `  ${cuenta.usuario.padEnd(15)} ${PASSWORD.padEnd(14)} ${cuenta.rol.padEnd(13)} ${cuenta.sucursal.padEnd(22)} ${cuenta.area}`
     );
     console.log(`  ${''.padEnd(15)} ${cuenta.nombre} - ${cuenta.proposito}`);
   }

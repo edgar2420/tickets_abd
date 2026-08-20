@@ -66,9 +66,9 @@ export const crear = asyncHandler(async (req, res) => {
   const { titulo, descripcion, prioridad } = req.body;
   const categoria = await validarCategoria(req.body.categoria);
   const { rows } = await query(
-    `INSERT INTO tickets (titulo, descripcion, categoria, prioridad, estado, solicitante_id)
-     VALUES ($1, $2, $3, $4, 'Abierto', $5) RETURNING id`,
-    [titulo, descripcion, categoria, prioridad, req.usuario.id]
+    `INSERT INTO tickets (titulo, descripcion, categoria, prioridad, estado, solicitante_id, sucursal_id)
+     VALUES ($1, $2, $3, $4, 'Abierto', $5, $6) RETURNING id`,
+    [titulo, descripcion, categoria, prioridad, req.usuario.id, req.usuario.sucursal_id ?? null]
   );
   const ticket = await obtenerTicket(rows[0].id);
 

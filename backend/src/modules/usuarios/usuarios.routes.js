@@ -15,6 +15,7 @@ const crearUsuarioSchema = z.object({
   email: z.string().email().max(150).optional().nullable(),
   password: z.string().min(8, 'La contrasena debe tener al menos 8 caracteres'),
   area_id: z.number().int().positive(),
+  sucursal_id: z.number().int().positive(),
   rol_id: z.number().int().positive()
 });
 
@@ -24,27 +25,30 @@ const editarUsuarioSchema = crearUsuarioSchema.partial({ password: true }).exten
 
 const SELECT_USUARIO = `
   SELECT u.id, u.nombre, u.usuario, u.email, u.activo, u.fecha_creacion,
-         u.area_id, a.nombre AS area, u.rol_id, r.nombre AS rol
+         u.area_id, a.nombre AS area, u.rol_id, r.nombre AS rol,
+         u.sucursal_id, s.nombre AS sucursal, s.codigo AS sucursal_codigo
     FROM usuarios u
     JOIN areas a ON a.id = u.area_id
-    JOIN roles r ON r.id = u.rol_id`;
+    JOIN roles r ON r.id = u.rol_id
+    LEFT JOIN sucursales s ON s.id = u.sucursal_id`;
 
 export const usuariosRouter = Router();
 usuariosRouter.use(autenticar);
 
 usuariosRouter.get('/', requierePermiso('admin.usuarios'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
-  const { busqueda = null, area_id = null, rol_id = null, activo = null } = req.query;
+  const { busqueda = null, area_id = null, rol_id = null, activo = null, sucursal_id = null } = req.query;
   const condiciones = `
       WHERE ($1::text IS NULL OR u.nombre ILIKE '%' || $1 || '%' OR u.usuario ILIKE '%' || $1 || '%')
         AND ($2::int  IS NULL OR u.area_id = $2)
         AND ($3::int  IS NULL OR u.rol_id = $3)
-        AND ($4::bool IS NULL OR u.activo = $4)`;
-  const parametros = [busqueda, area_id, rol_id, activo === null ? null : activo === 'true'];
+        AND ($4::bool IS NULL OR u.activo = $4)
+        AND ($5::int  IS NULL OR u.sucursal_id = $5)`;
+  const parametros = [busqueda, area_id, rol_id, activo === null ? null : activo === 'true', sucursal_id];
 
   const { rows: total } = await query(`SELECT COUNT(*)::int AS total FROM usuarios u ${condiciones}`, parametros);
   const { rows } = await query(
-    `${SELECT_USUARIO} ${condiciones} ORDER BY u.nombre LIMIT $5 OFFSET $6`,
+    `${SELECT_USUARIO} ${condiciones} ORDER BY u.nombre LIMIT $6 OFFSET $7`,
     [...parametros, limite, desplazamiento]
   );
   res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
@@ -65,12 +69,12 @@ usuariosRouter.get('/tecnicos', requierePermiso('tickets.ver_todos'), asyncHandl
 }));
 
 usuariosRouter.post('/', requierePermiso('admin.usuarios'), validate(crearUsuarioSchema), asyncHandler(async (req, res) => {
-  const { nombre, usuario, email, password, area_id, rol_id } = req.body;
+  const { nombre, usuario, email, password, area_id, sucursal_id, rol_id } = req.body;
   const hash = await bcrypt.hash(password, 10);
   const { rows } = await query(
-    `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
-     VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-    [nombre, usuario, email ?? null, hash, area_id, rol_id]
+    `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, sucursal_id, rol_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
+    [nombre, usuario, email ?? null, hash, area_id, sucursal_id, rol_id]
   );
   const { rows: creado } = await query(`${SELECT_USUARIO} WHERE u.id = $1`, [rows[0].id]);
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: rows[0].id, accion: 'CREAR', detalle: creado[0], ip: req.ip });
@@ -79,7 +83,7 @@ usuariosRouter.post('/', requierePermiso('admin.usuarios'), validate(crearUsuari
 
 usuariosRouter.put('/:id', requierePermiso('admin.usuarios'), validate(editarUsuarioSchema), asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
-  const { nombre, usuario, email, area_id, rol_id, activo, password } = req.body;
+  const { nombre, usuario, email, area_id, sucursal_id, rol_id, activo, password } = req.body;
   const hash = password ? await bcrypt.hash(password, 10) : null;
   const { rowCount } = await query(
     `UPDATE usuarios SET
@@ -87,11 +91,13 @@ usuariosRouter.put('/:id', requierePermiso('admin.usuarios'), validate(editarUsu
         usuario       = COALESCE($2::varchar, usuario),
         email         = COALESCE($3::varchar, email),
         area_id       = COALESCE($4::int, area_id),
-        rol_id        = COALESCE($5::int, rol_id),
-        activo        = COALESCE($6::boolean, activo),
-        password_hash = COALESCE($7::varchar, password_hash)
-      WHERE id = $8`,
-    [nombre ?? null, usuario ?? null, email ?? null, area_id ?? null, rol_id ?? null, activo ?? null, hash, id]
+        sucursal_id   = COALESCE($5::int, sucursal_id),
+        rol_id        = COALESCE($6::int, rol_id),
+        activo        = COALESCE($7::boolean, activo),
+        password_hash = COALESCE($8::varchar, password_hash)
+      WHERE id = $9`,
+    [nombre ?? null, usuario ?? null, email ?? null, area_id ?? null, sucursal_id ?? null,
+      rol_id ?? null, activo ?? null, hash, id]
   );
   if (!rowCount) throw HttpError.notFound('El usuario indicado no existe');
   const { rows } = await query(`${SELECT_USUARIO} WHERE u.id = $1`, [id]);

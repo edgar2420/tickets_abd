@@ -8,7 +8,7 @@ import { usarConfirmacion } from '../components/Confirmacion';
 import { Paginacion } from '../components/Paginacion';
 import { CampoPassword } from '../components/CampoPassword';
 import { fechaCorta } from '../lib/formato';
-import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Usuario } from '../lib/tipos';
+import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Sucursal, Usuario } from '../lib/tipos';
 
 interface Formulario {
   id: number | null;
@@ -17,18 +17,21 @@ interface Formulario {
   email: string;
   password: string;
   area_id: string;
+  sucursal_id: string;
   rol_id: string;
   activo: boolean;
 }
 
 const FORMULARIO_VACIO: Formulario = {
-  id: null, nombre: '', usuario: '', email: '', password: '', area_id: '', rol_id: '', activo: true
+  id: null, nombre: '', usuario: '', email: '', password: '',
+  area_id: '', sucursal_id: '', rol_id: '', activo: true
 };
 
 export const AdminUsuarios = () => {
   const [usuarios, setUsuarios] = useState<Usuario[] | null>(null);
   const [areas, setAreas] = useState<Area[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [formulario, setFormulario] = useState<Formulario>(FORMULARIO_VACIO);
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,15 +43,17 @@ export const AdminUsuarios = () => {
 
   const cargar = useCallback(async () => {
     try {
-      const [respUsuarios, respAreas, respRoles] = await Promise.all([
+      const [respUsuarios, respAreas, respRoles, respSucursales] = await Promise.all([
         api<RespuestaPaginada<Usuario>>('/usuarios', { parametros: { limite, pagina } }),
         api<{ datos: Area[] }>('/areas', { parametros: { activas: true } }),
-        api<{ datos: Rol[] }>('/roles')
+        api<{ datos: Rol[] }>('/roles'),
+        api<{ datos: Sucursal[] }>('/sucursales', { parametros: { activas: true } })
       ]);
       setUsuarios(respUsuarios.datos);
       setInfo(respUsuarios.paginacion);
       setAreas(respAreas.datos);
       setRoles(respRoles.datos);
+      setSucursales(respSucursales.datos);
       setError(null);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'Error al cargar la informacion');
@@ -72,6 +77,7 @@ export const AdminUsuarios = () => {
       email: usuario.email ?? '',
       password: '',
       area_id: String(usuario.area_id),
+      sucursal_id: usuario.sucursal_id ? String(usuario.sucursal_id) : '',
       rol_id: String(usuario.rol_id),
       activo: usuario.activo
     });
@@ -87,6 +93,7 @@ export const AdminUsuarios = () => {
       usuario: formulario.usuario,
       email: formulario.email || null,
       area_id: Number(formulario.area_id),
+      sucursal_id: Number(formulario.sucursal_id),
       rol_id: Number(formulario.rol_id)
     };
     if (formulario.password) cuerpo.password = formulario.password;
@@ -147,6 +154,7 @@ export const AdminUsuarios = () => {
                 <tr>
                   <th>Nombre</th>
                   <th>Usuario</th>
+                  <th>Sucursal</th>
                   <th>Area</th>
                   <th>Rol</th>
                   <th>Estado</th>
@@ -219,6 +227,14 @@ export const AdminUsuarios = () => {
               <label className="etiqueta">Correo electronico</label>
               <input type="email" className="campo" value={formulario.email}
                 onChange={(e) => setFormulario((f) => ({ ...f, email: e.target.value }))} />
+            </div>
+            <div>
+              <label className="etiqueta">Sucursal</label>
+              <select className="campo" required value={formulario.sucursal_id}
+                onChange={(e) => setFormulario((f) => ({ ...f, sucursal_id: e.target.value }))}>
+                <option value="">Seleccione</option>
+                {sucursales.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+              </select>
             </div>
             <div>
               <label className="etiqueta">Area</label>

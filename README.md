@@ -100,6 +100,10 @@ Todas comparten la contrasena `Prueba123*`:
 | `tecnico` | Luis Mamani Colque | tecnico_l1 | Tecnologias de la Informacion | Atender, resolver y cerrar |
 | `tecnico2` | Jorge Choque Silva | tecnico_l1 | Tecnologias de la Informacion | Asignacion de un ticket a otro tecnico |
 | `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Tecnologias de la Informacion | Escalamiento a segundo nivel |
+| `gerente` | Ricardo Ayala Pena | gerencia | Casa Central | Aprobacion presupuestaria de las compras |
+
+Los solicitantes estan repartidos entre Casa Central, La Paz y Cochabamba, de modo que el corte
+por sucursal del tablero muestre datos reales.
 
 Estas credenciales son conocidas y por eso **no** forman parte de la carga inicial: el script
 es de ejecucion manual y las cuentas deben desactivarse antes de publicar el sistema.
@@ -128,6 +132,7 @@ Permisos precargados:
 | ADMIN | `admin.roles` | Gestion CRUD de roles y matriz de permisos |
 | ADMIN | `admin.areas` | Gestion del catalogo de areas |
 | ADMIN | `admin.categorias` | Gestion del catalogo de categorias de tickets |
+| ADMIN | `admin.sucursales` | Gestion del catalogo de sucursales |
 | REPORTES | `reportes.ver` | Consultar tablero de indicadores |
 | REPORTES | `reportes.exportar` | Exportar reportes y documentacion en PDF |
 | INVENTARIO | `inventario.ver` | Consultar el catalogo y el kardex |
@@ -136,6 +141,11 @@ Permisos precargados:
 | EQUIPOS | `equipos.ver` | Consultar el parque informatico |
 | EQUIPOS | `equipos.gestionar` | Alta, edicion y baja de equipos |
 | EQUIPOS | `equipos.credenciales` | Revelar la contrasena de acceso remoto |
+| COMPRAS | `compras.solicitar` | Registrar solicitudes de compra de equipos |
+| COMPRAS | `compras.ver_todas` | Consultar todas las solicitudes |
+| COMPRAS | `compras.revisar` | Revision tecnica y cotizacion |
+| COMPRAS | `compras.aprobar` | Aprobacion presupuestaria de Gerencia |
+| COMPRAS | `compras.gestionar` | Registrar la compra y la entrega |
 
 Los permisos vigentes de cada rol se resuelven contra la base de datos y se mantienen en una
 cache de corta duracion que se invalida al modificar la matriz de un rol, de modo que un
@@ -227,9 +237,51 @@ Prefijo base: `/api/v1`
 | GET | `/equipos` | `equipos.ver` |
 | POST/PUT/DELETE | `/equipos` | `equipos.gestionar` |
 | GET | `/equipos/:id/credenciales` | `equipos.credenciales` |
+| GET | `/sucursales` | Autenticado (alta: `admin.sucursales`) |
+| GET/POST | `/compras` | `compras.solicitar` / `compras.ver_todas` |
+| PUT | `/compras/:id/aprobar-ti` | `compras.revisar` |
+| PUT | `/compras/:id/aprobar-gerencia` | `compras.aprobar` |
 | GET | `/permisos` | `admin.roles` |
 | GET | `/notificaciones` | Autenticado |
 | GET | `/auditoria` | `reportes.ver` / `admin.usuarios` |
+
+## Sucursales
+
+El usuario pertenece a una **sucursal** y a un **area**, dos dimensiones independientes: las
+mismas areas funcionales existen en varias sucursales, de modo que separarlas evita duplicar el
+catalogo y permite cortar los indicadores por cualquiera de las dos.
+
+| Codigo | Sucursal | Tipo |
+|---|---|---|
+| SCZ | Casa Central | Fabrica, sede del sistema |
+| SILO | Silos Central de Insumos | Planta |
+| LP, CBBA, SRE, ORU | La Paz, Cochabamba, Sucre y Oruro | Sucursales |
+
+El catalogo es administrable desde **Sucursales**: las oficinas futuras, como Distribucion
+Central o Venta Privada, se agregan sin tocar el codigo.
+
+El **ticket, el equipo y la solicitud de compra heredan la sucursal** de quien los origina, sin
+preguntarla, de modo que siempre se sabe desde donde se pide. El area de TI ve el conjunto de
+las sucursales; la sucursal funciona como dato y filtro, no como restriccion de acceso.
+
+## Solicitudes de compra
+
+Circuito propio para el pedido de equipos, que cualquier solicitante puede iniciar:
+
+| Estado | Quien actua | Que ocurre |
+|---|---|---|
+| Solicitada | Solicitante | Registra el pedido con su justificacion |
+| En revision | TI | Evalua la viabilidad tecnica y cotiza |
+| Aprobada por TI | TI | Da el visto bueno tecnico y eleva a Gerencia |
+| Aprobada por Gerencia | Gerencia | Aprueba el presupuesto |
+| Comprada | TI | Registra la orden de compra y el monto final |
+| Entregada | TI | Entrega el equipo y lo vincula al parque |
+| Rechazada | TI o Gerencia | Rechaza con motivo, antes de la compra |
+
+**El orden se valida en el servidor**: Gerencia no puede aprobar antes que TI, ni se puede
+registrar una compra sin aprobacion previa. Cada paso avisa a quien corresponde y queda
+asentado en la bitacora. Al entregar, la solicitud puede vincularse al equipo dado de alta en el
+parque, cerrando la trazabilidad entre el pedido y el activo.
 
 ## Equipos de la empresa
 

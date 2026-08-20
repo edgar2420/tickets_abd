@@ -35,6 +35,7 @@ const PERMISOS = [
   { modulo: 'ADMIN', codigo: 'admin.roles', descripcion: 'Gestion CRUD de roles y matriz de permisos.' },
   { modulo: 'ADMIN', codigo: 'admin.areas', descripcion: 'Gestion del catalogo de areas de la empresa.' },
   { modulo: 'ADMIN', codigo: 'admin.categorias', descripcion: 'Gestion del catalogo de categorias de tickets.' },
+  { modulo: 'ADMIN', codigo: 'admin.sucursales', descripcion: 'Gestion del catalogo de sucursales de la empresa.' },
   { modulo: 'REPORTES', codigo: 'reportes.ver', descripcion: 'Permite consultar el tablero de indicadores y reportes.' },
   { modulo: 'REPORTES', codigo: 'reportes.exportar', descripcion: 'Permite exportar reportes y documentacion en formato PDF.' },
   { modulo: 'INVENTARIO', codigo: 'inventario.ver', descripcion: 'Consultar el catalogo de articulos y el kardex de movimientos.' },
@@ -42,7 +43,12 @@ const PERMISOS = [
   { modulo: 'INVENTARIO', codigo: 'inventario.movimientos', descripcion: 'Registrar entradas y salidas de inventario.' },
   { modulo: 'EQUIPOS', codigo: 'equipos.ver', descripcion: 'Consultar el parque de equipos y sus caracteristicas.' },
   { modulo: 'EQUIPOS', codigo: 'equipos.gestionar', descripcion: 'Alta, edicion y baja de equipos y su asignacion.' },
-  { modulo: 'EQUIPOS', codigo: 'equipos.credenciales', descripcion: 'Revelar la contrasena de acceso remoto de un equipo.' }
+  { modulo: 'EQUIPOS', codigo: 'equipos.credenciales', descripcion: 'Revelar la contrasena de acceso remoto de un equipo.' },
+  { modulo: 'COMPRAS', codigo: 'compras.solicitar', descripcion: 'Registrar solicitudes de compra de equipos.' },
+  { modulo: 'COMPRAS', codigo: 'compras.ver_todas', descripcion: 'Consultar todas las solicitudes de compra.' },
+  { modulo: 'COMPRAS', codigo: 'compras.revisar', descripcion: 'Revisar la viabilidad tecnica y cotizar la solicitud.' },
+  { modulo: 'COMPRAS', codigo: 'compras.aprobar', descripcion: 'Aprobar o rechazar la solicitud desde Gerencia.' },
+  { modulo: 'COMPRAS', codigo: 'compras.gestionar', descripcion: 'Registrar la compra ejecutada y la entrega.' }
 ];
 
 const ENDPOINTS = [
@@ -79,6 +85,16 @@ const ENDPOINTS = [
   { metodo: 'GET', ruta: '/equipos/:id/credenciales', permiso: 'equipos.credenciales', descripcion: 'Revela la contrasena remota, con registro en bitacora' },
   { metodo: 'GET', ruta: '/equipos/reporte/pdf', permiso: 'equipos.ver', descripcion: 'Reporte del parque en PDF' },
   { metodo: 'GET', ruta: '/equipos/:id/ficha/pdf', permiso: 'equipos.ver', descripcion: 'Ficha tecnica del equipo en PDF' },
+  { metodo: 'GET', ruta: '/sucursales', permiso: 'Autenticado', descripcion: 'Catalogo de sucursales' },
+  { metodo: 'POST', ruta: '/sucursales', permiso: 'admin.sucursales', descripcion: 'Alta de sucursal u oficina' },
+  { metodo: 'GET', ruta: '/compras', permiso: 'compras.solicitar / ver_todas', descripcion: 'Solicitudes con alcance por permiso' },
+  { metodo: 'POST', ruta: '/compras', permiso: 'compras.solicitar', descripcion: 'Registro del pedido de equipo' },
+  { metodo: 'PUT', ruta: '/compras/:id/revisar', permiso: 'compras.revisar', descripcion: 'Revision tecnica y cotizacion' },
+  { metodo: 'PUT', ruta: '/compras/:id/aprobar-ti', permiso: 'compras.revisar', descripcion: 'Aprobacion tecnica, eleva a Gerencia' },
+  { metodo: 'PUT', ruta: '/compras/:id/aprobar-gerencia', permiso: 'compras.aprobar', descripcion: 'Aprobacion presupuestaria' },
+  { metodo: 'PUT', ruta: '/compras/:id/rechazar', permiso: 'compras.revisar / aprobar', descripcion: 'Rechazo con motivo' },
+  { metodo: 'PUT', ruta: '/compras/:id/comprar', permiso: 'compras.gestionar', descripcion: 'Registro de la compra ejecutada' },
+  { metodo: 'PUT', ruta: '/compras/:id/entregar', permiso: 'compras.gestionar', descripcion: 'Entrega y vinculo con el parque' },
   { metodo: 'GET', ruta: '/areas', permiso: 'Autenticado', descripcion: 'Catalogo de areas' },
   { metodo: 'POST', ruta: '/areas', permiso: 'admin.areas', descripcion: 'Alta de area' },
   { metodo: 'PUT', ruta: '/areas/:id', permiso: 'admin.areas', descripcion: 'Edicion de area' },
@@ -113,7 +129,9 @@ const EVENTOS = [
   { evento: 'ticket:resuelto', direccion: 'Servidor a cliente', descripcion: 'Registro de la solucion tecnica' },
   { evento: 'notificacion:nueva', direccion: 'Servidor a cliente', descripcion: 'Notificacion personal para el destinatario' },
   { evento: 'comentario:nuevo', direccion: 'Servidor a cliente', descripcion: 'Mensaje nuevo en la conversacion del ticket' },
-  { evento: 'inventario:movimiento', direccion: 'Servidor a cliente', descripcion: 'Entrada o salida registrada en el inventario' }
+  { evento: 'inventario:movimiento', direccion: 'Servidor a cliente', descripcion: 'Entrada o salida registrada en el inventario' },
+  { evento: 'compra:creada', direccion: 'Servidor a cliente', descripcion: 'Nueva solicitud de compra registrada' },
+  { evento: 'compra:actualizada', direccion: 'Servidor a cliente', descripcion: 'Avance de la solicitud en el circuito' }
 ];
 
 const ARCHIVOS = [
@@ -124,6 +142,9 @@ const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/05_inventario.sql', descripcion: 'Articulos y kardex de movimientos' },
   { componente: 'Base de datos', ruta: 'db/06_equipos.sql', descripcion: 'Parque de equipos de la empresa' },
   { componente: 'Base de datos', ruta: 'db/07_estado_articulos.sql', descripcion: 'Situacion del articulo de inventario' },
+  { componente: 'Base de datos', ruta: 'db/08_sucursales.sql', descripcion: 'Sucursales y ubicacion de usuarios, tickets y equipos' },
+  { componente: 'Base de datos', ruta: 'db/09_compras.sql', descripcion: 'Solicitudes de compra con doble aprobacion' },
+  { componente: 'API', ruta: 'backend/src/modules/compras/', descripcion: 'Circuito de adquisiciones de equipos' },
   { componente: 'API', ruta: 'backend/src/modules/equipos/', descripcion: 'Parque informatico y credenciales de acceso remoto' },
   { componente: 'API', ruta: 'backend/src/utils/cifrado.js', descripcion: 'Cifrado AES-256-GCM de credenciales' },
   { componente: 'API', ruta: 'backend/src/modules/inventario/', descripcion: 'Catalogo, movimientos y reportes de inventario' },
@@ -207,7 +228,9 @@ const construir = async () => {
     { tabla: 'adjuntos', proposito: 'Capturas de pantalla y documentos asociados al ticket' },
     { tabla: 'inventario_articulos', proposito: 'Catalogo de articulos con su saldo vigente' },
     { tabla: 'inventario_movimientos', proposito: 'Kardex de entradas, salidas y ajustes' },
-    { tabla: 'equipos', proposito: 'Parque informatico, asignacion y acceso remoto cifrado' }
+    { tabla: 'equipos', proposito: 'Parque informatico, asignacion y acceso remoto cifrado' },
+    { tabla: 'sucursales', proposito: 'Mapa de la empresa: casa central, plantas, sucursales y oficinas' },
+    { tabla: 'solicitudes_compra', proposito: 'Pedidos de equipos con doble aprobacion y trazabilidad' }
   ]);
   doc.nota('La categoria del ticket dejo de ser una lista fija en el codigo: ahora se valida contra el '
     + 'catalogo administrable de la tabla categorias, mantenible desde el panel de administracion. '
@@ -390,9 +413,45 @@ const construir = async () => {
     + 'deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.',
   { icono: 'alerta', color: PALETA.critico });
 
-  // 12. Despliegue
+  // 12. Sucursales y compras
   doc.saltoPagina();
-  doc.titulo1('12. Despliegue en servidor', 'engranaje');
+  doc.titulo1('12. Sucursales y circuito de compras', 'red');
+  doc.parrafo('El usuario pertenece a una sucursal y a un area, ambas independientes: las mismas areas '
+    + 'funcionales existen en varias sucursales, de modo que separarlas evita duplicar el catalogo y '
+    + 'permite cortar los indicadores por cualquiera de las dos dimensiones. El ticket, el equipo y la '
+    + 'solicitud de compra heredan la sucursal de quien los origina, sin preguntarla.');
+  doc.tabla([
+    { titulo: 'Codigo', campo: 'codigo', ancho: 0.22 },
+    { titulo: 'Sucursal', campo: 'nombre', ancho: 0.4 },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.38 }
+  ], [
+    { codigo: 'SCZ', nombre: 'Casa Central', tipo: 'Fabrica, sede del sistema' },
+    { codigo: 'SILO', nombre: 'Silos Central de Insumos', tipo: 'Planta' },
+    { codigo: 'LP, CBBA, SRE, ORU', nombre: 'La Paz, Cochabamba, Sucre y Oruro', tipo: 'Sucursales' }
+  ], { alturaFila: 18 });
+  doc.nota('El catalogo es administrable: las oficinas futuras, como Distribucion Central o Venta Privada, '
+    + 'se agregan desde el panel sin intervenir el codigo.', { icono: 'engranaje' });
+
+  doc.titulo2('Circuito de la solicitud de compra');
+  doc.tabla([
+    { titulo: 'Estado', campo: 'estado', ancho: 0.28 },
+    { titulo: 'Quien actua', campo: 'quien', ancho: 0.24 },
+    { titulo: 'Que ocurre', campo: 'que', ancho: 0.48 }
+  ], [
+    { estado: 'Solicitada', quien: 'Solicitante', que: 'Registra el pedido con su justificacion' },
+    { estado: 'En revision', quien: 'TI', que: 'Evalua la viabilidad tecnica y cotiza' },
+    { estado: 'Aprobada por TI', quien: 'TI', que: 'Da el visto bueno tecnico y eleva a Gerencia' },
+    { estado: 'Aprobada por Gerencia', quien: 'Gerencia', que: 'Aprueba el presupuesto' },
+    { estado: 'Comprada', quien: 'TI', que: 'Registra la orden de compra y el monto final' },
+    { estado: 'Entregada', quien: 'TI', que: 'Entrega el equipo y lo vincula al parque' },
+    { estado: 'Rechazada', quien: 'TI o Gerencia', que: 'Rechaza con motivo, antes de la compra' }
+  ], { alturaFila: 18 });
+  doc.nota('El orden del circuito se valida en el servidor: Gerencia no puede aprobar antes que TI, ni se '
+    + 'puede registrar una compra sin aprobacion previa.', { icono: 'escudo' });
+
+  // 13. Despliegue
+  doc.saltoPagina();
+  doc.titulo1('13. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -426,7 +485,7 @@ const construir = async () => {
   ].join('\n'));
 
   // 11. Inventario
-  doc.titulo1('13. Inventario de componentes', 'baseDatos');
+  doc.titulo1('14. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
@@ -434,7 +493,7 @@ const construir = async () => {
   ], ARCHIVOS);
 
   // 12. Credenciales y control de versiones
-  doc.titulo1('14. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('15. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Admin123*' },
