@@ -167,6 +167,7 @@ export const AdminUsuarios = () => {
                   <tr key={usuario.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{usuario.nombre}</td>
                     <td className="font-mono text-xs text-slate-600 dark:text-slate-200">{usuario.usuario}</td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{usuario.sucursal ?? '-'}</td>
                     <td className="text-slate-600 dark:text-slate-200">{usuario.area}</td>
                     <td className="text-slate-600 dark:text-slate-200">{usuario.rol}</td>
                     <td>

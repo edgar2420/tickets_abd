@@ -7,7 +7,7 @@ import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 
-const TIPOS = ['Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
+const TIPOS = ['Fabrica', 'Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
 
 const sucursalSchema = z.object({
   codigo: z.string().min(2).max(10).regex(/^[A-Za-z0-9]+$/, 'Solo letras y numeros'),

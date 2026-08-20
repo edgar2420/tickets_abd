@@ -16,45 +16,29 @@ import { cifrar } from '../utils/cifrado.js';
 const PASSWORD = 'Prueba123*';
 
 const CUENTAS = [
-  // --- Solicitantes: solo crean y consultan sus propios tickets ---
+  // --- Equipo de Tecnologias de la Informacion, en la fabrica ---
+  // Reciben las solicitudes de compra y atienden los tickets de toda la empresa
   {
-    nombre: 'Ana Quispe Torrez',
-    usuario: 'solicitante',
-    area: 'Contabilidad',
-    sucursal: 'Casa Central',
-    rol: 'cliente',
-    proposito: 'Solicitante de Contabilidad, Casa Central'
-  },
-  {
-    nombre: 'Carlos Vargas Rojas',
-    usuario: 'solicitante2',
-    area: 'Recursos Humanos',
-    sucursal: 'Sucursal La Paz',
-    rol: 'cliente',
-    proposito: 'Solicitante de Recursos Humanos, La Paz'
-  },
-  {
-    nombre: 'Maria Flores Colque',
-    usuario: 'solicitante3',
-    area: 'Comercial',
-    sucursal: 'Sucursal Cochabamba',
-    rol: 'cliente',
-    proposito: 'Solicitante de Comercial, Cochabamba'
+    nombre: 'Ing. William Abuawad',
+    usuario: 'wabuawad',
+    area: 'Tecnologias de la Informacion',
+    sucursal: 'Fabrica Santa Cruz',
+    rol: 'admin',
+    proposito: 'Responsable de sistemas: atiende, resuelve y gestiona las compras'
   },
   {
     nombre: 'Ricardo Ayala Pena',
     usuario: 'gerente',
     area: 'Gerencia',
-    sucursal: 'Casa Central',
+    sucursal: 'Fabrica Santa Cruz',
     rol: 'gerencia',
     proposito: 'Aprueba presupuestariamente las solicitudes de compra'
   },
-  // --- Mesa de ayuda: atienden y resuelven tickets de toda la organizacion ---
   {
     nombre: 'Luis Mamani Colque',
     usuario: 'tecnico',
     area: 'Tecnologias de la Informacion',
-    sucursal: 'Casa Central',
+    sucursal: 'Fabrica Santa Cruz',
     rol: 'tecnico_l1',
     proposito: 'Tecnico de primer nivel'
   },
@@ -62,7 +46,7 @@ const CUENTAS = [
     nombre: 'Jorge Choque Silva',
     usuario: 'tecnico2',
     area: 'Tecnologias de la Informacion',
-    sucursal: 'Casa Central',
+    sucursal: 'Fabrica Santa Cruz',
     rol: 'tecnico_l1',
     proposito: 'Tecnico de primer nivel, para probar la asignacion entre tecnicos'
   },
@@ -70,9 +54,59 @@ const CUENTAS = [
     nombre: 'Patricia Nina Alvarez',
     usuario: 'tecnico3',
     area: 'Tecnologias de la Informacion',
-    sucursal: 'Casa Central',
+    sucursal: 'Fabrica Santa Cruz',
     rol: 'tecnico_l2',
     proposito: 'Tecnico de segundo nivel, para probar el escalamiento'
+  },
+
+  // --- Un solicitante por cada sucursal, para ver el corte por origen ---
+  {
+    nombre: 'Ana Quispe Torrez',
+    usuario: 'solicitante',
+    area: 'Contabilidad',
+    sucursal: 'Fabrica Santa Cruz',
+    rol: 'cliente',
+    proposito: 'Solicitante de Contabilidad en la fabrica'
+  },
+  {
+    nombre: 'Mario Cespedes Rivero',
+    usuario: 'silos',
+    area: 'Operaciones',
+    sucursal: 'Silos Central de Insumos',
+    rol: 'cliente',
+    proposito: 'Solicitante de Operaciones en los silos'
+  },
+  {
+    nombre: 'Carlos Vargas Rojas',
+    usuario: 'lapaz',
+    area: 'Recursos Humanos',
+    sucursal: 'Sucursal La Paz',
+    rol: 'cliente',
+    proposito: 'Solicitante de Recursos Humanos en La Paz'
+  },
+  {
+    nombre: 'Maria Flores Colque',
+    usuario: 'cochabamba',
+    area: 'Comercial',
+    sucursal: 'Sucursal Cochabamba',
+    rol: 'cliente',
+    proposito: 'Solicitante de Comercial en Cochabamba'
+  },
+  {
+    nombre: 'Elena Padilla Vaca',
+    usuario: 'sucre',
+    area: 'Comercial',
+    sucursal: 'Sucursal Sucre',
+    rol: 'cliente',
+    proposito: 'Solicitante de Comercial en Sucre'
+  },
+  {
+    nombre: 'Hugo Mendoza Ticona',
+    usuario: 'oruro',
+    area: 'Operaciones',
+    sucursal: 'Sucursal Oruro',
+    rol: 'cliente',
+    proposito: 'Solicitante de Operaciones en Oruro'
   }
 ];
 
@@ -141,12 +175,12 @@ const EQUIPOS = [
   { codigo: 'PC-002', nombre_equipo: 'RRHH-01', tipo: 'Escritorio', marca: 'HP', modelo: 'ProDesk 400 G7',
     sistema_operativo: 'Windows 10 Pro', procesador: 'Intel Core i3-10100', ram_gb: 8,
     almacenamiento: 'HDD 1 TB', direccion_ip: '192.168.0.42', direccion_mac: 'A4:BB:6D:11:22:02',
-    anydesk_id: '451 223 781', password: 'Remoto#Rrhh01', usuario: 'solicitante2',
+    anydesk_id: '451 223 781', password: 'Remoto#Rrhh01', usuario: 'lapaz',
     ubicacion: 'Recursos Humanos - Escritorio 1', estado: 'Operativo' },
   { codigo: 'LP-001', nombre_equipo: 'COMERCIAL-LP1', tipo: 'Laptop', marca: 'Lenovo', modelo: 'ThinkPad E14',
     sistema_operativo: 'Windows 11 Pro', procesador: 'AMD Ryzen 5 5500U', ram_gb: 16,
     almacenamiento: 'SSD 256 GB', direccion_ip: '192.168.0.61', direccion_mac: 'A4:BB:6D:11:22:03',
-    anydesk_id: '451 223 782', password: 'Remoto#Comercial', usuario: 'solicitante3',
+    anydesk_id: '451 223 782', password: 'Remoto#Comercial', usuario: 'cochabamba',
     ubicacion: 'Comercial - Movil', estado: 'Operativo' },
   { codigo: 'LP-002', nombre_equipo: 'SOPORTE-LP1', tipo: 'Laptop', marca: 'Dell', modelo: 'Latitude 3420',
     sistema_operativo: 'Windows 11 Pro', procesador: 'Intel Core i7-1165G7', ram_gb: 32,
