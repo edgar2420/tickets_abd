@@ -58,7 +58,7 @@ export const Login = () => {
             <section className="hidden lg:block">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-institucional-100 backdrop-blur">
                 <ShieldCheck className="h-3.5 w-3.5" />
-                Documento STD-2026-TI - Version 1.1.0
+                Control de acceso basado en roles
               </span>
 
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white xl:text-5xl">
@@ -136,16 +136,10 @@ export const Login = () => {
                   </button>
                 </div>
 
-                <dl className="mt-7 grid grid-cols-2 gap-4 border-t border-slate-200 pt-5 text-xs">
-                  <div>
-                    <dt className="font-semibold uppercase tracking-wide text-slate-400">Documento</dt>
-                    <dd className="mt-0.5 font-medium text-slate-600">STD-2026-TI</dd>
-                  </div>
-                  <div>
-                    <dt className="font-semibold uppercase tracking-wide text-slate-400">Responsable</dt>
-                    <dd className="mt-0.5 font-medium text-slate-600">Ing. Edgar Rojas Apaza</dd>
-                  </div>
-                </dl>
+                <p className="mt-7 border-t border-slate-200 pt-5 text-xs text-slate-500">
+                  <span className="font-semibold uppercase tracking-wide text-slate-400">Responsable</span>
+                  <span className="mt-0.5 block font-medium text-slate-600">Ing. Edgar Rojas Apaza</span>
+                </p>
               </form>
             </section>
           </div>
