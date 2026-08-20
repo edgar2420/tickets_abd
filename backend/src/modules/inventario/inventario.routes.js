@@ -12,6 +12,7 @@ import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { construirReporteInventario, construirKardex } from '../../services/pdf/documentos.service.js';
 
 const TIPOS = ['Equipo', 'Consumible', 'Repuesto', 'Licencia', 'Accesorio'];
+const ESTADOS = ['Disponible', 'En reparacion', 'En resguardo', 'De baja'];
 const TIPOS_MOVIMIENTO = ['Entrada', 'Salida', 'Ajuste'];
 
 const articuloSchema = z.object({
@@ -22,7 +23,14 @@ const articuloSchema = z.object({
   unidad: z.string().min(1).max(20).default('Unidad'),
   stock_minimo: z.number().int().min(0).default(0),
   ubicacion: z.string().max(100).optional().nullable(),
+  estado: z.enum(ESTADOS).default('Disponible'),
   activo: z.boolean().optional()
+});
+
+/** Cambio rapido de la situacion del articulo, sin abrir la edicion completa. */
+const estadoSchema = z.object({
+  estado: z.enum(ESTADOS),
+  motivo: z.string().max(255).optional().nullable()
 });
 
 const movimientoSchema = z.object({
@@ -34,7 +42,7 @@ const movimientoSchema = z.object({
 
 const SELECT_ARTICULO = `
   SELECT a.id, a.codigo, a.nombre, a.descripcion, a.tipo, a.unidad,
-         a.stock_actual, a.stock_minimo, a.ubicacion, a.activo, a.fecha_creacion,
+         a.stock_actual, a.stock_minimo, a.ubicacion, a.estado, a.activo, a.fecha_creacion,
          (a.stock_actual <= a.stock_minimo) AS bajo_minimo,
          (SELECT MAX(m.fecha) FROM inventario_movimientos m WHERE m.articulo_id = a.id) AS ultimo_movimiento
     FROM inventario_articulos a`;
@@ -64,15 +72,16 @@ inventarioRouter.get('/resumen', requierePermiso('inventario.ver'), asyncHandler
 /** Catalogo de articulos con filtros y paginacion. */
 inventarioRouter.get('/articulos', requierePermiso('inventario.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
-  const { busqueda = null, tipo = null, activo = null, solo_criticos = null } = req.query;
+  const { busqueda = null, tipo = null, estado = null, activo = null, solo_criticos = null } = req.query;
   const criticos = solo_criticos === 'true';
 
   const condiciones = `
      WHERE ($1::text IS NULL OR a.nombre ILIKE '%' || $1 || '%' OR a.codigo ILIKE '%' || $1 || '%')
        AND ($2::text IS NULL OR a.tipo = $2)
        AND ($3::bool IS NULL OR a.activo = $3)
-       AND ($4 = FALSE OR a.stock_actual <= a.stock_minimo)`;
-  const parametros = [busqueda, tipo, activo === null ? null : activo === 'true', criticos];
+       AND ($4 = FALSE OR a.stock_actual <= a.stock_minimo)
+       AND ($5::text IS NULL OR a.estado = $5)`;
+  const parametros = [busqueda, tipo, activo === null ? null : activo === 'true', criticos, estado];
 
   const { rows: total } = await query(
     `SELECT COUNT(*)::int AS total FROM inventario_articulos a ${condiciones}`, parametros
@@ -80,7 +89,7 @@ inventarioRouter.get('/articulos', requierePermiso('inventario.ver'), asyncHandl
   const { rows } = await query(
     `${SELECT_ARTICULO} ${condiciones}
       ORDER BY (a.stock_actual <= a.stock_minimo) DESC, a.nombre
-      LIMIT $5 OFFSET $6`,
+      LIMIT $6 OFFSET $7`,
     [...parametros, limite, desplazamiento]
   );
   res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
@@ -94,11 +103,11 @@ inventarioRouter.get('/articulos/:id', requierePermiso('inventario.ver'), asyncH
 
 inventarioRouter.post('/articulos', requierePermiso('inventario.articulos'), validate(articuloSchema),
   asyncHandler(async (req, res) => {
-    const { codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion } = req.body;
+    const { codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion, estado } = req.body;
     const { rows } = await query(
-      `INSERT INTO inventario_articulos (codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-      [codigo.toUpperCase(), nombre, descripcion ?? null, tipo, unidad, stock_minimo, ubicacion ?? null]
+      `INSERT INTO inventario_articulos (codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion, estado)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+      [codigo.toUpperCase(), nombre, descripcion ?? null, tipo, unidad, stock_minimo, ubicacion ?? null, estado]
     );
     const { rows: creado } = await query(`${SELECT_ARTICULO} WHERE a.id = $1`, [rows[0].id]);
     await registrarAuditoria({
@@ -112,13 +121,14 @@ inventarioRouter.post('/articulos', requierePermiso('inventario.articulos'), val
 inventarioRouter.put('/articulos/:id', requierePermiso('inventario.articulos'), validate(articuloSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const { codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion, activo } = req.body;
+    const { codigo, nombre, descripcion, tipo, unidad, stock_minimo, ubicacion, estado, activo } = req.body;
     const { rowCount } = await query(
       `UPDATE inventario_articulos
           SET codigo = $1, nombre = $2, descripcion = $3, tipo = $4, unidad = $5,
-              stock_minimo = $6, ubicacion = $7, activo = COALESCE($8::boolean, activo)
-        WHERE id = $9`,
-      [codigo.toUpperCase(), nombre, descripcion ?? null, tipo, unidad, stock_minimo, ubicacion ?? null, activo ?? null, id]
+              stock_minimo = $6, ubicacion = $7, estado = $8, activo = COALESCE($9::boolean, activo)
+        WHERE id = $10`,
+      [codigo.toUpperCase(), nombre, descripcion ?? null, tipo, unidad, stock_minimo,
+        ubicacion ?? null, estado, activo ?? null, id]
     );
     if (!rowCount) throw HttpError.notFound('El articulo indicado no existe');
     const { rows } = await query(`${SELECT_ARTICULO} WHERE a.id = $1`, [id]);
@@ -132,7 +142,8 @@ inventarioRouter.put('/articulos/:id', requierePermiso('inventario.articulos'), 
 /** Baja logica: el kardex historico se conserva. */
 inventarioRouter.delete('/articulos/:id', requierePermiso('inventario.articulos'), asyncHandler(async (req, res) => {
   const { rows } = await query(
-    'UPDATE inventario_articulos SET activo = FALSE WHERE id = $1 RETURNING id, nombre', [req.params.id]
+    `UPDATE inventario_articulos SET activo = FALSE, estado = 'De baja' WHERE id = $1 RETURNING id, nombre`,
+    [req.params.id]
   );
   if (!rows[0]) throw HttpError.notFound('El articulo indicado no existe');
   await registrarAuditoria({
@@ -153,6 +164,31 @@ inventarioRouter.put('/articulos/:id/activar', requierePermiso('inventario.artic
   });
   res.json({ ok: true, datos: articulo[0] });
 }));
+
+/** Cambia la situacion del articulo dejando constancia del motivo. */
+inventarioRouter.put('/articulos/:id/estado', requierePermiso('inventario.articulos'), validate(estadoSchema),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const { estado, motivo } = req.body;
+    const { rows: previa } = await query('SELECT estado, nombre FROM inventario_articulos WHERE id = $1', [id]);
+    if (!previa[0]) throw HttpError.notFound('El articulo indicado no existe');
+
+    // Un articulo dado de baja deja de figurar entre los activos
+    await query(
+      `UPDATE inventario_articulos
+          SET estado = $1::varchar,
+              activo = ($1::varchar <> 'De baja')
+        WHERE id = $2`,
+      [estado, id]
+    );
+    const { rows } = await query(`${SELECT_ARTICULO} WHERE a.id = $1`, [id]);
+
+    await registrarAuditoria({
+      usuarioId: req.usuario.id, entidad: 'INVENTARIO', entidadId: id, accion: 'CAMBIAR_ESTADO',
+      detalle: { anterior: previa[0].estado, nuevo: estado, motivo: motivo ?? null }, ip: req.ip
+    });
+    res.json({ ok: true, datos: rows[0] });
+  }));
 
 const SELECT_MOVIMIENTO = `
   SELECT m.id, m.tipo, m.cantidad, m.stock_anterior, m.stock_resultante, m.motivo,

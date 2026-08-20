@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
   AlertTriangle, Ban, Boxes, FileDown, Filter, Package, PackageMinus, PackagePlus,
-  PencilLine, PlusCircle, RotateCcw, Search, TrendingDown, TrendingUp
+  PencilLine, PlusCircle, RotateCcw, Search, TrendingDown, TrendingUp, Wrench
 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
@@ -13,11 +13,19 @@ import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
 import { fechaHora } from '../lib/formato';
 import type {
-  Articulo, InfoPaginacion, Movimiento, RespuestaPaginada, ResumenInventario,
+  Articulo, EstadoArticulo, InfoPaginacion, Movimiento, RespuestaPaginada, ResumenInventario,
   TipoArticulo, TipoMovimiento
 } from '../lib/tipos';
 
 const TIPOS: TipoArticulo[] = ['Equipo', 'Consumible', 'Repuesto', 'Licencia', 'Accesorio'];
+const ESTADOS: EstadoArticulo[] = ['Disponible', 'En reparacion', 'En resguardo', 'De baja'];
+
+const ESTILO_ESTADO: Record<EstadoArticulo, string> = {
+  'Disponible': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30',
+  'En reparacion': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/30',
+  'En resguardo': 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
+  'De baja': 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600'
+};
 
 const ESTILO_MOVIMIENTO: Record<TipoMovimiento, string> = {
   'Entrada': 'bg-green-100 text-green-800 border-green-300',
@@ -34,12 +42,13 @@ interface FormularioArticulo {
   unidad: string;
   stock_minimo: string;
   ubicacion: string;
+  estado: EstadoArticulo;
   activo: boolean;
 }
 
 const ARTICULO_VACIO: FormularioArticulo = {
   id: null, codigo: '', nombre: '', descripcion: '', tipo: 'Equipo',
-  unidad: 'Unidad', stock_minimo: '0', ubicacion: '', activo: true
+  unidad: 'Unidad', stock_minimo: '0', ubicacion: '', estado: 'Disponible', activo: true
 };
 
 export const Inventario = () => {
@@ -52,7 +61,7 @@ export const Inventario = () => {
 
   const [articulos, setArticulos] = useState<Articulo[] | null>(null);
   const [pagArticulos, setPagArticulos] = useState<InfoPaginacion | null>(null);
-  const [filtros, setFiltros] = useState({ busqueda: '', tipo: '', solo_criticos: false });
+  const [filtros, setFiltros] = useState({ busqueda: '', tipo: '', estado: '', solo_criticos: false });
   const [paginaArticulos, setPaginaArticulos] = useState(1);
   const [limiteArticulos, setLimiteArticulos] = useState(25);
 
@@ -68,6 +77,10 @@ export const Inventario = () => {
 
   const [movimiento, setMovimiento] = useState<{ articulo: Articulo; tipo: TipoMovimiento } | null>(null);
   const [datosMovimiento, setDatosMovimiento] = useState({ cantidad: '1', motivo: '' });
+  const [cambioEstado, setCambioEstado] = useState<Articulo | null>(null);
+  const [datosEstado, setDatosEstado] = useState<{ estado: EstadoArticulo; motivo: string }>({
+    estado: 'Disponible', motivo: ''
+  });
 
   const cargarResumen = useCallback(async () => {
     const { datos } = await api<{ datos: ResumenInventario }>('/inventario/resumen');
@@ -79,6 +92,7 @@ export const Inventario = () => {
       parametros: {
         busqueda: filtros.busqueda,
         tipo: filtros.tipo,
+        estado: filtros.estado,
         solo_criticos: filtros.solo_criticos ? 'true' : '',
         limite: limiteArticulos,
         pagina: paginaArticulos
@@ -129,6 +143,7 @@ export const Inventario = () => {
       unidad: articulo.unidad,
       stock_minimo: String(articulo.stock_minimo),
       ubicacion: articulo.ubicacion ?? '',
+      estado: articulo.estado,
       activo: articulo.activo
     });
     setModalArticulo(true);
@@ -149,6 +164,7 @@ export const Inventario = () => {
           unidad: formulario.unidad.trim(),
           stock_minimo: Number(formulario.stock_minimo) || 0,
           ubicacion: formulario.ubicacion || null,
+          estado: formulario.estado,
           activo: formulario.activo
         }
       });
@@ -180,6 +196,25 @@ export const Inventario = () => {
       await recargar();
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'No fue posible registrar el movimiento');
+    } finally {
+      setGuardando(false);
+    }
+  };
+
+  const guardarEstado = async (evento: FormEvent) => {
+    evento.preventDefault();
+    if (!cambioEstado) return;
+    setGuardando(true);
+    setError(null);
+    try {
+      await api(`/inventario/articulos/${cambioEstado.id}/estado`, {
+        metodo: 'PUT',
+        cuerpo: { estado: datosEstado.estado, motivo: datosEstado.motivo || null }
+      });
+      setCambioEstado(null);
+      await recargar();
+    } catch (fallo) {
+      setError(fallo instanceof Error ? fallo.message : 'No fue posible cambiar la situacion');
     } finally {
       setGuardando(false);
     }
@@ -258,7 +293,7 @@ export const Inventario = () => {
       {vista === 'articulos' && (
         <>
           <Panel titulo="Filtros" icono={Filter}>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div>
                 <label className="etiqueta">Busqueda</label>
                 <div className="relative">
@@ -280,6 +315,17 @@ export const Inventario = () => {
                 >
                   <option value="">Todos</option>
                   {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="etiqueta">Situacion</label>
+                <select
+                  className="campo"
+                  value={filtros.estado}
+                  onChange={(e) => { setFiltros((f) => ({ ...f, estado: e.target.value })); setPaginaArticulos(1); }}
+                >
+                  <option value="">Todas</option>
+                  {ESTADOS.map((estado) => <option key={estado} value={estado}>{estado}</option>)}
                 </select>
               </div>
               <label className="flex items-end gap-2 pb-2.5 text-sm text-slate-700 dark:text-slate-200">
@@ -334,13 +380,13 @@ export const Inventario = () => {
                           <span className="ml-1 text-xs font-normal text-slate-400 dark:text-slate-400">{articulo.unidad}</span>
                         </td>
                         <td>
-                          {!articulo.activo
-                            ? <Etiqueta texto="Inactivo" clase="bg-slate-100 text-slate-600 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
-                            : articulo.stock_actual === 0
-                              ? <Etiqueta texto="Agotado" clase="bg-red-100 text-red-800 border-red-300 animate-pulse" />
-                              : articulo.bajo_minimo
-                                ? <Etiqueta texto="Bajo minimo" clase="bg-yellow-100 text-yellow-800 border-yellow-300" />
-                                : <Etiqueta texto="Disponible" clase="bg-green-100 text-green-800 border-green-300" />}
+                          <Etiqueta texto={articulo.estado} clase={ESTILO_ESTADO[articulo.estado]} />
+                          {articulo.activo && articulo.stock_actual === 0 && (
+                            <span className="mt-1 block text-[11px] font-semibold text-rose-600 dark:text-rose-400">Agotado</span>
+                          )}
+                          {articulo.activo && articulo.stock_actual > 0 && articulo.bajo_minimo && (
+                            <span className="mt-1 block text-[11px] font-semibold text-amber-600 dark:text-amber-400">Bajo minimo</span>
+                          )}
                         </td>
                         <td>
                           <Acciones>
@@ -368,6 +414,14 @@ export const Inventario = () => {
                             />
                             {puede('inventario.articulos') && (
                               <>
+                                <BotonAccion
+                                  icono={Wrench}
+                                  rotulo="Cambiar situacion"
+                                  alPulsar={() => {
+                                    setCambioEstado(articulo);
+                                    setDatosEstado({ estado: articulo.estado, motivo: '' });
+                                  }}
+                                />
                                 <BotonAccion icono={PencilLine} rotulo="Editar articulo" alPulsar={() => abrirEdicion(articulo)} />
                                 {articulo.activo
                                   ? <BotonAccion icono={Ban} rotulo="Desactivar" tono="peligro" alPulsar={() => desactivar(articulo)} />
@@ -523,7 +577,14 @@ export const Inventario = () => {
                 value={formulario.stock_minimo}
                 onChange={(e) => setFormulario((f) => ({ ...f, stock_minimo: e.target.value }))} />
             </div>
-            <div className="sm:col-span-2">
+            <div>
+              <label className="etiqueta">Situacion</label>
+              <select className="campo" value={formulario.estado}
+                onChange={(e) => setFormulario((f) => ({ ...f, estado: e.target.value as EstadoArticulo }))}>
+                {ESTADOS.map((estado) => <option key={estado} value={estado}>{estado}</option>)}
+              </select>
+            </div>
+            <div>
               <label className="etiqueta">Ubicacion</label>
               <input className="campo" maxLength={100} placeholder="Deposito TI - Estante B"
                 value={formulario.ubicacion}
@@ -606,6 +667,68 @@ export const Inventario = () => {
               <button type="submit" className="boton-primario" disabled={guardando}>
                 Registrar {movimiento.tipo.toLowerCase()}
               </button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      <Modal
+        titulo="Cambiar la situacion del articulo"
+        icono={Wrench}
+        abierto={cambioEstado !== null}
+        alCerrar={() => setCambioEstado(null)}
+        ancho="max-w-lg"
+      >
+        {cambioEstado && (
+          <form onSubmit={guardarEstado} className="space-y-4">
+            <div className="superficie p-4">
+              <p className="font-semibold text-institucional-900 dark:text-slate-100">{cambioEstado.nombre}</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Codigo {cambioEstado.codigo} - Situacion actual: <strong>{cambioEstado.estado}</strong>
+              </p>
+            </div>
+
+            <div>
+              <span className="etiqueta">Nueva situacion</span>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {ESTADOS.map((estado) => (
+                  <button
+                    key={estado}
+                    type="button"
+                    onClick={() => setDatosEstado((d) => ({ ...d, estado }))}
+                    className={`rounded-lg border-2 p-3 text-left transition ${
+                      datosEstado.estado === estado
+                        ? 'border-institucional-700 bg-institucional-50 dark:border-institucional-400 dark:bg-noche-800'
+                        : 'border-slate-200 bg-white hover:border-slate-300 dark:border-noche-700 dark:bg-noche-800 dark:hover:border-noche-600'
+                    }`}
+                  >
+                    <Etiqueta texto={estado} clase={ESTILO_ESTADO[estado]} />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="etiqueta">Motivo</label>
+              <input
+                className="campo"
+                maxLength={255}
+                placeholder="Por ejemplo: enviado a servicio tecnico"
+                value={datosEstado.motivo}
+                onChange={(e) => setDatosEstado((d) => ({ ...d, motivo: e.target.value }))}
+              />
+            </div>
+
+            {datosEstado.estado === 'De baja' && (
+              <p className="superficie p-3 text-xs text-slate-600 dark:text-slate-200">
+                Al darlo de baja el articulo deja de figurar entre los activos y no admite movimientos.
+                Su kardex historico se conserva.
+              </p>
+            )}
+
+            <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
+              <button type="button" className="boton-secundario" onClick={() => setCambioEstado(null)}>Cancelar</button>
+              <button type="submit" className="boton-primario" disabled={guardando}>Guardar situacion</button>
             </div>
           </form>
         )}

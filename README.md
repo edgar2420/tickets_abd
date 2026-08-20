@@ -270,6 +270,18 @@ exclusivamente de los movimientos registrados, cada uno con su saldo anterior y 
 | Salida | Descuenta el saldo; se rechaza si no alcanza el stock disponible |
 | Ajuste | Fija el saldo en la cantidad indicada, para recuentos fisicos |
 
+Cada articulo lleva ademas su **situacion**, independiente del saldo:
+
+| Situacion | Significado |
+|---|---|
+| Disponible | En condiciones de uso |
+| En reparacion | Enviado a servicio tecnico |
+| En resguardo | Retirado de circulacion de forma temporal |
+| De baja | Retirado definitivamente; no admite movimientos |
+
+Se cambia desde la accion correspondiente del listado, dejando el motivo asentado en la
+bitacora. Darlo de baja lo retira de los activos; volver a Disponible lo reactiva.
+
 La fila del articulo se bloquea durante la transaccion (`SELECT ... FOR UPDATE`), de modo que
 dos movimientos simultaneos no dejan un saldo erroneo. Un movimiento puede asociarse a un
 ticket, dejando trazabilidad del consumo, y al caer por debajo del minimo definido se avisa al

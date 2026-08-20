@@ -15,6 +15,7 @@ export interface RespuestaPaginada<T> {
 
 export type TipoArticulo = 'Equipo' | 'Consumible' | 'Repuesto' | 'Licencia' | 'Accesorio';
 export type TipoMovimiento = 'Entrada' | 'Salida' | 'Ajuste';
+export type EstadoArticulo = 'Disponible' | 'En reparacion' | 'En resguardo' | 'De baja';
 
 export interface Articulo {
   id: number;
@@ -26,6 +27,7 @@ export interface Articulo {
   stock_actual: number;
   stock_minimo: number;
   ubicacion: string | null;
+  estado: EstadoArticulo;
   activo: boolean;
   fecha_creacion: string;
   bajo_minimo: boolean;

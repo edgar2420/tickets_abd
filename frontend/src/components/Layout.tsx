@@ -199,7 +199,11 @@ export const Layout = () => {
                   <NavLink
                     to={ruta}
                     end={ruta === '/tickets'}
-                    onClick={() => setMenuAbierto(false)}
+                    onClick={() => {
+                      // En pantallas angostas el menu se superpone al contenido y debe
+                      // replegarse al navegar; en escritorio la decision es del usuario.
+                      if (window.innerWidth < 1024) setMenuAbierto(false);
+                    }}
                     className={({ isActive }) => (isActive ? 'enlace-menu-activo' : 'enlace-menu-inactivo')}
                   >
                     <Icono className="h-4 w-4" />

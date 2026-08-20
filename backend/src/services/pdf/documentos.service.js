@@ -225,13 +225,16 @@ export const construirReporteInventario = ({ filas, resumen }) => {
 
   doc.titulo1('Detalle de articulos', 'documento');
   doc.tabla([
-    { titulo: 'Codigo', campo: 'codigo', ancho: 0.12 },
-    { titulo: 'Articulo', campo: 'nombre', ancho: 0.26 },
-    { titulo: 'Tipo', campo: 'tipo', ancho: 0.12 },
-    { titulo: 'Ubicacion', campo: 'ubicacion', ancho: 0.18 },
-    { titulo: 'Unidad', campo: 'unidad', ancho: 0.1 },
-    { titulo: 'Minimo', campo: 'stock_minimo', ancho: 0.09, alineacion: 'right' },
-    { titulo: 'Stock', campo: 'stock_actual', ancho: 0.13, alineacion: 'right',
+    { titulo: 'Codigo', campo: 'codigo', ancho: 0.11 },
+    { titulo: 'Articulo', campo: 'nombre', ancho: 0.23 },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.1 },
+    { titulo: 'Ubicacion', campo: 'ubicacion', ancho: 0.16 },
+    { titulo: 'Situacion', campo: 'estado', ancho: 0.13,
+      color: (f) => (f.estado === 'Disponible' ? PALETA.ok
+        : f.estado === 'En reparacion' ? PALETA.advertencia : PALETA.suave) },
+    { titulo: 'Unidad', campo: 'unidad', ancho: 0.08 },
+    { titulo: 'Minimo', campo: 'stock_minimo', ancho: 0.08, alineacion: 'right' },
+    { titulo: 'Stock', campo: 'stock_actual', ancho: 0.11, alineacion: 'right',
       color: (f) => (f.bajo_minimo ? PALETA.critico : PALETA.ok) }
   ], filas, { alturaFila: 15 });
 
@@ -254,6 +257,7 @@ export const construirKardex = ({ articulo, movimientos }) => {
     { etiqueta: 'Tipo', valor: articulo.tipo },
     { etiqueta: 'Unidad', valor: articulo.unidad },
     { etiqueta: 'Ubicacion', valor: articulo.ubicacion },
+    { etiqueta: 'Situacion', valor: articulo.estado },
     { etiqueta: 'Stock actual', valor: articulo.stock_actual },
     { etiqueta: 'Stock minimo', valor: articulo.stock_minimo },
     { etiqueta: 'Situacion', valor: articulo.bajo_minimo ? 'Bajo el minimo' : 'Dentro del minimo' },

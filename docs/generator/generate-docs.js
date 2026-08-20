@@ -68,6 +68,7 @@ const ENDPOINTS = [
   { metodo: 'PUT', ruta: '/inventario/articulos/:id', permiso: 'inventario.articulos', descripcion: 'Edicion del articulo' },
   { metodo: 'DELETE', ruta: '/inventario/articulos/:id', permiso: 'inventario.articulos', descripcion: 'Baja logica del articulo' },
   { metodo: 'POST', ruta: '/inventario/articulos/:id/movimientos', permiso: 'inventario.movimientos', descripcion: 'Entrada, salida o ajuste' },
+  { metodo: 'PUT', ruta: '/inventario/articulos/:id/estado', permiso: 'inventario.articulos', descripcion: 'Cambio de situacion del articulo' },
   { metodo: 'GET', ruta: '/inventario/movimientos', permiso: 'inventario.ver', descripcion: 'Kardex paginado' },
   { metodo: 'GET', ruta: '/inventario/reporte/pdf', permiso: 'inventario.ver', descripcion: 'Reporte del catalogo en PDF' },
   { metodo: 'GET', ruta: '/inventario/articulos/:id/kardex/pdf', permiso: 'inventario.ver', descripcion: 'Kardex del articulo en PDF' },
@@ -122,6 +123,7 @@ const ARCHIVOS = [
   { componente: 'Base de datos', ruta: 'db/04_comentarios.sql', descripcion: 'Conversacion y adjuntos del ticket' },
   { componente: 'Base de datos', ruta: 'db/05_inventario.sql', descripcion: 'Articulos y kardex de movimientos' },
   { componente: 'Base de datos', ruta: 'db/06_equipos.sql', descripcion: 'Parque de equipos de la empresa' },
+  { componente: 'Base de datos', ruta: 'db/07_estado_articulos.sql', descripcion: 'Situacion del articulo de inventario' },
   { componente: 'API', ruta: 'backend/src/modules/equipos/', descripcion: 'Parque informatico y credenciales de acceso remoto' },
   { componente: 'API', ruta: 'backend/src/utils/cifrado.js', descripcion: 'Cifrado AES-256-GCM de credenciales' },
   { componente: 'API', ruta: 'backend/src/modules/inventario/', descripcion: 'Catalogo, movimientos y reportes de inventario' },
@@ -348,7 +350,9 @@ const construir = async () => {
     'Ajuste: fija el saldo en la cantidad indicada, para recuentos fisicos.',
     'El movimiento puede asociarse a un ticket, dejando trazabilidad del consumo.',
     'La fila del articulo se bloquea durante la transaccion, de modo que dos movimientos simultaneos no dejan un saldo erroneo.',
-    'Al caer por debajo del minimo definido se avisa al equipo tecnico.'
+    'Al caer por debajo del minimo definido se avisa al equipo tecnico.',
+    'Cada articulo lleva ademas su situacion: Disponible, En reparacion, En resguardo o De baja.',
+    'Darlo de baja lo retira de los activos y le impide admitir movimientos; volver a Disponible lo reactiva.'
   ]);
 
   doc.titulo2('Limites de carga de los listados');
