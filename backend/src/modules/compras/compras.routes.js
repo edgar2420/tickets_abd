@@ -54,9 +54,10 @@ const SELECT_SOLICITUD = `
          c.solicitante_id, sol.nombre AS solicitante_nombre,
          c.sucursal_id, suc.nombre AS sucursal_nombre,
          c.area_id, a.nombre AS area_nombre,
-         c.revisado_por_id, rev.nombre AS revisado_por_nombre, c.fecha_revision,
+         c.revisado_por_id, rev.nombre AS revisado_por_nombre, rrev.nombre AS revisado_por_rol, c.fecha_revision,
          c.observacion_ti, c.monto_estimado, c.proveedor_sugerido,
-         c.aprobado_por_id, apr.nombre AS aprobado_por_nombre, c.fecha_aprobacion, c.observacion_gerencia,
+         c.aprobado_por_id, apr.nombre AS aprobado_por_nombre, rapr.nombre AS aprobado_por_rol,
+         aar.nombre AS aprobado_por_area, c.fecha_aprobacion, c.observacion_gerencia,
          c.rechazado_por_id, rec.nombre AS rechazado_por_nombre, c.fecha_rechazo, c.motivo_rechazo,
          c.comprado_por_id, com.nombre AS comprado_por_nombre, c.fecha_compra, c.numero_orden, c.monto_final,
          c.entregado_por_id, ent.nombre AS entregado_por_nombre, c.fecha_entrega,
@@ -66,7 +67,10 @@ const SELECT_SOLICITUD = `
     LEFT JOIN sucursales suc ON suc.id = c.sucursal_id
     LEFT JOIN areas a        ON a.id = c.area_id
     LEFT JOIN usuarios rev   ON rev.id = c.revisado_por_id
+    LEFT JOIN roles rrev     ON rrev.id = rev.rol_id
     LEFT JOIN usuarios apr   ON apr.id = c.aprobado_por_id
+    LEFT JOIN roles rapr     ON rapr.id = apr.rol_id
+    LEFT JOIN areas aar      ON aar.id = apr.area_id
     LEFT JOIN usuarios rec   ON rec.id = c.rechazado_por_id
     LEFT JOIN usuarios com   ON com.id = c.comprado_por_id
     LEFT JOIN usuarios ent   ON ent.id = c.entregado_por_id

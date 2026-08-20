@@ -27,7 +27,7 @@ const CUENTAS = [
     proposito: 'Responsable de sistemas: atiende, resuelve y gestiona las compras'
   },
   {
-    nombre: 'Ricardo Ayala Pena',
+    nombre: 'Ing. Juan Pablo',
     usuario: 'gerente',
     area: 'Gerencia',
     sucursal: 'Fabrica Santa Cruz',

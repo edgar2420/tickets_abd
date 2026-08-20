@@ -166,19 +166,35 @@ export class DocumentoPDF {
   /** Pares etiqueta/valor distribuidos en columnas. */
   camposClaveValor(pares, columnas = 2) {
     const anchoCol = this.ancho / columnas;
+    const anchoTexto = anchoCol - 12;
+
+    const textoDe = (par) => {
+      const vacio = par.valor === null || par.valor === undefined || par.valor === '';
+      return { vacio, texto: vacio ? 'No registrado' : String(par.valor) };
+    };
+
     for (let i = 0; i < pares.length; i += columnas) {
       const grupo = pares.slice(i, i + columnas);
-      this.asegurarEspacio(32);
+
+      // El alto lo fija el valor mas extenso del grupo, para que ninguno se solape
+      const altoValor = grupo.reduce((mayor, par) => {
+        const alto = this.doc.font('Helvetica-Bold').fontSize(9.5)
+          .heightOfString(textoDe(par).texto, { width: anchoTexto });
+        return Math.max(mayor, alto);
+      }, 0);
+      const altoBloque = Math.ceil(altoValor) + 22;
+
+      this.asegurarEspacio(altoBloque + 8);
       const y = this.doc.y + 6;
       grupo.forEach((par, c) => {
         const cx = this.x + anchoCol * c;
-        const vacio = par.valor === null || par.valor === undefined || par.valor === '';
+        const { vacio, texto } = textoDe(par);
         this.doc.font('Helvetica').fontSize(7.5).fillColor(PALETA.suave)
-          .text(String(par.etiqueta).toUpperCase(), cx, y, { width: anchoCol - 10, lineBreak: false });
+          .text(String(par.etiqueta).toUpperCase(), cx, y, { width: anchoTexto, lineBreak: false });
         this.doc.font('Helvetica-Bold').fontSize(9.5).fillColor(vacio ? PALETA.suave : PALETA.texto)
-          .text(vacio ? 'No registrado' : String(par.valor), cx, y + 10, { width: anchoCol - 10 });
+          .text(texto, cx, y + 11, { width: anchoTexto });
       });
-      this.doc.y = y + 28;
+      this.doc.y = y + altoBloque;
     }
     return this;
   }
@@ -188,47 +204,76 @@ export class DocumentoPDF {
    * columnas: [{ titulo, campo, ancho (proporcion 0-1), alineacion, render, color }]
    */
   tabla(columnas, filas, opciones = {}) {
-    const alturaFila = opciones.alturaFila ?? 18;
     const d = this.doc;
     const anchos = columnas.map((c) => c.ancho * this.ancho);
+    const relleno = 8;              // margen interno horizontal de la celda
+    const margenVertical = 6;       // aire arriba y abajo del texto
+    const alturaMinima = opciones.alturaFila ?? 20;
+    // Una columna angosta se trunca; el resto ajusta el alto de la fila al texto
+    const ajustar = opciones.ajustarAltura ?? true;
+
+    const valorDe = (col, fila) => {
+      const bruto = typeof col.render === 'function' ? col.render(fila) : fila[col.campo];
+      return bruto === null || bruto === undefined || bruto === '' ? '-' : String(bruto);
+    };
+
+    /** Alto que necesita la fila para mostrar completo su contenido. */
+    const altoDe = (fila) => {
+      if (!ajustar) return alturaMinima;
+      const alto = columnas.reduce((mayor, col, i) => {
+        if (col.truncar) return mayor;
+        const necesario = d.font('Helvetica').fontSize(8)
+          .heightOfString(valorDe(col, fila), { width: anchos[i] - relleno * 2, lineGap: 1 });
+        return Math.max(mayor, necesario);
+      }, 0);
+      return Math.max(alturaMinima, Math.ceil(alto) + margenVertical * 2);
+    };
 
     const encabezado = () => {
       const y = d.y;
-      d.save().rect(this.x, y, this.ancho, alturaFila).fill(PALETA.primario).restore();
+      d.save().rect(this.x, y, this.ancho, alturaMinima).fill(PALETA.primario).restore();
       let cx = this.x;
       columnas.forEach((col, i) => {
         d.font('Helvetica-Bold').fontSize(8).fillColor('#FFFFFF')
-          .text(col.titulo.toUpperCase(), cx + 6, y + 5.5,
-            { width: anchos[i] - 12, align: col.alineacion ?? 'left', lineBreak: false });
+          .text(col.titulo.toUpperCase(), cx + relleno, y + (alturaMinima - 8) / 2,
+            { width: anchos[i] - relleno * 2, align: col.alineacion ?? 'left', lineBreak: false });
         cx += anchos[i];
       });
-      d.y = y + alturaFila;
+      d.y = y + alturaMinima;
     };
 
-    this.asegurarEspacio(alturaFila * 3);
+    this.asegurarEspacio(alturaMinima * 3);
     encabezado();
 
     filas.forEach((fila, indice) => {
+      const alturaFila = altoDe(fila);
+      // La fila no se parte entre paginas: si no entra, se lleva entera a la siguiente
       if (d.y + alturaFila > this.limiteInferior) {
         d.addPage();
         encabezado();
       }
       const y = d.y;
       if (indice % 2 === 1) d.save().rect(this.x, y, this.ancho, alturaFila).fill(PALETA.fondo).restore();
+
       let cx = this.x;
       columnas.forEach((col, i) => {
-        const bruto = typeof col.render === 'function' ? col.render(fila) : fila[col.campo];
-        const valor = bruto === null || bruto === undefined || bruto === '' ? '-' : String(bruto);
+        const valor = valorDe(col, fila);
+        const opcionesTexto = {
+          width: anchos[i] - relleno * 2,
+          align: col.alineacion ?? 'left',
+          lineGap: 1,
+          ...(col.truncar ? { lineBreak: false, ellipsis: true } : {})
+        };
         d.font('Helvetica').fontSize(8).fillColor(col.color ? col.color(fila) : PALETA.texto)
-          .text(valor, cx + 6, y + 5.5,
-            { width: anchos[i] - 12, align: col.alineacion ?? 'left', lineBreak: false, ellipsis: true });
+          .text(valor, cx + relleno, y + margenVertical, opcionesTexto);
         cx += anchos[i];
       });
+
       d.save().moveTo(this.x, y + alturaFila).lineTo(this.x + this.ancho, y + alturaFila)
         .lineWidth(0.4).strokeColor(PALETA.linea).stroke().restore();
       d.y = y + alturaFila;
     });
-    d.y += 10;
+    d.y += 12;
     return this;
   }
 
