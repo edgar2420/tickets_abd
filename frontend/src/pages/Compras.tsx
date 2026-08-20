@@ -430,18 +430,18 @@ export const Compras = () => {
               <p className="etiqueta">Circuito de aprobacion</p>
               <ol className="space-y-3 border-l-2 border-slate-200 pl-4 dark:border-noche-700">
                 {[
-                  { paso: 'Registro del pedido', quien: ficha.solicitante_nombre, cuando: ficha.fecha_creacion, nota: null },
-                  { paso: 'Revision tecnica de TI', quien: ficha.revisado_por_nombre, cuando: ficha.fecha_revision, nota: ficha.observacion_ti },
-                  { paso: 'Aprobacion de Gerencia', quien: ficha.aprobado_por_nombre, cuando: ficha.fecha_aprobacion, nota: ficha.observacion_gerencia },
-                  { paso: 'Compra ejecutada', quien: ficha.comprado_por_nombre, cuando: ficha.fecha_compra, nota: ficha.numero_orden ? `Orden ${ficha.numero_orden}` : null },
-                  { paso: 'Entrega', quien: ficha.entregado_por_nombre, cuando: ficha.fecha_entrega, nota: ficha.equipo_codigo ? `Equipo ${ficha.equipo_codigo}` : null }
-                ].map(({ paso, quien, cuando, nota }) => (
+                  { paso: 'Registro del pedido', quien: ficha.solicitante_nombre, cargo: 'Solicitante', cuando: ficha.fecha_creacion, nota: null },
+                  { paso: 'Revision tecnica', quien: ficha.revisado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_revision, nota: ficha.observacion_ti },
+                  { paso: 'Aprobacion presupuestaria', quien: ficha.aprobado_por_nombre, cargo: ficha.aprobado_por_area ?? 'Gerencia', cuando: ficha.fecha_aprobacion, nota: ficha.observacion_gerencia },
+                  { paso: 'Compra ejecutada', quien: ficha.comprado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_compra, nota: ficha.numero_orden ? `Orden ${ficha.numero_orden}` : null },
+                  { paso: 'Entrega', quien: ficha.entregado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_entrega, nota: ficha.equipo_codigo ? `Equipo ${ficha.equipo_codigo}` : null }
+                ].map(({ paso, quien, cargo, cuando, nota }) => (
                   <li key={paso}>
                     <p className={`text-sm font-semibold ${quien ? 'text-institucional-900 dark:text-slate-100' : 'text-slate-400 dark:text-slate-500'}`}>
                       {paso}
                     </p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
-                      {quien ? `${quien} - ${fechaHora(cuando)}` : 'Pendiente'}
+                      {quien ? `${quien} - ${cargo} - ${fechaHora(cuando)}` : 'Pendiente'}
                     </p>
                     {nota && <p className="mt-0.5 text-xs text-slate-600 dark:text-slate-300">{nota}</p>}
                   </li>
@@ -455,6 +455,17 @@ export const Compras = () => {
               <Dato etiqueta="Monto final" valor={ficha.monto_final} />
               <Dato etiqueta="Proveedor" valor={ficha.proveedor_sugerido} />
             </div>
+
+            {ficha.aprobado_por_nombre && (
+              <p className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-800
+                            dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+                <BadgeCheck className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  Aprobacion presupuestaria otorgada por <strong>{ficha.aprobado_por_nombre}</strong>,{' '}
+                  {ficha.aprobado_por_area ?? 'Gerencia'}, el {fechaHora(ficha.fecha_aprobacion)}.
+                </span>
+              </p>
+            )}
 
             {ficha.estado === 'Rechazada' && (
               <Alerta mensaje={`Rechazada por ${ficha.rechazado_por_nombre ?? 'la organizacion'}: ${ficha.motivo_rechazo ?? 'sin motivo registrado'}`} />

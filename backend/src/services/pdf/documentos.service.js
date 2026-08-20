@@ -450,42 +450,60 @@ export const construirFichaCompra = ({ solicitud }) => {
 
   doc.titulo1('Circuito de aprobacion', 'flujo');
   doc.tabla([
-    { titulo: 'Instancia', campo: 'instancia', ancho: 0.26 },
-    { titulo: 'Responsable', campo: 'responsable', ancho: 0.26 },
-    { titulo: 'Fecha', campo: 'fecha', ancho: 0.24 },
-    { titulo: 'Observacion', campo: 'observacion', ancho: 0.24 }
+    { titulo: 'Instancia', campo: 'instancia', ancho: 0.24 },
+    { titulo: 'Responsable', campo: 'responsable', ancho: 0.24 },
+    { titulo: 'Cargo', campo: 'cargo', ancho: 0.16 },
+    { titulo: 'Fecha', campo: 'fecha', ancho: 0.16, truncar: true },
+    { titulo: 'Observacion', campo: 'observacion', ancho: 0.2 }
   ], [
     {
       instancia: 'Registro del pedido',
       responsable: solicitud.solicitante_nombre,
+      cargo: 'Solicitante',
       fecha: fecha(solicitud.fecha_creacion),
       observacion: '-'
     },
     {
-      instancia: 'Revision tecnica de TI',
+      instancia: 'Revision tecnica',
       responsable: solicitud.revisado_por_nombre ?? 'Pendiente',
+      cargo: solicitud.revisado_por_nombre ? 'Tecnologias de la Informacion' : '-',
       fecha: fecha(solicitud.fecha_revision) ?? 'Pendiente',
       observacion: solicitud.observacion_ti ?? '-'
     },
     {
-      instancia: 'Aprobacion de Gerencia',
+      instancia: 'Aprobacion presupuestaria',
       responsable: solicitud.aprobado_por_nombre ?? 'Pendiente',
+      cargo: solicitud.aprobado_por_nombre ? (solicitud.aprobado_por_area ?? 'Gerencia') : '-',
       fecha: fecha(solicitud.fecha_aprobacion) ?? 'Pendiente',
       observacion: solicitud.observacion_gerencia ?? '-'
     },
     {
       instancia: 'Compra ejecutada',
       responsable: solicitud.comprado_por_nombre ?? 'Pendiente',
+      cargo: solicitud.comprado_por_nombre ? 'Tecnologias de la Informacion' : '-',
       fecha: fecha(solicitud.fecha_compra) ?? 'Pendiente',
       observacion: solicitud.numero_orden ? 'Orden ' + solicitud.numero_orden : '-'
     },
     {
       instancia: 'Entrega al solicitante',
       responsable: solicitud.entregado_por_nombre ?? 'Pendiente',
+      cargo: solicitud.entregado_por_nombre ? 'Tecnologias de la Informacion' : '-',
       fecha: fecha(solicitud.fecha_entrega) ?? 'Pendiente',
       observacion: solicitud.equipo_codigo ? 'Equipo ' + solicitud.equipo_codigo : '-'
     }
-  ], { alturaFila: 22 });
+  ]);
+
+  // Constancia destacada de la aprobacion presupuestaria
+  if (solicitud.aprobado_por_nombre) {
+    doc.nota('Aprobacion presupuestaria otorgada por ' + solicitud.aprobado_por_nombre
+      + ', ' + (solicitud.aprobado_por_area ?? 'Gerencia')
+      + ', el ' + (fecha(solicitud.fecha_aprobacion) ?? 'sin fecha') + '. '
+      + (solicitud.observacion_gerencia ? 'Observacion: ' + solicitud.observacion_gerencia : 'Sin observaciones.'),
+    { icono: 'check', color: PALETA.ok });
+  } else if (solicitud.estado !== 'Rechazada') {
+    doc.nota('La solicitud aun no cuenta con la aprobacion presupuestaria de Gerencia.',
+      { icono: 'alerta', color: PALETA.advertencia });
+  }
 
   doc.titulo1('Valores', 'grafico');
   doc.camposClaveValor([
