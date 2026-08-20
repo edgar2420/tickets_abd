@@ -7,6 +7,7 @@ import { env } from './config/env.js';
 import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { areasRouter } from './modules/areas/areas.routes.js';
+import { sucursalesRouter } from './modules/sucursales/sucursales.routes.js';
 import { categoriasRouter } from './modules/categorias/categorias.routes.js';
 import { rolesRouter } from './modules/roles/roles.routes.js';
 import { permisosRouter } from './modules/permisos/permisos.routes.js';
@@ -16,6 +17,7 @@ import { adjuntosRouter } from './modules/comentarios/comentarios.routes.js';
 import { auditoriaRouter } from './modules/auditoria/auditoria.routes.js';
 import { inventarioRouter } from './modules/inventario/inventario.routes.js';
 import { equiposRouter } from './modules/equipos/equipos.routes.js';
+import { comprasRouter } from './modules/compras/compras.routes.js';
 import { notificacionesRouter } from './modules/notificaciones/notificaciones.routes.js';
 
 export const crearApp = () => {
@@ -40,6 +42,7 @@ export const crearApp = () => {
   const api = express.Router();
   api.use('/auth', authRouter);
   api.use('/areas', areasRouter);
+  api.use('/sucursales', sucursalesRouter);
   api.use('/categorias', categoriasRouter);
   api.use('/roles', rolesRouter);
   api.use('/permisos', permisosRouter);
@@ -49,6 +52,7 @@ export const crearApp = () => {
   api.use('/auditoria', auditoriaRouter);
   api.use('/inventario', inventarioRouter);
   api.use('/equipos', equiposRouter);
+  api.use('/compras', comprasRouter);
   api.use('/notificaciones', notificacionesRouter);
 
   app.use(env.apiPrefix, api);

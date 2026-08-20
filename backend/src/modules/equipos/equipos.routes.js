@@ -32,6 +32,7 @@ const equipoSchema = z.object({
   anydesk_password: opcional(z.string().max(200)),
   usuario_id: z.number().int().positive().optional().nullable(),
   area_id: z.number().int().positive().optional().nullable(),
+  sucursal_id: z.number().int().positive().optional().nullable(),
   ubicacion: opcional(z.string().max(120)),
   estado: z.enum(ESTADOS).default('Operativo'),
   observaciones: opcional(z.string().max(500)),
@@ -53,10 +54,12 @@ const SELECT_EQUIPO = `
          (e.anydesk_password IS NOT NULL) AS tiene_password,
          e.usuario_id, u.nombre AS usuario_nombre,
          e.area_id, a.nombre AS area_nombre,
+         e.sucursal_id, s.nombre AS sucursal_nombre, s.codigo AS sucursal_codigo,
          e.ubicacion, e.estado, e.observaciones, e.fecha_asignacion, e.activo, e.fecha_creacion
     FROM equipos e
     LEFT JOIN usuarios u ON u.id = e.usuario_id
-    LEFT JOIN areas    a ON a.id = e.area_id`;
+    LEFT JOIN areas    a ON a.id = e.area_id
+    LEFT JOIN sucursales s ON s.id = e.sucursal_id`;
 
 export const equiposRouter = Router();
 equiposRouter.use(autenticar);
@@ -78,7 +81,8 @@ equiposRouter.get('/resumen', requierePermiso('equipos.ver'), asyncHandler(async
 /** Listado con filtros y paginacion. */
 equiposRouter.get('/', requierePermiso('equipos.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
-  const { busqueda = null, tipo = null, estado = null, area_id = null, usuario_id = null, activo = null } = req.query;
+  const { busqueda = null, tipo = null, estado = null, area_id = null, usuario_id = null,
+    activo = null, sucursal_id = null } = req.query;
 
   const condiciones = `
      WHERE ($1::text IS NULL OR e.nombre_equipo ILIKE '%' || $1 || '%' OR e.codigo ILIKE '%' || $1 || '%'
@@ -87,15 +91,17 @@ equiposRouter.get('/', requierePermiso('equipos.ver'), asyncHandler(async (req, 
        AND ($3::text IS NULL OR e.estado = $3)
        AND ($4::int  IS NULL OR e.area_id = $4)
        AND ($5::int  IS NULL OR e.usuario_id = $5)
-       AND ($6::bool IS NULL OR e.activo = $6)`;
-  const parametros = [busqueda, tipo, estado, area_id, usuario_id, activo === null ? null : activo === 'true'];
+       AND ($6::bool IS NULL OR e.activo = $6)
+       AND ($7::int  IS NULL OR e.sucursal_id = $7)`;
+  const parametros = [busqueda, tipo, estado, area_id, usuario_id,
+    activo === null ? null : activo === 'true', sucursal_id];
 
   const { rows: total } = await query(
     `SELECT COUNT(*)::int AS total FROM equipos e LEFT JOIN usuarios u ON u.id = e.usuario_id ${condiciones}`,
     parametros
   );
   const { rows } = await query(
-    `${SELECT_EQUIPO} ${condiciones} ORDER BY e.codigo LIMIT $7 OFFSET $8`,
+    `${SELECT_EQUIPO} ${condiciones} ORDER BY e.codigo LIMIT $8 OFFSET $9`,
     [...parametros, limite, desplazamiento]
   );
   res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
@@ -137,15 +143,15 @@ equiposRouter.post('/', requierePermiso('equipos.gestionar'), validate(equipoSch
     `INSERT INTO equipos (codigo, nombre_equipo, tipo, marca, modelo, numero_serie,
                           sistema_operativo, procesador, ram_gb, almacenamiento,
                           direccion_ip, direccion_mac, anydesk_id, anydesk_password,
-                          usuario_id, area_id, ubicacion, estado, observaciones, fecha_asignacion)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+                          usuario_id, area_id, sucursal_id, ubicacion, estado, observaciones, fecha_asignacion)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
      RETURNING id`,
     [
       c.codigo.toUpperCase(), c.nombre_equipo, c.tipo, vacioANulo(c.marca), vacioANulo(c.modelo),
       vacioANulo(c.numero_serie), vacioANulo(c.sistema_operativo), vacioANulo(c.procesador),
       c.ram_gb ?? null, vacioANulo(c.almacenamiento), vacioANulo(c.direccion_ip), vacioANulo(c.direccion_mac),
       vacioANulo(c.anydesk_id), cifrar(vacioANulo(c.anydesk_password)),
-      c.usuario_id ?? null, c.area_id ?? null, vacioANulo(c.ubicacion), c.estado,
+      c.usuario_id ?? null, c.area_id ?? null, c.sucursal_id ?? null, vacioANulo(c.ubicacion), c.estado,
       vacioANulo(c.observaciones), vacioANulo(c.fecha_asignacion)
     ]
   );
@@ -169,15 +175,15 @@ equiposRouter.put('/:id', requierePermiso('equipos.gestionar'), validate(equipoS
         sistema_operativo = $7, procesador = $8, ram_gb = $9, almacenamiento = $10,
         direccion_ip = $11, direccion_mac = $12, anydesk_id = $13,
         anydesk_password = COALESCE($14::text, anydesk_password),
-        usuario_id = $15, area_id = $16, ubicacion = $17, estado = $18,
-        observaciones = $19, fecha_asignacion = $20, activo = COALESCE($21::boolean, activo)
-      WHERE id = $22`,
+        usuario_id = $15, area_id = $16, sucursal_id = $17, ubicacion = $18, estado = $19,
+        observaciones = $20, fecha_asignacion = $21, activo = COALESCE($22::boolean, activo)
+      WHERE id = $23`,
     [
       c.codigo.toUpperCase(), c.nombre_equipo, c.tipo, vacioANulo(c.marca), vacioANulo(c.modelo),
       vacioANulo(c.numero_serie), vacioANulo(c.sistema_operativo), vacioANulo(c.procesador),
       c.ram_gb ?? null, vacioANulo(c.almacenamiento), vacioANulo(c.direccion_ip), vacioANulo(c.direccion_mac),
       vacioANulo(c.anydesk_id), nueva ? cifrar(nueva) : null,
-      c.usuario_id ?? null, c.area_id ?? null, vacioANulo(c.ubicacion), c.estado,
+      c.usuario_id ?? null, c.area_id ?? null, c.sucursal_id ?? null, vacioANulo(c.ubicacion), c.estado,
       vacioANulo(c.observaciones), vacioANulo(c.fecha_asignacion), c.activo ?? null, id
     ]
   );

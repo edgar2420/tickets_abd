@@ -207,6 +207,7 @@ export const DetalleTicket = () => {
             <div className="space-y-3">
               <Dato etiqueta="Solicitante" valor={ticket.solicitante_nombre} />
               <Dato etiqueta="Area solicitante" valor={ticket.solicitante_area} />
+              <Dato etiqueta="Sucursal" valor={ticket.sucursal_nombre} />
               <Dato etiqueta="Atendido por" valor={ticket.asignado_nombre} />
               <Dato etiqueta="Resuelto por" valor={ticket.resuelto_por_nombre} />
             </div>
