@@ -17,11 +17,11 @@ CREATE TABLE IF NOT EXISTS sucursales (
 
 ALTER TABLE sucursales DROP CONSTRAINT IF EXISTS chk_sucursal_tipo;
 ALTER TABLE sucursales ADD  CONSTRAINT chk_sucursal_tipo
-    CHECK (tipo IN ('Casa Central','Sucursal','Planta','Oficina','Deposito'));
+    CHECK (tipo IN ('Fabrica','Casa Central','Sucursal','Planta','Oficina','Deposito'));
 
 -- CARGA INICIAL DEL MAPA DE LA EMPRESA
 INSERT INTO sucursales (codigo, nombre, ciudad, tipo) VALUES
-    ('SCZ',  'Casa Central',                 'Santa Cruz',  'Casa Central'),
+    ('SCZ',  'Fabrica Santa Cruz',           'Santa Cruz',  'Fabrica'),
     ('SILO', 'Silos Central de Insumos',     'Santa Cruz',  'Planta'),
     ('LP',   'Sucursal La Paz',              'La Paz',      'Sucursal'),
     ('CBBA', 'Sucursal Cochabamba',          'Cochabamba',  'Sucursal'),
@@ -36,7 +36,7 @@ ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS sucursal_id INT REFERENCES sucursa
 ALTER TABLE tickets  ADD COLUMN IF NOT EXISTS sucursal_id INT REFERENCES sucursales(id);
 ALTER TABLE equipos  ADD COLUMN IF NOT EXISTS sucursal_id INT REFERENCES sucursales(id);
 
--- Lo existente se ubica en la casa central, que es donde opera el sistema hoy
+-- Lo existente se ubica en la fabrica, que es donde opera el sistema hoy
 UPDATE usuarios SET sucursal_id = (SELECT id FROM sucursales WHERE codigo = 'SCZ')
  WHERE sucursal_id IS NULL;
 UPDATE equipos  SET sucursal_id = (SELECT id FROM sucursales WHERE codigo = 'SCZ')

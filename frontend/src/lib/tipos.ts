@@ -59,7 +59,7 @@ export interface ResumenInventario {
   salidas_mes: number;
 }
 
-export type TipoSucursal = 'Casa Central' | 'Sucursal' | 'Planta' | 'Oficina' | 'Deposito';
+export type TipoSucursal = 'Fabrica' | 'Casa Central' | 'Sucursal' | 'Planta' | 'Oficina' | 'Deposito';
 
 export interface Sucursal {
   id: number;

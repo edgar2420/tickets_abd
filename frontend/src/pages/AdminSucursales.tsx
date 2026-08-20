@@ -7,9 +7,10 @@ import {
 import { usarConfirmacion } from '../components/Confirmacion';
 import type { Sucursal, TipoSucursal } from '../lib/tipos';
 
-const TIPOS: TipoSucursal[] = ['Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
+const TIPOS: TipoSucursal[] = ['Fabrica', 'Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
 
 const ESTILO_TIPO: Record<TipoSucursal, string> = {
+  'Fabrica': 'bg-institucional-100 text-institucional-800 border-institucional-300 dark:bg-institucional-500/15 dark:text-institucional-200 dark:border-institucional-500/30',
   'Casa Central': 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30',
   'Sucursal': 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
   'Planta': 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',

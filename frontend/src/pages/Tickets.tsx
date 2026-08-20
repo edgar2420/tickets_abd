@@ -175,6 +175,7 @@ export const Tickets = () => {
                     <td><Etiqueta texto={ticket.prioridad} clase={estiloPrioridad[ticket.prioridad]} /></td>
                     <td><Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} /></td>
                     <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.solicitante_nombre}</td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.sucursal_nombre ?? '-'}</td>
                     <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.asignado_nombre ?? 'Sin asignar'}</td>
                     <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-300">{fechaHora(ticket.fecha_creacion)}</td>
                   </tr>
