@@ -12,7 +12,8 @@ import {
 import { Paginacion } from '../components/Paginacion';
 import { usarConfirmacion } from '../components/Confirmacion';
 import type {
-  Area, Equipo, EstadoEquipo, InfoPaginacion, RespuestaPaginada, ResumenEquipos, TipoEquipo, Usuario
+  Area, Equipo, EstadoEquipo, InfoPaginacion, RespuestaPaginada, ResumenEquipos, Sucursal,
+  TipoEquipo, Usuario
 } from '../lib/tipos';
 
 const TIPOS: TipoEquipo[] = ['Escritorio', 'Laptop', 'Servidor', 'Impresora', 'Monitor', 'Red', 'Otro'];
@@ -43,6 +44,7 @@ interface FormularioEquipo {
   anydesk_password: string;
   usuario_id: string;
   area_id: string;
+  sucursal_id: string;
   ubicacion: string;
   estado: EstadoEquipo;
   observaciones: string;
@@ -53,7 +55,7 @@ interface FormularioEquipo {
 const EQUIPO_VACIO: FormularioEquipo = {
   id: null, codigo: '', nombre_equipo: '', tipo: 'Escritorio', marca: '', modelo: '', numero_serie: '',
   sistema_operativo: '', procesador: '', ram_gb: '', almacenamiento: '', direccion_ip: '', direccion_mac: '',
-  anydesk_id: '', anydesk_password: '', usuario_id: '', area_id: '', ubicacion: '',
+  anydesk_id: '', anydesk_password: '', usuario_id: '', area_id: '', sucursal_id: '', ubicacion: '',
   estado: 'Operativo', observaciones: '', fecha_asignacion: '', activo: true
 };
 
@@ -74,9 +76,10 @@ export const Equipos = () => {
   const [resumen, setResumen] = useState<ResumenEquipos | null>(null);
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const [filtros, setFiltros] = useState({ busqueda: '', tipo: '', estado: '' });
+  const [filtros, setFiltros] = useState({ busqueda: '', tipo: '', estado: '', sucursal_id: '' });
   const [pagina, setPagina] = useState(1);
   const [limite, setLimite] = useState(25);
 
@@ -114,6 +117,12 @@ export const Equipos = () => {
       .then(({ datos }) => setAreas(datos)).catch(() => setAreas([]));
   }, [puede]);
 
+  // El catalogo de sucursales alimenta el filtro para todos los perfiles
+  useEffect(() => {
+    void api<{ datos: Sucursal[] }>('/sucursales')
+      .then(({ datos }) => setSucursales(datos)).catch(() => setSucursales([]));
+  }, []);
+
   const abrirNuevo = () => {
     setFormulario(EQUIPO_VACIO);
     setModalAbierto(true);
@@ -138,6 +147,7 @@ export const Equipos = () => {
       anydesk_password: '',
       usuario_id: equipo.usuario_id ? String(equipo.usuario_id) : '',
       area_id: equipo.area_id ? String(equipo.area_id) : '',
+      sucursal_id: equipo.sucursal_id ? String(equipo.sucursal_id) : '',
       ubicacion: equipo.ubicacion ?? '',
       estado: equipo.estado,
       observaciones: equipo.observaciones ?? '',
@@ -171,6 +181,7 @@ export const Equipos = () => {
           anydesk_password: formulario.anydesk_password || null,
           usuario_id: formulario.usuario_id ? Number(formulario.usuario_id) : null,
           area_id: formulario.area_id ? Number(formulario.area_id) : null,
+          sucursal_id: formulario.sucursal_id ? Number(formulario.sucursal_id) : null,
           ubicacion: formulario.ubicacion || null,
           estado: formulario.estado,
           observaciones: formulario.observaciones || null,
@@ -267,7 +278,7 @@ export const Equipos = () => {
       )}
 
       <Panel titulo="Filtros" icono={Filter}>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="etiqueta">Busqueda</label>
             <div className="relative">
@@ -286,6 +297,14 @@ export const Equipos = () => {
               onChange={(e) => { setFiltros((f) => ({ ...f, tipo: e.target.value })); setPagina(1); }}>
               <option value="">Todos</option>
               {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="etiqueta">Sucursal</label>
+            <select className="campo" value={filtros.sucursal_id}
+              onChange={(e) => { setFiltros((f) => ({ ...f, sucursal_id: e.target.value })); setPagina(1); }}>
+              <option value="">Todas</option>
+              {sucursales.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
             </select>
           </div>
           <div>
@@ -312,6 +331,7 @@ export const Equipos = () => {
                   <th>Codigo</th>
                   <th>Equipo</th>
                   <th>Asignado a</th>
+                  <th>Sucursal</th>
                   <th>Sistema operativo</th>
                   <th className="text-right">RAM</th>
                   <th>Direccion IP</th>
@@ -342,6 +362,7 @@ export const Equipos = () => {
                       </p>
                       <p className="text-xs text-slate-400 dark:text-slate-400">{equipo.area_nombre ?? '-'}</p>
                     </td>
+                    <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{equipo.sucursal_nombre ?? '-'}</td>
                     <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{equipo.sistema_operativo ?? '-'}</td>
                     <td className="whitespace-nowrap text-right text-slate-600 dark:text-slate-200">
                       {equipo.ram_gb ? `${equipo.ram_gb} GB` : '-'}
@@ -504,6 +525,14 @@ export const Equipos = () => {
                 </select>
               </div>
               <div>
+                <label className="etiqueta">Sucursal</label>
+                <select className="campo" value={formulario.sucursal_id}
+                  onChange={(e) => setFormulario((f) => ({ ...f, sucursal_id: e.target.value }))}>
+                  <option value="">Sin sucursal</option>
+                  {sucursales.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
+                </select>
+              </div>
+              <div>
                 <label className="etiqueta">Area</label>
                 <select className="campo" value={formulario.area_id}
                   onChange={(e) => setFormulario((f) => ({ ...f, area_id: e.target.value }))}>
@@ -564,6 +593,7 @@ export const Equipos = () => {
             <div className="grid gap-4 sm:grid-cols-2">
               <Dato etiqueta="Asignado a" valor={ficha.usuario_nombre ?? 'Sin asignar'} />
               <Dato etiqueta="Area" valor={ficha.area_nombre} />
+              <Dato etiqueta="Sucursal" valor={ficha.sucursal_nombre} />
               <Dato etiqueta="Ubicacion" valor={ficha.ubicacion} />
               <Dato etiqueta="Fecha de asignacion" valor={ficha.fecha_asignacion?.slice(0, 10)} />
               <Dato etiqueta="Sistema operativo" valor={ficha.sistema_operativo} />

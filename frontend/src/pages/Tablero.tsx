@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
+import { AlertTriangle, Building, CheckCircle2, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
 import { usarNotificaciones } from '../context/NotificacionesContext';
@@ -14,6 +14,7 @@ interface RespuestaTablero {
   datos: {
     resumen: Indicadores;
     graficos: {
+      porSucursal: Distribucion[];
       porCategoria: Distribucion[];
       porEstado: Distribucion[];
       porArea: Distribucion[];
@@ -139,6 +140,9 @@ export const Tablero = () => {
           <div className="space-y-4">
             <Panel titulo="Tickets por categoria" icono={Layers}>
               <BarraDistribucion filas={graficos.porCategoria} />
+            </Panel>
+            <Panel titulo="Tickets por sucursal" icono={Building}>
+              <BarraDistribucion filas={graficos.porSucursal} />
             </Panel>
             <Panel titulo="Tickets por area solicitante" icono={Ticket}>
               <BarraDistribucion filas={graficos.porArea} />

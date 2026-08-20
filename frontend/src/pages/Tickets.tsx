@@ -7,7 +7,7 @@ import { usarNotificaciones } from '../context/NotificacionesContext';
 import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAccionable } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
-import type { Categoria, InfoPaginacion, RespuestaPaginada, Ticket } from '../lib/tipos';
+import type { Categoria, InfoPaginacion, RespuestaPaginada, Sucursal, Ticket } from '../lib/tipos';
 
 const ESTADOS = ['Abierto', 'En Proceso', 'Resuelto', 'Cerrado'];
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
@@ -18,11 +18,12 @@ export const Tickets = () => {
   const navegar = useNavigate();
   const [tickets, setTickets] = useState<Ticket[] | null>(null);
   const [categorias, setCategorias] = useState<Categoria[]>([]);
+  const [sucursales, setSucursales] = useState<Sucursal[]>([]);
   const [pagina, setPagina] = useState(1);
   const [limite, setLimite] = useState(25);
   const [info, setInfo] = useState<InfoPaginacion | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [filtros, setFiltros] = useState({ estado: '', categoria: '', prioridad: '', busqueda: '' });
+  const [filtros, setFiltros] = useState({ estado: '', categoria: '', prioridad: '', sucursal_id: '', busqueda: '' });
 
   const cargar = useCallback(async () => {
     try {
@@ -41,11 +42,14 @@ export const Tickets = () => {
     void cargar();
   }, [cargar, ultimoEventoTicket]);
 
-  // El filtro se alimenta del catalogo administrable de categorias
+  // Los filtros se alimentan de los catalogos administrables
   useEffect(() => {
     void api<{ datos: Categoria[] }>('/categorias')
       .then(({ datos }) => setCategorias(datos))
       .catch(() => setCategorias([]));
+    void api<{ datos: Sucursal[] }>('/sucursales')
+      .then(({ datos }) => setSucursales(datos))
+      .catch(() => setSucursales([]));
   }, []);
 
   return (
@@ -80,7 +84,7 @@ export const Tickets = () => {
       </EncabezadoPagina>
 
       <Panel titulo="Filtros de busqueda" icono={Filter}>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <div>
             <label className="etiqueta">Estado</label>
             <select className="campo" value={filtros.estado} onChange={(e) => { setFiltros((f) => ({ ...f, estado: e.target.value })); setPagina(1); }}>
@@ -102,6 +106,14 @@ export const Tickets = () => {
             <select className="campo" value={filtros.prioridad} onChange={(e) => { setFiltros((f) => ({ ...f, prioridad: e.target.value })); setPagina(1); }}>
               <option value="">Todas</option>
               {PRIORIDADES.map((prioridad) => <option key={prioridad} value={prioridad}>{prioridad}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="etiqueta">Sucursal</label>
+            <select className="campo" value={filtros.sucursal_id}
+              onChange={(e) => { setFiltros((f) => ({ ...f, sucursal_id: e.target.value })); setPagina(1); }}>
+              <option value="">Todas</option>
+              {sucursales.map((s) => <option key={s.id} value={s.id}>{s.nombre}</option>)}
             </select>
           </div>
           <div>
@@ -137,6 +149,7 @@ export const Tickets = () => {
                   <th>Prioridad</th>
                   <th>Estado</th>
                   <th>Solicitante</th>
+                  <th>Sucursal</th>
                   <th>Atendido por</th>
                   <th>Registrado</th>
                 </tr>

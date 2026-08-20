@@ -19,10 +19,12 @@ export const autenticar = async (req, _res, next) => {
     const payload = jwt.verify(token, env.jwt.secret);
     const { rows } = await query(
       `SELECT u.id, u.nombre, u.usuario, u.email, u.activo,
-              u.rol_id, r.nombre AS rol, u.area_id, a.nombre AS area
+              u.rol_id, r.nombre AS rol, u.area_id, a.nombre AS area,
+              u.sucursal_id, s.nombre AS sucursal, s.codigo AS sucursal_codigo
          FROM usuarios u
-         JOIN roles r ON r.id = u.rol_id
-         JOIN areas a ON a.id = u.area_id
+         JOIN roles r      ON r.id = u.rol_id
+         JOIN areas a      ON a.id = u.area_id
+         LEFT JOIN sucursales s ON s.id = u.sucursal_id
         WHERE u.id = $1`,
       [payload.sub]
     );

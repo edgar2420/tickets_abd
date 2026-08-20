@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  Bell, Boxes, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Monitor, Moon,
+  Bell, Boxes, Building, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Monitor, Moon,
+  ShoppingCart,
   PanelLeftClose, PanelLeftOpen, ScrollText, ShieldCheck, Sun, Tags, Ticket,
   UserCog, Users, type LucideIcon
 } from 'lucide-react';
@@ -25,8 +26,10 @@ const ENLACES: Enlace[] = [
   { ruta: '/tickets/nuevo', texto: 'Nuevo ticket', icono: ClipboardList, permisos: ['tickets.crear'], grupo: 'Operacion' },
   { ruta: '/inventario', texto: 'Inventario', icono: Boxes, permisos: ['inventario.ver'], grupo: 'Operacion' },
   { ruta: '/equipos', texto: 'Equipos', icono: Monitor, permisos: ['equipos.ver'], grupo: 'Operacion' },
+  { ruta: '/compras', texto: 'Compras', icono: ShoppingCart, permisos: ['compras.solicitar', 'compras.ver_todas'], grupo: 'Operacion' },
   { ruta: '/admin/usuarios', texto: 'Usuarios', icono: Users, permisos: ['admin.usuarios'], grupo: 'Administracion' },
   { ruta: '/admin/roles', texto: 'Roles y permisos', icono: ShieldCheck, permisos: ['admin.roles'], grupo: 'Administracion' },
+  { ruta: '/admin/sucursales', texto: 'Sucursales', icono: Building, permisos: ['admin.sucursales'], grupo: 'Administracion' },
   { ruta: '/admin/areas', texto: 'Areas', icono: Building2, permisos: ['admin.areas'], grupo: 'Administracion' },
   { ruta: '/admin/categorias', texto: 'Categorias', icono: Tags, permisos: ['admin.categorias'], grupo: 'Administracion' },
   { ruta: '/auditoria', texto: 'Auditoria', icono: ScrollText, permisos: ['reportes.ver', 'admin.usuarios'], grupo: 'Administracion' }
@@ -161,6 +164,7 @@ export const Layout = () => {
               <p className="text-sm font-semibold">{usuario?.nombre}</p>
               <p className="text-[11px] text-institucional-200">
                 {usuario?.rol} - {usuario?.area}
+                {usuario?.sucursal ? ` - ${usuario.sucursal}` : ''}
               </p>
             </div>
             <button

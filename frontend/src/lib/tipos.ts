@@ -59,6 +59,75 @@ export interface ResumenInventario {
   salidas_mes: number;
 }
 
+export type TipoSucursal = 'Casa Central' | 'Sucursal' | 'Planta' | 'Oficina' | 'Deposito';
+
+export interface Sucursal {
+  id: number;
+  codigo: string;
+  nombre: string;
+  ciudad: string | null;
+  tipo: TipoSucursal;
+  direccion: string | null;
+  activo: boolean;
+  fecha_creacion: string;
+  total_usuarios: number;
+  total_equipos: number;
+  total_tickets: number;
+}
+
+export type EstadoCompra =
+  | 'Solicitada' | 'En revision' | 'Aprobada por TI'
+  | 'Aprobada por Gerencia' | 'Comprada' | 'Entregada' | 'Rechazada';
+
+export interface SolicitudCompra {
+  id: number;
+  titulo: string;
+  justificacion: string;
+  tipo_equipo: string;
+  cantidad: number;
+  especificaciones: string | null;
+  prioridad: PrioridadTicket;
+  estado: EstadoCompra;
+  fecha_creacion: string;
+  solicitante_id: number;
+  solicitante_nombre: string;
+  sucursal_id: number | null;
+  sucursal_nombre: string | null;
+  area_id: number | null;
+  area_nombre: string | null;
+  revisado_por_nombre: string | null;
+  fecha_revision: string | null;
+  observacion_ti: string | null;
+  monto_estimado: string | null;
+  proveedor_sugerido: string | null;
+  aprobado_por_nombre: string | null;
+  fecha_aprobacion: string | null;
+  observacion_gerencia: string | null;
+  rechazado_por_nombre: string | null;
+  fecha_rechazo: string | null;
+  motivo_rechazo: string | null;
+  comprado_por_nombre: string | null;
+  fecha_compra: string | null;
+  numero_orden: string | null;
+  monto_final: string | null;
+  entregado_por_nombre: string | null;
+  fecha_entrega: string | null;
+  equipo_id: number | null;
+  equipo_codigo: string | null;
+}
+
+export interface ResumenCompras {
+  total: number;
+  solicitadas: number;
+  en_revision: number;
+  esperando_gerencia: number;
+  aprobadas: number;
+  compradas: number;
+  entregadas: number;
+  rechazadas: number;
+  monto_ejecutado: number;
+}
+
 export type TipoEquipo = 'Escritorio' | 'Laptop' | 'Servidor' | 'Impresora' | 'Monitor' | 'Red' | 'Otro';
 export type EstadoEquipo = 'Operativo' | 'En reparacion' | 'En resguardo' | 'De baja';
 
@@ -83,6 +152,8 @@ export interface Equipo {
   usuario_nombre: string | null;
   area_id: number | null;
   area_nombre: string | null;
+  sucursal_id: number | null;
+  sucursal_nombre: string | null;
   ubicacion: string | null;
   estado: EstadoEquipo;
   observaciones: string | null;
@@ -125,6 +196,9 @@ export interface Usuario {
   rol: string;
   area_id: number;
   area: string;
+  sucursal_id: number | null;
+  sucursal: string | null;
+  sucursal_codigo?: string | null;
   permisos: string[];
   fecha_creacion?: string;
 }
@@ -167,6 +241,9 @@ export interface Ticket {
   solicitante_id: number;
   solicitante_nombre: string;
   solicitante_area: string;
+  sucursal_id: number | null;
+  sucursal_nombre: string | null;
+  sucursal_codigo: string | null;
   asignado_id: number | null;
   asignado_nombre: string | null;
   resuelto_por_id: number | null;

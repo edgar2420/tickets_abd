@@ -6,12 +6,14 @@ export const SELECT_TICKET = `
   SELECT t.id, t.titulo, t.descripcion, t.categoria, t.prioridad, t.estado,
          t.solucion_detalle, t.fecha_creacion, t.fecha_asignacion, t.fecha_resolucion,
          t.solicitante_id,  s.nombre  AS solicitante_nombre,  sa.nombre AS solicitante_area,
+         t.sucursal_id,     suc.nombre AS sucursal_nombre,     suc.codigo AS sucursal_codigo,
          t.asignado_id,     asg.nombre AS asignado_nombre,
          t.resuelto_por_id, res.nombre AS resuelto_por_nombre,
          EXTRACT(EPOCH FROM (COALESCE(t.fecha_resolucion, CURRENT_TIMESTAMP) - t.fecha_creacion)) / 3600 AS horas_atencion
     FROM tickets t
     JOIN usuarios s       ON s.id = t.solicitante_id
     JOIN areas    sa      ON sa.id = s.area_id
+    LEFT JOIN sucursales suc ON suc.id = t.sucursal_id
     LEFT JOIN usuarios asg ON asg.id = t.asignado_id
     LEFT JOIN usuarios res ON res.id = t.resuelto_por_id`;
 
@@ -36,19 +38,21 @@ export const listarTickets = async (filtros, usuario) => {
         AND ($5::varchar   IS NULL OR t.prioridad = $5)
         AND ($6::int       IS NULL OR t.asignado_id = $6)
         AND ($7::int       IS NULL OR s.area_id = $7)
+        AND ($12::int      IS NULL OR t.sucursal_id = $12)
         AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
         AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
       ORDER BY
         CASE t.prioridad WHEN 'Critica' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Media' THEN 3 ELSE 4 END,
         t.fecha_creacion DESC
-      LIMIT $11 OFFSET $12`,
+      LIMIT $11 OFFSET $13`,
     [
       verTodos, usuario.id,
       filtros.estado ?? null, filtros.categoria ?? null, filtros.prioridad ?? null,
       filtros.asignado_id ?? null, filtros.area_id ?? null,
       filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
       filtros.limite ?? 25,
+      filtros.sucursal_id ?? null,
       filtros.desplazamiento ?? 0
     ]
   );
@@ -70,12 +74,14 @@ export const contarTickets = async (filtros, usuario) => {
         AND ($7::int       IS NULL OR s.area_id = $7)
         AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
-        AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')`,
+        AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
+        AND ($11::int      IS NULL OR t.sucursal_id = $11)`,
     [
       verTodos, usuario.id,
       filtros.estado ?? null, filtros.categoria ?? null, filtros.prioridad ?? null,
       filtros.asignado_id ?? null, filtros.area_id ?? null,
-      filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null
+      filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
+      filtros.sucursal_id ?? null
     ]
   );
   return rows[0].total;
@@ -123,7 +129,13 @@ export const distribuciones = async () => {
        FROM tickets t JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id
       GROUP BY u.nombre, a.nombre ORDER BY total DESC LIMIT 10`
   );
+  const porSucursal = await query(
+    `SELECT COALESCE(s.nombre, 'Sin sucursal') AS etiqueta, COUNT(*)::int AS total
+       FROM tickets t LEFT JOIN sucursales s ON s.id = t.sucursal_id
+      GROUP BY s.nombre ORDER BY total DESC LIMIT 10`
+  );
   return {
+    porSucursal: porSucursal.rows,
     porCategoria: porCategoria.rows,
     porEstado: porEstado.rows,
     porArea: porArea.rows,
