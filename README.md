@@ -99,7 +99,7 @@ atienden los tickets de todas las sucursales:
 |---|---|---|---|
 | `admin` | Ing. Edgar Rojas Apaza | admin | Sistema completo (contrasena `Admin123*`) |
 | `wabuawad` | Ing. William Abuawad | admin | Sistema completo |
-| `gerente` | Ricardo Ayala Pena | gerencia | Aprobacion presupuestaria de las compras |
+| `gerente` | Ing. Juan Pablo | gerencia | Aprobacion presupuestaria de las compras |
 | `tecnico` | Luis Mamani Colque | tecnico_l1 | Atender, resolver y cerrar tickets |
 | `tecnico2` | Jorge Choque Silva | tecnico_l1 | Asignacion entre tecnicos |
 | `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Escalamiento y gestion del parque |
@@ -287,6 +287,10 @@ Circuito propio para el pedido de equipos, que cualquier solicitante puede inici
 | Comprada | TI | Registra la orden de compra y el monto final |
 | Entregada | TI | Entrega el equipo y lo vincula al parque |
 | Rechazada | TI o Gerencia | Rechaza con motivo, antes de la compra |
+
+Cada instancia registra **quien actuo y con que cargo**: la ficha y el PDF de la solicitud
+muestran el nombre, el area y la fecha de quien aprobo, con una constancia destacada de la
+aprobacion presupuestaria de Gerencia.
 
 **El orden se valida en el servidor**: Gerencia no puede aprobar antes que TI, ni se puede
 registrar una compra sin aprobacion previa. Cada paso avisa a quien corresponde y queda

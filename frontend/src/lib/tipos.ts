@@ -101,6 +101,9 @@ export interface SolicitudCompra {
   monto_estimado: string | null;
   proveedor_sugerido: string | null;
   aprobado_por_nombre: string | null;
+  aprobado_por_rol: string | null;
+  aprobado_por_area: string | null;
+  revisado_por_rol: string | null;
   fecha_aprobacion: string | null;
   observacion_gerencia: string | null;
   rechazado_por_nombre: string | null;
