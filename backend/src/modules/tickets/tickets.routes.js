@@ -12,6 +12,8 @@ ticketsRouter.use('/:id/comentarios', comentariosRouter);
 
 ticketsRouter.get('/tablero', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.tablero);
 ticketsRouter.get('/reporte/pdf', requierePermiso('reportes.exportar', 'tickets.ver_todos'), ctrl.reportePdf);
+ticketsRouter.get('/mensual', requierePermiso('reportes.ver', 'tickets.ver_todos'), ctrl.mensual);
+ticketsRouter.get('/mensual/pdf', requierePermiso('reportes.ver', 'tickets.ver_todos'), ctrl.mensualPdf);
 
 ticketsRouter.get('/', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.listar);
 ticketsRouter.get('/:id', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.detalle);

@@ -10,7 +10,7 @@ import { construirReporteAuditoria, construirMatrizRoles } from '../../services/
 export const auditoriaRouter = Router();
 auditoriaRouter.use(autenticar);
 
-auditoriaRouter.get('/', requierePermiso('reportes.ver', 'admin.usuarios'), asyncHandler(async (req, res) => {
+auditoriaRouter.get('/', requierePermiso('auditoria.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
   const filtros = {
     desde: req.query.desde ?? null,
@@ -25,7 +25,7 @@ auditoriaRouter.get('/', requierePermiso('reportes.ver', 'admin.usuarios'), asyn
   res.json(respuestaPaginada(datos, total, limite, pagina));
 }));
 
-auditoriaRouter.get('/pdf', requierePermiso('reportes.exportar', 'admin.usuarios'), asyncHandler(async (req, res) => {
+auditoriaRouter.get('/pdf', requierePermiso('auditoria.ver'), asyncHandler(async (req, res) => {
   const filas = await listarAuditoria({
     desde: req.query.desde ?? null,
     hasta: req.query.hasta ?? null,
