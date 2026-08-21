@@ -7,6 +7,7 @@ import { Alerta, Cargando, Etiqueta, Panel } from '../../../components/Ui';
 import { descargarPdf } from '../../../lib/api';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaCorta } from '../../../lib/formato';
 import { PRIORIDADES } from '../constantes';
+import { SelectorPeriodo } from './SelectorPeriodo';
 import type { FiltrosReporte } from '../usarReporteMensual';
 import type {
   Categoria, FilaMensual, FilaTecnico, ReporteMensual as Reporte, Sucursal
@@ -255,17 +256,8 @@ export const ReporteMensual = ({
       <p className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-institucional-800 dark:text-institucional-200">
         <ListFilter className="h-3.5 w-3.5" /> Filtros del reporte
       </p>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <label className="etiqueta">Periodo</label>
-          <input
-            type="month"
-            className="campo"
-            max={mesTope}
-            value={mes}
-            onChange={(evento) => setMes(evento.target.value)}
-          />
-        </div>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <SelectorPeriodo mes={mes} setMes={setMes} tope={mesTope} />
         <div>
           <label className="etiqueta">Sucursal</label>
           <select
