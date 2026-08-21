@@ -15,6 +15,7 @@
     "demo": "node src/scripts/demo.js",
     "docs:pdf": "node ../docs/generator/generate-docs.js",
     "qa": "npm run qa:secretos && npm run qa:seguridad && npm run qa:funcional && npm run qa:tiempo-real",
+    "qa:navegador": "node qa/navegador.mjs",
     "qa:secretos": "node qa/secretos.mjs",
     "qa:seguridad": "node qa/seguridad.mjs",
     "qa:funcional": "node qa/funcional.mjs",

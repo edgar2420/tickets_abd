@@ -530,6 +530,7 @@ npm run qa:secretos    # credenciales en el codigo y en todo el historial de git
 npm run qa:seguridad   # cookies, origen, cabeceras, bloqueo, cache y acceso cerrado
 npm run qa:funcional   # los once accesos y todos los modulos del sistema
 npm run qa:tiempo-real # canal de WebSockets y reparto por salas
+npm run qa:navegador   # recorrido completo atravesando el servidor web
 npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 ```
 
@@ -539,9 +540,11 @@ npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 | Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache, acceso cerrado por omision y cierre de sesion | 34 de 34 |
 | Funcional | Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada | 70 de 70 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
+| Navegador | Recorrido de punta a punta contra el servidor web: portada, acceso, las doce pantallas, ciclo del ticket, descarga de PDF y cierre de sesion | 28 de 28 |
 
-**115 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
-recortados.
+**143 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
+recortados. La bateria del navegador requiere el servidor web levantado (`npm run dev` en
+`frontend`); las otras cuatro solo necesitan la API.
 
 Todo lo que crean las pruebas lleva el prefijo `QA - ` en el titulo, de modo que
 `npm run qa:limpiar` lo identifica sin tocar la informacion real de la empresa.
