@@ -5,6 +5,12 @@ import { autenticarSocket } from '../middleware/auth.js';
 let io = null;
 
 export const SALA_TECNICOS = 'sala:tecnicos';
+/**
+ * Sala del circuito de compras. Gerencia no forma parte del equipo tecnico
+ * y por eso no entra a la sala anterior; sin esta, los cambios de estado de
+ * una solicitud no le llegarian y tendria que recargar la pantalla.
+ */
+export const SALA_COMPRAS = 'sala:compras';
 export const salaUsuario = (usuarioId) => `usuario:${usuarioId}`;
 export const salaTicket = (ticketId) => `ticket:${ticketId}`;
 
@@ -21,6 +27,7 @@ export const inicializarSockets = (httpServer) => {
     const { usuario } = socket.data;
     socket.join(salaUsuario(usuario.id));
     if (usuario.permisos.includes('tickets.ver_todos')) socket.join(SALA_TECNICOS);
+    if (usuario.permisos.includes('compras.ver_todas')) socket.join(SALA_COMPRAS);
 
     socket.emit('conexion:establecida', {
       usuario: usuario.usuario,

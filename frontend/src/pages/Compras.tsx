@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import {
-  BadgeCheck, ClipboardCheck, FileDown, Filter, Info, PackageCheck, PlusCircle,
-  ShoppingCart, ThumbsUp, XCircle
+  BadgeCheck, Check, ClipboardCheck, FileDown, Filter, Info, PackageCheck, PlusCircle,
+  ShoppingCart, ThumbsUp, Wallet, XCircle
 } from 'lucide-react';
 import { api, descargarPdf } from '../lib/api';
 import { usarAuth } from '../context/AuthContext';
@@ -10,7 +10,7 @@ import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Indicador, Modal, Panel, Vacio
 } from '../components/Ui';
 import { Paginacion } from '../components/Paginacion';
-import { estiloPrioridad, fechaHora } from '../lib/formato';
+import { estiloPrioridad, fechaHora, montoBs } from '../lib/formato';
 import type {
   Equipo, EstadoCompra, InfoPaginacion, PrioridadTicket, RespuestaPaginada,
   ResumenCompras, SolicitudCompra, Sucursal
@@ -34,6 +34,93 @@ const ESTILO_ESTADO: Record<EstadoCompra, string> = {
 
 export const codigoCompra = (id: number) => `SC-${String(id).padStart(5, '0')}`;
 
+/**
+ * Los cinco pasos por los que atraviesa una solicitud. El orden importa:
+ * la posicion del estado dentro de esta lista es lo que indica hasta donde
+ * llego el pedido y que falta para completarlo.
+ */
+const PASOS = ['Registro', 'Revision de TI', 'Aprobacion de Gerencia', 'Compra', 'Entrega'] as const;
+
+/** Ultimo paso concluido segun el estado vigente. */
+const pasoAlcanzado = (estado: EstadoCompra) => {
+  if (estado === 'Rechazada') return -1;
+  if (estado === 'Entregada') return 4;
+  if (estado === 'Comprada') return 3;
+  if (estado === 'Aprobada por Gerencia') return 2;
+  if (estado === 'Aprobada por TI') return 1;
+  return 0;
+};
+
+/** Quien tiene la solicitud en sus manos en este momento. */
+const enManosDe = (estado: EstadoCompra) => {
+  const responsables: Record<EstadoCompra, string> = {
+    'Solicitada': 'Esperando la revision tecnica de TI',
+    'En revision': 'TI la esta revisando',
+    'Aprobada por TI': 'Esperando la aprobacion de Gerencia',
+    'Aprobada por Gerencia': 'Esperando que TI ejecute la compra',
+    'Comprada': 'Esperando la entrega al solicitante',
+    'Entregada': 'Circuito concluido',
+    'Rechazada': 'Circuito interrumpido'
+  };
+  return responsables[estado];
+};
+
+/**
+ * Barra del recorrido. Muestra de un vistazo hasta donde llego la solicitud
+ * y donde esta detenida, sin obligar a leer la bitacora completa.
+ */
+const Recorrido = ({ estado }: { estado: EstadoCompra }) => {
+  const alcanzado = pasoAlcanzado(estado);
+  const rechazada = estado === 'Rechazada';
+
+  return (
+    <div className="superficie p-4">
+      <div className="flex items-center justify-between gap-1">
+        {PASOS.map((paso, indice) => {
+          const cumplido = indice <= alcanzado;
+          const enCurso = indice === alcanzado + 1 && !rechazada;
+          return (
+            <div key={paso} className="flex flex-1 flex-col items-center gap-1.5 text-center">
+              <div className="flex w-full items-center">
+                <span className={`h-0.5 flex-1 ${indice === 0 ? 'bg-transparent'
+                  : cumplido ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-noche-700'}`} />
+                <span
+                  className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold
+                    ${cumplido
+                      ? 'border-emerald-500 bg-emerald-500 text-white'
+                      : enCurso
+                        ? 'border-amber-500 bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
+                        : rechazada
+                          ? 'border-red-300 bg-red-50 text-red-400 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-400'
+                          : 'border-slate-300 bg-white text-slate-400 dark:border-noche-600 dark:bg-noche-800 dark:text-slate-500'}`}
+                >
+                  {cumplido ? <Check className="h-4 w-4" /> : indice + 1}
+                </span>
+                <span className={`h-0.5 flex-1 ${indice === PASOS.length - 1 ? 'bg-transparent'
+                  : indice < alcanzado ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-noche-700'}`} />
+              </div>
+              <span className={`text-[11px] font-semibold leading-tight
+                ${cumplido ? 'text-emerald-700 dark:text-emerald-400'
+                  : enCurso ? 'text-amber-700 dark:text-amber-300'
+                  : 'text-slate-400 dark:text-slate-500'}`}>
+                {paso}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <p className={`mt-3 border-t pt-3 text-center text-sm font-semibold
+        ${rechazada
+          ? 'border-red-200 text-red-700 dark:border-red-500/30 dark:text-red-400'
+          : estado === 'Entregada'
+            ? 'border-emerald-200 text-emerald-700 dark:border-emerald-500/30 dark:text-emerald-400'
+            : 'border-slate-200 text-amber-700 dark:border-noche-700 dark:text-amber-300'}`}>
+        {enManosDe(estado)}
+      </p>
+    </div>
+  );
+};
+
 const SOLICITUD_VACIA = {
   titulo: '', justificacion: '', tipo_equipo: 'Escritorio', cantidad: '1',
   especificaciones: '', prioridad: 'Media' as PrioridadTicket
@@ -51,7 +138,9 @@ const Dato = ({ etiqueta, valor }: { etiqueta: string; valor?: string | number |
 
 export const Compras = () => {
   const { puede, usuario } = usarAuth();
-  const { ultimoEventoTicket } = usarNotificaciones();
+  // Gerencia aprueba el presupuesto pero no revisa ni ejecuta la compra
+  const soloAprueba = puede('compras.aprobar') && !puede('compras.revisar');
+  const { ultimoEventoCompra } = usarNotificaciones();
 
   const [solicitudes, setSolicitudes] = useState<SolicitudCompra[] | null>(null);
   const [info, setInfo] = useState<InfoPaginacion | null>(null);
@@ -87,9 +176,18 @@ export const Compras = () => {
     }
   }, [filtros, limite, pagina]);
 
+  // Cada aviso del servidor sobre una solicitud vuelve a pedir los datos, de
+  // modo que el estado cambia solo, sin recargar la pantalla.
   useEffect(() => {
     void cargar();
-  }, [cargar, ultimoEventoTicket]);
+  }, [cargar, ultimoEventoCompra]);
+
+  // Si la ficha abierta es la que cambio, se refresca su contenido.
+  useEffect(() => {
+    if (!ficha || !solicitudes) return;
+    const actualizada = solicitudes.find((s) => s.id === ficha.id);
+    if (actualizada && actualizada.estado !== ficha.estado) setFicha(actualizada);
+  }, [solicitudes, ficha]);
 
   useEffect(() => {
     void api<{ datos: Sucursal[] }>('/sucursales').then(({ datos }) => setSucursales(datos)).catch(() => setSucursales([]));
@@ -222,18 +320,45 @@ export const Compras = () => {
       {error && <Alerta mensaje={error} />}
 
       {resumen && (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          <Indicador etiqueta="Solicitudes" valor={resumen.total} icono={ShoppingCart} />
-          <Indicador etiqueta="Por revisar" valor={resumen.solicitadas + resumen.en_revision} icono={ClipboardCheck} tono="info" />
-          <Indicador etiqueta="En Gerencia" valor={resumen.esperando_gerencia} icono={ThumbsUp} tono="advertencia" />
-          <Indicador etiqueta="Entregadas" valor={resumen.entregadas} icono={PackageCheck} tono="exito" />
-          <Indicador
-            etiqueta="Monto ejecutado"
-            valor={Number(resumen.monto_ejecutado ?? 0).toFixed(2)}
-            icono={BadgeCheck}
-            tono="neutro"
-          />
-        </div>
+        soloAprueba ? (
+          /* Gerencia no gestiona el circuito: solo necesita saber que espera su firma */
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Indicador
+              etiqueta="Esperan su aprobacion"
+              valor={resumen.esperando_gerencia}
+              icono={ThumbsUp}
+              tono={resumen.esperando_gerencia > 0 ? 'advertencia' : 'exito'}
+              pie={resumen.esperando_gerencia > 0 ? 'Requieren su decision' : 'Nada pendiente'}
+            />
+            <Indicador
+              etiqueta="En revision de TI"
+              valor={resumen.solicitadas + resumen.en_revision}
+              icono={ClipboardCheck}
+              tono="info"
+              pie="Aun no llegan a Gerencia"
+            />
+            <Indicador
+              etiqueta="Monto ejecutado"
+              valor={montoBs(resumen.monto_ejecutado ?? 0) ?? 'Bs 0.00'}
+              icono={Wallet}
+              tono="neutro"
+              pie="Compras ya concretadas"
+            />
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <Indicador etiqueta="Solicitudes" valor={resumen.total} icono={ShoppingCart} />
+            <Indicador etiqueta="Por revisar" valor={resumen.solicitadas + resumen.en_revision} icono={ClipboardCheck} tono="info" />
+            <Indicador etiqueta="En Gerencia" valor={resumen.esperando_gerencia} icono={ThumbsUp} tono="advertencia" />
+            <Indicador
+              etiqueta="Entregadas"
+              valor={resumen.entregadas}
+              icono={PackageCheck}
+              tono="exito"
+              pie={`${montoBs(resumen.monto_ejecutado ?? 0) ?? 'Bs 0.00'} ejecutado`}
+            />
+          </div>
+        )
       )}
 
       <Panel titulo="Filtros" icono={Filter}>
@@ -279,12 +404,17 @@ export const Compras = () => {
                   <th className="text-right">Cant.</th>
                   <th>Prioridad</th>
                   <th>Estado</th>
+                  <th>En manos de</th>
                   <th className="text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {solicitudes.map((s) => (
-                  <tr key={s.id}>
+                  <tr
+                    key={s.id}
+                    onClick={() => setFicha(s)}
+                    className="cursor-pointer transition hover:bg-institucional-50/70 dark:hover:bg-noche-700/60"
+                  >
                     <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
                       {codigoCompra(s.id)}
                     </td>
@@ -297,7 +427,8 @@ export const Compras = () => {
                     <td className="text-right text-slate-600 dark:text-slate-300">{s.cantidad}</td>
                     <td><Etiqueta texto={s.prioridad} clase={estiloPrioridad[s.prioridad]} /></td>
                     <td><Etiqueta texto={s.estado} clase={ESTILO_ESTADO[s.estado]} /></td>
-                    <td>
+                    <td className="whitespace-nowrap text-xs text-slate-500 dark:text-slate-400">{enManosDe(s.estado)}</td>
+                    <td onClick={(e) => e.stopPropagation()}>
                       <Acciones>
                         <BotonAccion icono={Info} rotulo="Ver ficha" alPulsar={() => setFicha(s)} />
                         {puede('compras.revisar') && ['Solicitada', 'En revision'].includes(s.estado) && (
@@ -414,6 +545,8 @@ export const Compras = () => {
               <Etiqueta texto={ficha.estado} clase={ESTILO_ESTADO[ficha.estado]} />
             </div>
 
+            <Recorrido estado={ficha.estado} />
+
             <div>
               <p className="etiqueta">Justificacion</p>
               <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ficha.justificacion}</p>
@@ -433,7 +566,7 @@ export const Compras = () => {
                   { paso: 'Registro del pedido', quien: ficha.solicitante_nombre, cargo: 'Solicitante', cuando: ficha.fecha_creacion, nota: null },
                   { paso: 'Revision tecnica', quien: ficha.revisado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_revision, nota: ficha.observacion_ti },
                   { paso: 'Aprobacion presupuestaria', quien: ficha.aprobado_por_nombre, cargo: ficha.aprobado_por_area ?? 'Gerencia', cuando: ficha.fecha_aprobacion, nota: ficha.observacion_gerencia },
-                  { paso: 'Compra ejecutada', quien: ficha.comprado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_compra, nota: ficha.numero_orden ? `Orden ${ficha.numero_orden}` : null },
+                  { paso: 'Compra ejecutada', quien: ficha.comprado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_compra, nota: [ficha.numero_orden ? `Orden ${ficha.numero_orden}` : null, montoBs(ficha.monto_final)].filter(Boolean).join(' - ') || null },
                   { paso: 'Entrega', quien: ficha.entregado_por_nombre, cargo: 'Tecnologias de la Informacion', cuando: ficha.fecha_entrega, nota: ficha.equipo_codigo ? `Equipo ${ficha.equipo_codigo}` : null }
                 ].map(({ paso, quien, cargo, cuando, nota }) => (
                   <li key={paso}>
@@ -451,8 +584,8 @@ export const Compras = () => {
 
             <div className="grid gap-4 sm:grid-cols-4">
               <Dato etiqueta="Cantidad" valor={ficha.cantidad} />
-              <Dato etiqueta="Monto estimado" valor={ficha.monto_estimado} />
-              <Dato etiqueta="Monto final" valor={ficha.monto_final} />
+              <Dato etiqueta="Monto estimado" valor={montoBs(ficha.monto_estimado)} />
+              <Dato etiqueta="Monto final" valor={montoBs(ficha.monto_final)} />
               <Dato etiqueta="Proveedor" valor={ficha.proveedor_sugerido} />
             </div>
 
@@ -497,7 +630,7 @@ export const Compras = () => {
 
             {['revisar', 'aprobar-ti'].includes(accion.tipo) && (
               <>
-                {campoAccion('monto_estimado', 'Monto estimado', { type: 'number', min: 0, step: '0.01', placeholder: '4500.00' })}
+                {campoAccion('monto_estimado', 'Monto estimado (Bs)', { type: 'number', min: 0, step: '0.01', placeholder: '4500.00' })}
                 {campoAccion('proveedor_sugerido', 'Proveedor sugerido', { maxLength: 150 })}
                 <div>
                   <label className="etiqueta">Observacion tecnica</label>
@@ -505,6 +638,27 @@ export const Compras = () => {
                     placeholder="Viabilidad tecnica, alternativas evaluadas o condiciones"
                     value={datosAccion.observacion_ti ?? ''}
                     onChange={(e) => setDatosAccion((d) => ({ ...d, observacion_ti: e.target.value }))} />
+                </div>
+              </>
+            )}
+
+            {accion.tipo === 'aprobar-gerencia' && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <Dato etiqueta="Monto estimado por TI" valor={montoBs(accion.solicitud.monto_estimado)} />
+                  <Dato etiqueta="Proveedor sugerido" valor={accion.solicitud.proveedor_sugerido} />
+                </div>
+                {accion.solicitud.observacion_ti && (
+                  <div>
+                    <p className="etiqueta">Observacion tecnica de TI</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-200">{accion.solicitud.observacion_ti}</p>
+                  </div>
+                )}
+                <div>
+                  <p className="etiqueta">Justificacion del solicitante</p>
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                    {accion.solicitud.justificacion}
+                  </p>
                 </div>
               </>
             )}
@@ -532,7 +686,7 @@ export const Compras = () => {
             {accion.tipo === 'comprar' && (
               <>
                 {campoAccion('numero_orden', 'Numero de orden de compra', { maxLength: 60, placeholder: 'OC-2026-0145' })}
-                {campoAccion('monto_final', 'Monto final', { type: 'number', min: 0, step: '0.01' })}
+                {campoAccion('monto_final', 'Monto final (Bs)', { type: 'number', min: 0, step: '0.01' })}
               </>
             )}
 

@@ -2,6 +2,17 @@ import type { EstadoTicket, PrioridadTicket } from './tipos';
 
 export const codigoTicket = (id: number) => `TI-${String(id).padStart(5, '0')}`;
 
+/**
+ * Importes en bolivianos. El sistema opera en Bolivia y todos los montos
+ * del circuito de compras se expresan en esa moneda.
+ */
+export const montoBs = (valor: string | number | null | undefined) => {
+  if (valor === null || valor === undefined || valor === '') return null;
+  const numero = Number(valor);
+  if (!Number.isFinite(numero)) return null;
+  return `Bs ${numero.toLocaleString('es-BO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+};
+
 export const fechaHora = (valor: string | null | undefined) =>
   valor ? new Date(valor).toLocaleString('es-BO', { dateStyle: 'short', timeStyle: 'short' }) : 'No registrado';
 
