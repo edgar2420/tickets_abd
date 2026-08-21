@@ -4,13 +4,13 @@ import {
   ArrowLeft, CheckCircle2, ClipboardCheck, Clock, FileDown, History, Loader2,
   PlayCircle, UserCheck, Users
 } from 'lucide-react';
-import { api, descargarPdf } from '../lib/api';
-import { obtenerSocket } from '../lib/socket';
-import { usarAuth } from '../context/AuthContext';
-import { Alerta, Cargando, Etiqueta, Modal, Panel } from '../components/Ui';
-import { Conversacion } from '../components/Conversacion';
-import { codigoTicket, duracionLegible, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
-import type { Ticket } from '../lib/tipos';
+import { api, descargarPdf } from '../../lib/api';
+import { obtenerSocket } from '../../lib/socket';
+import { usarAuth } from '../../context/AuthContext';
+import { Alerta, Cargando, Etiqueta, Modal, Panel } from '../../components/Ui';
+import { Conversacion } from '../../components/Conversacion';
+import { codigoTicket, duracionLegible, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
+import type { Ticket } from '../../lib/tipos';
 
 interface Tecnico {
   id: number;
@@ -53,7 +53,6 @@ export const DetalleTicket = () => {
     void cargar();
   }, [cargar]);
 
-  // Suscripcion en tiempo real a los cambios de este ticket en particular.
   useEffect(() => {
     const socket = obtenerSocket();
     if (!socket || !id) return;

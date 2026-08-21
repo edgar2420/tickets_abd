@@ -1,9 +1,3 @@
-/**
- * Biblioteca de iconos vectoriales trazados directamente sobre el PDF.
- * No se utilizan emojis en ningun documento generado por el sistema:
- * cada simbolo es un trazo vectorial nitido a cualquier resolucion.
- * Firma comun: dibujar(doc, x, y, tam, color)
- */
 
 const preparar = (doc, color, tam) => {
   doc.save();
@@ -15,7 +9,6 @@ const preparar = (doc, color, tam) => {
 const cerrar = (doc) => doc.restore();
 
 export const iconos = {
-  // Ticket: rectangulo con muescas laterales
   ticket(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.roundedRect(x, y + s * 0.2, s, s * 0.6, s * 0.08).stroke();
@@ -26,7 +19,6 @@ export const iconos = {
     doc.undash();
     cerrar(doc);
   },
-  // Usuario: circulo y hombros
   usuario(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.circle(x + s * 0.5, y + s * 0.32, s * 0.2).stroke();
@@ -35,7 +27,6 @@ export const iconos = {
       .stroke();
     cerrar(doc);
   },
-  // Escudo: control de acceso / RBAC
   escudo(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.moveTo(x + s * 0.5, y + s * 0.08)
@@ -47,7 +38,6 @@ export const iconos = {
       .closePath().stroke();
     cerrar(doc);
   },
-  // Reloj: fechas y tiempos
   reloj(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.circle(x + s * 0.5, y + s * 0.5, s * 0.42).stroke();
@@ -55,14 +45,12 @@ export const iconos = {
     doc.moveTo(x + s * 0.5, y + s * 0.5).lineTo(x + s * 0.68, y + s * 0.6).stroke();
     cerrar(doc);
   },
-  // Check: resuelto / cumplido
   check(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.circle(x + s * 0.5, y + s * 0.5, s * 0.42).stroke();
     doc.moveTo(x + s * 0.28, y + s * 0.52).lineTo(x + s * 0.45, y + s * 0.68).lineTo(x + s * 0.74, y + s * 0.33).stroke();
     cerrar(doc);
   },
-  // Alerta: prioridad alta / critica
   alerta(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.moveTo(x + s * 0.5, y + s * 0.08).lineTo(x + s * 0.95, y + s * 0.88).lineTo(x + s * 0.05, y + s * 0.88).closePath().stroke();
@@ -70,7 +58,6 @@ export const iconos = {
     doc.circle(x + s * 0.5, y + s * 0.75, s * 0.045).fill();
     cerrar(doc);
   },
-  // Engranaje: configuracion / administracion
   engranaje(doc, x, y, s, color) {
     preparar(doc, color, s);
     const cx = x + s * 0.5, cy = y + s * 0.5, r = s * 0.28;
@@ -84,7 +71,6 @@ export const iconos = {
     }
     cerrar(doc);
   },
-  // Documento: reportes y bitacora
   documento(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.moveTo(x + s * 0.18, y + s * 0.06)
@@ -97,7 +83,6 @@ export const iconos = {
     [0.45, 0.6, 0.75].forEach((f) => doc.moveTo(x + s * 0.3, y + s * f).lineTo(x + s * 0.72, y + s * f).stroke());
     cerrar(doc);
   },
-  // Grafico de barras: indicadores
   grafico(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.moveTo(x + s * 0.1, y + s * 0.1).lineTo(x + s * 0.1, y + s * 0.9).lineTo(x + s * 0.92, y + s * 0.9).stroke();
@@ -106,7 +91,6 @@ export const iconos = {
     doc.rect(x + s * 0.66, y + s * 0.22, s * 0.14, s * 0.68).stroke();
     cerrar(doc);
   },
-  // Base de datos: modelo de datos
   baseDatos(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.ellipse(x + s * 0.5, y + s * 0.2, s * 0.36, s * 0.12).stroke();
@@ -116,14 +100,12 @@ export const iconos = {
     doc.ellipse(x + s * 0.5, y + s * 0.78, s * 0.36, s * 0.12).stroke();
     cerrar(doc);
   },
-  // Flecha de flujo: ciclo de vida
   flujo(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.moveTo(x + s * 0.1, y + s * 0.5).lineTo(x + s * 0.78, y + s * 0.5).stroke();
     doc.moveTo(x + s * 0.6, y + s * 0.32).lineTo(x + s * 0.86, y + s * 0.5).lineTo(x + s * 0.6, y + s * 0.68).stroke();
     cerrar(doc);
   },
-  // Red / conexiones: sockets
   red(doc, x, y, s, color) {
     preparar(doc, color, s);
     doc.circle(x + s * 0.5, y + s * 0.16, s * 0.11).stroke();

@@ -39,7 +39,6 @@ auditoriaRouter.get('/pdf', requierePermiso('reportes.exportar', 'admin.usuarios
   res.send(buffer);
 }));
 
-/** Documento PDF de la matriz de roles y permisos vigente. */
 auditoriaRouter.get('/matriz-rbac/pdf', requierePermiso('admin.roles'), asyncHandler(async (req, res) => {
   const { rows: permisos } = await query('SELECT id, codigo, descripcion, modulo FROM permisos ORDER BY modulo, codigo');
   const { rows: roles } = await query(

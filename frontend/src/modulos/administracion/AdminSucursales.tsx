@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, Building, CheckCircle2, MapPin, Monitor, PencilLine, PlusCircle, RotateCcw, Ticket, Users } from 'lucide-react';
-import { api } from '../lib/api';
+import { api } from '../../lib/api';
 import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio
-} from '../components/Ui';
-import { usarConfirmacion } from '../components/Confirmacion';
-import type { Sucursal, TipoSucursal } from '../lib/tipos';
+} from '../../components/Ui';
+import { usarConfirmacion } from '../../components/Confirmacion';
+import type { Sucursal, TipoSucursal } from '../../lib/tipos';
 
 const TIPOS: TipoSucursal[] = ['Fabrica', 'Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
 

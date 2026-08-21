@@ -16,11 +16,6 @@ export const PALETA = {
 const MARGEN = 48;
 const ALTO_FOOTER = 46;
 
-/**
- * Constructor de documentos PDF institucionales.
- * Reglas del sistema: sin emojis, iconografia vectorial y pie de pagina
- * fijo con la autoria del modulo en todas las paginas.
- */
 export class DocumentoPDF {
   constructor({ titulo, subtitulo = '', codigo = 'STD-2026-TI', icono = 'documento', orientacion = 'portrait' }) {
     this.titulo = titulo;
@@ -81,7 +76,6 @@ export class DocumentoPDF {
     d.y = 132;
   }
 
-  /** Salta de pagina si el bloque siguiente no entra en el espacio restante. */
   asegurarEspacio(alto) {
     if (this.doc.y + alto > this.limiteInferior) this.doc.addPage();
     return this;
@@ -126,7 +120,6 @@ export class DocumentoPDF {
     return this;
   }
 
-  /** Bloque resaltado para notas, reglas de negocio o advertencias. */
   nota(texto, opciones = {}) {
     const icono = opciones.icono ?? 'alerta';
     const color = opciones.color ?? PALETA.acento;
@@ -146,7 +139,6 @@ export class DocumentoPDF {
     return this;
   }
 
-  /** Bloque de codigo o DDL en tipografia monoespaciada. */
   codigoFuente(texto) {
     const lineas = String(texto).split('\n');
     const alturaLinea = 10.5;
@@ -163,7 +155,6 @@ export class DocumentoPDF {
     return this;
   }
 
-  /** Pares etiqueta/valor distribuidos en columnas. */
   camposClaveValor(pares, columnas = 2) {
     const anchoCol = this.ancho / columnas;
     const anchoTexto = anchoCol - 12;
@@ -176,7 +167,6 @@ export class DocumentoPDF {
     for (let i = 0; i < pares.length; i += columnas) {
       const grupo = pares.slice(i, i + columnas);
 
-      // El alto lo fija el valor mas extenso del grupo, para que ninguno se solape
       const altoValor = grupo.reduce((mayor, par) => {
         const alto = this.doc.font('Helvetica-Bold').fontSize(9.5)
           .heightOfString(textoDe(par).texto, { width: anchoTexto });
@@ -199,17 +189,12 @@ export class DocumentoPDF {
     return this;
   }
 
-  /**
-   * Tabla con encabezado repetido en cada pagina.
-   * columnas: [{ titulo, campo, ancho (proporcion 0-1), alineacion, render, color }]
-   */
   tabla(columnas, filas, opciones = {}) {
     const d = this.doc;
     const anchos = columnas.map((c) => c.ancho * this.ancho);
-    const relleno = 8;              // margen interno horizontal de la celda
-    const margenVertical = 6;       // aire arriba y abajo del texto
+    const relleno = 8;
+    const margenVertical = 6;
     const alturaMinima = opciones.alturaFila ?? 20;
-    // Una columna angosta se trunca; el resto ajusta el alto de la fila al texto
     const ajustar = opciones.ajustarAltura ?? true;
 
     const valorDe = (col, fila) => {
@@ -217,7 +202,6 @@ export class DocumentoPDF {
       return bruto === null || bruto === undefined || bruto === '' ? '-' : String(bruto);
     };
 
-    /** Alto que necesita la fila para mostrar completo su contenido. */
     const altoDe = (fila) => {
       if (!ajustar) return alturaMinima;
       const alto = columnas.reduce((mayor, col, i) => {
@@ -247,7 +231,6 @@ export class DocumentoPDF {
 
     filas.forEach((fila, indice) => {
       const alturaFila = altoDe(fila);
-      // La fila no se parte entre paginas: si no entra, se lleva entera a la siguiente
       if (d.y + alturaFila > this.limiteInferior) {
         d.addPage();
         encabezado();
@@ -277,7 +260,6 @@ export class DocumentoPDF {
     return this;
   }
 
-  /** Tarjetas de indicadores numericos. */
   indicadores(tarjetas) {
     const d = this.doc;
     const separacion = 10;
@@ -304,7 +286,6 @@ export class DocumentoPDF {
     return this;
   }
 
-  /** Aplica el pie de pagina institucional a todas las paginas y cierra el documento. */
   finalizar() {
     const d = this.doc;
     const rango = d.bufferedPageRange();
@@ -328,7 +309,6 @@ export class DocumentoPDF {
     return d;
   }
 
-  /** Devuelve el PDF completo como Buffer. */
   aBuffer() {
     return new Promise((resolve, reject) => {
       const partes = [];
@@ -339,7 +319,6 @@ export class DocumentoPDF {
     });
   }
 
-  /** Escribe el PDF en disco creando el directorio destino si no existe. */
   async aArchivo(ruta) {
     const buffer = await this.aBuffer();
     const { writeFile, mkdir } = await import('node:fs/promises');

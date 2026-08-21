@@ -17,17 +17,12 @@ export const SELECT_TICKET = `
     LEFT JOIN usuarios asg ON asg.id = t.asignado_id
     LEFT JOIN usuarios res ON res.id = t.resuelto_por_id`;
 
-/** Recupera un ticket con toda su trazabilidad resuelta. */
 export const obtenerTicket = async (id) => {
   const { rows } = await query(`${SELECT_TICKET} WHERE t.id = $1`, [id]);
   if (!rows[0]) throw HttpError.notFound('El ticket indicado no existe');
   return rows[0];
 };
 
-/**
- * Listado con filtros. El alcance de visibilidad depende de los permisos:
- * tickets.ver_todos accede al universo completo; en caso contrario solo a los propios.
- */
 export const listarTickets = async (filtros, usuario) => {
   const verTodos = usuario.permisos.includes('tickets.ver_todos');
   const { rows } = await query(
@@ -59,7 +54,6 @@ export const listarTickets = async (filtros, usuario) => {
   return rows;
 };
 
-/** Cantidad total de tickets que cumplen los filtros, para la paginacion. */
 export const contarTickets = async (filtros, usuario) => {
   const verTodos = usuario.permisos.includes('tickets.ver_todos');
   const { rows } = await query(
@@ -87,7 +81,6 @@ export const contarTickets = async (filtros, usuario) => {
   return rows[0].total;
 };
 
-/** Indicadores agregados para el tablero y los reportes. */
 export const indicadores = async (filtros = {}, usuario = null) => {
   const verTodos = usuario ? usuario.permisos.includes('tickets.ver_todos') : true;
   const { rows } = await query(
@@ -108,7 +101,6 @@ export const indicadores = async (filtros = {}, usuario = null) => {
   return rows[0];
 };
 
-/** Distribucion por categoria, prioridad y area para el tablero de indicadores. */
 export const distribuciones = async () => {
   const porCategoria = await query(
     `SELECT categoria AS etiqueta, COUNT(*)::int AS total FROM tickets GROUP BY categoria ORDER BY total DESC`
@@ -121,7 +113,6 @@ export const distribuciones = async () => {
        FROM tickets t JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id
       GROUP BY a.nombre ORDER BY total DESC LIMIT 10`
   );
-  // Ranking de solicitantes: quienes generan mas requerimientos
   const porSolicitante = await query(
     `SELECT u.nombre AS etiqueta, a.nombre AS detalle, COUNT(*)::int AS total
        FROM tickets t JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id
@@ -141,7 +132,6 @@ export const distribuciones = async () => {
   };
 };
 
-/** Bitacora de auditoria asociada a un ticket. */
 export const bitacoraTicket = async (ticketId) => {
   const { rows } = await query(
     `SELECT a.accion, a.detalle, a.ip, a.fecha, u.nombre AS usuario_nombre
@@ -153,10 +143,6 @@ export const bitacoraTicket = async (ticketId) => {
   return rows;
 };
 
-/**
- * Documentacion automatica: cada transicion del ticket deja un acta PDF
- * archivada en el repositorio documental del sistema.
- */
 export const archivarActaTicket = async (ticketId, accion) => {
   try {
     const ticket = await obtenerTicket(ticketId);

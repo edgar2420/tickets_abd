@@ -56,7 +56,6 @@ rolesRouter.post('/', requierePermiso('admin.roles'), validate(rolSchema), async
   res.status(201).json({ ok: true, datos: rol });
 }));
 
-/** Actualiza datos del rol y reemplaza integramente su matriz de permisos. */
 rolesRouter.put('/:id', requierePermiso('admin.roles'), validate(rolSchema), asyncHandler(async (req, res) => {
   const rolId = Number(req.params.id);
   const { nombre, descripcion, activo, permisos } = req.body;

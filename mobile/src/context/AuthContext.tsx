@@ -17,7 +17,6 @@ export const ProveedorAuth = ({ children }: { children: React.ReactNode }) => {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [cargando, setCargando] = useState(true);
 
-  // Restaura la sesion almacenada en el dispositivo.
   useEffect(() => {
     const restaurar = async () => {
       const token = await almacenToken.obtener();

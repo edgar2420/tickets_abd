@@ -55,7 +55,6 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  // El catalogo de categorias se administra desde el panel web
   useEffect(() => {
     void api<{ datos: Categoria[] }>('/categorias', { parametros: { activas: true } })
       .then(({ datos }) => {

@@ -5,7 +5,6 @@ import { HttpError } from '../utils/httpError.js';
 import { permisosDeRol } from '../services/permisos.cache.js';
 import { tokenDeLaPeticion, tokenDeCookies } from '../utils/sesion.js';
 
-/** Verifica el JWT y carga req.usuario con su rol, area y permisos vigentes. */
 export const autenticar = async (req, _res, next) => {
   try {
     const { token } = tokenDeLaPeticion(req);
@@ -37,10 +36,8 @@ export const autenticar = async (req, _res, next) => {
   }
 };
 
-/** Autenticacion de sockets: valida el JWT recibido en el handshake. */
 export const autenticarSocket = async (socket, next) => {
   try {
-    // El navegador viaja con la cookie de sesion; el movil manda el token en el handshake
     const token = tokenDeCookies(socket.handshake.headers?.cookie)
       ?? socket.handshake.auth?.token
       ?? socket.handshake.query?.token;

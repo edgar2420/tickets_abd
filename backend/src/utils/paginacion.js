@@ -1,11 +1,6 @@
 const LIMITE_POR_DEFECTO = 25;
 const LIMITE_MAXIMO = 200;
 
-/**
- * Normaliza los parametros de paginacion de una consulta.
- * Acota el limite para que un cliente no pueda pedir la tabla completa y
- * saturar la memoria del servidor o del navegador.
- */
 export const paginacion = (consulta = {}) => {
   const solicitado = Number.parseInt(consulta.limite, 10);
   const limite = Number.isFinite(solicitado) && solicitado > 0
@@ -18,7 +13,6 @@ export const paginacion = (consulta = {}) => {
   return { limite, pagina, desplazamiento: (pagina - 1) * limite };
 };
 
-/** Envoltura uniforme de las respuestas paginadas. */
 export const respuestaPaginada = (datos, total, limite, pagina) => ({
   ok: true,
   datos,

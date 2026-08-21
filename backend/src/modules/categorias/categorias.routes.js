@@ -23,7 +23,6 @@ const categoriaSchema = z.object({
 export const categoriasRouter = Router();
 categoriasRouter.use(autenticar);
 
-/** Catalogo disponible para cualquier usuario autenticado: alimenta los formularios. */
 categoriasRouter.get('/', cachearEnCliente(120), asyncHandler(async (req, res) => {
   const soloActivas = req.query.activas === 'true';
   const rows = await enCache(`categorias:${soloActivas}`, 120_000, async () => (await query(
@@ -52,7 +51,6 @@ categoriasRouter.post('/', requierePermiso('admin.categorias'), validate(categor
   res.status(201).json({ ok: true, datos: rows[0] });
 }));
 
-/** Al renombrar se propaga el cambio a los tickets ya registrados. */
 categoriasRouter.put('/:id', requierePermiso('admin.categorias'), validate(categoriaSchema), asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const { nombre, descripcion, color, icono, activo } = req.body;
@@ -73,7 +71,6 @@ categoriasRouter.put('/:id', requierePermiso('admin.categorias'), validate(categ
   res.json({ ok: true, datos: rows[0] });
 }));
 
-/** Baja logica: se conserva el historial de tickets ya clasificados. */
 categoriasRouter.delete('/:id', requierePermiso('admin.categorias'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE categorias SET activo = FALSE WHERE id = $1 RETURNING id, nombre', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La categoria indicada no existe');
@@ -82,7 +79,6 @@ categoriasRouter.delete('/:id', requierePermiso('admin.categorias'), asyncHandle
   res.json({ ok: true, mensaje: 'Categoria desactivada' });
 }));
 
-/** Reactivacion desde el panel. */
 categoriasRouter.put('/:id/activar', requierePermiso('admin.categorias'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE categorias SET activo = TRUE WHERE id = $1 RETURNING *', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La categoria indicada no existe');

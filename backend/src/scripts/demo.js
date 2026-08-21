@@ -1,14 +1,3 @@
-/**
- * Crea las cuentas de prueba necesarias para recorrer el ciclo completo del
- * ticket con varios perfiles y areas: quien solicita, quien atiende y quien
- * escala. Todas comparten la misma contrasena para agilizar las pruebas.
- *
- * Es idempotente: si la cuenta ya existe, repone su contrasena, area y rol.
- * No forma parte de la carga inicial del sistema, porque son credenciales
- * conocidas que no deben existir en un despliegue productivo.
- *
- * Uso:  npm run demo
- */
 import bcrypt from 'bcryptjs';
 import { pool } from '../config/db.js';
 import { cifrar } from '../utils/cifrado.js';
@@ -16,8 +5,6 @@ import { cifrar } from '../utils/cifrado.js';
 const PASSWORD = 'Prueba123*';
 
 const CUENTAS = [
-  // --- Equipo de Tecnologias de la Informacion, en la fabrica ---
-  // Reciben las solicitudes de compra y atienden los tickets de toda la empresa
   {
     nombre: 'Ing. William Abuawad',
     usuario: 'wabuawad',
@@ -59,7 +46,6 @@ const CUENTAS = [
     proposito: 'Tecnico de segundo nivel, para probar el escalamiento'
   },
 
-  // --- Un solicitante por cada sucursal, para ver el corte por origen ---
   {
     nombre: 'Ana Quispe Torrez',
     usuario: 'solicitante',
@@ -116,7 +102,6 @@ const idDe = async (tabla, nombre) => {
   return rows[0].id;
 };
 
-// Catalogo inicial del inventario, con su carga de existencias
 const ARTICULOS = [
   { codigo: 'TON26A', nombre: 'Toner HP 26A negro', descripcion: 'Consumible para impresora laser LaserJet Pro',
     tipo: 'Consumible', unidad: 'Unidad', stock_minimo: 3, ubicacion: 'Deposito TI - Estante B', inicial: 12 },
@@ -151,7 +136,6 @@ const cargarInventario = async (usuarioId) => {
     );
     const { id, stock_actual: actual } = rows[0];
 
-    // La carga inicial se asienta como movimiento, para que el kardex cuadre con el saldo
     if (actual === 0 && articulo.inicial > 0) {
       await pool.query(
         `INSERT INTO inventario_movimientos
@@ -165,7 +149,6 @@ const cargarInventario = async (usuarioId) => {
   }
 };
 
-// Parque de equipos de ejemplo, con acceso remoto y asignacion por usuario
 const EQUIPOS = [
   { codigo: 'PC-001', nombre_equipo: 'CONTAB-01', tipo: 'Escritorio', marca: 'Dell', modelo: 'OptiPlex 3080',
     sistema_operativo: 'Windows 11 Pro', procesador: 'Intel Core i5-10500', ram_gb: 16,
@@ -216,7 +199,6 @@ const cargarEquipos = async () => {
         sucursalId = rows[0].sucursal_id;
       }
     }
-    // Los equipos sin responsable quedan en la casa central
     if (!sucursalId) {
       const { rows } = await pool.query("SELECT id FROM sucursales WHERE codigo = 'SCZ'");
       sucursalId = rows[0]?.id ?? null;

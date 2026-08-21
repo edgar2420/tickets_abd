@@ -4,7 +4,6 @@ import { env } from '../../config/env.js';
 
 const fecha = (valor) => (valor ? new Date(valor).toLocaleString('es-BO') : null);
 
-/** Convierte una cantidad de horas decimales en un texto legible. */
 export const duracionLegible = (horas) => {
   if (horas === null || horas === undefined) return null;
   const minutosTotales = Math.max(0, Math.round(Number(horas) * 60));
@@ -40,13 +39,8 @@ const iconoEstado = (estado) => ({
   'Cerrado': 'check'
 }[estado] ?? 'ticket');
 
-/** Ruta destino de los documentos generados automaticamente. */
 export const rutaDocumento = (...segmentos) => path.resolve(process.cwd(), env.docs.outputDir, ...segmentos);
 
-/**
- * Acta PDF de un ticket con su trazabilidad completa.
- * Se emite bajo demanda y tambien de forma automatica en cada cambio de estado.
- */
 export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   const accion = opciones.accion ?? 'FICHA';
   const doc = new DocumentoPDF({
@@ -56,7 +50,6 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
     icono: iconoEstado(ticket.estado)
   });
 
-  // Ficha resumida: clasificacion, responsables y tiempos en un solo bloque
   doc.titulo1('Ficha del requerimiento', 'ticket');
   doc.camposClaveValor([
     { etiqueta: 'Ticket', valor: codigoTicket(ticket.id) },
@@ -95,7 +88,6 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   return doc;
 };
 
-/** Reporte consolidado de tickets con indicadores de gestion. */
 export const construirReporteTickets = ({ filas, indicadores, filtros }) => {
   const doc = new DocumentoPDF({
     titulo: 'Reporte de Gestion de Tickets',
@@ -139,7 +131,6 @@ export const construirReporteTickets = ({ filas, indicadores, filtros }) => {
   return doc;
 };
 
-/** Bitacora de auditoria del sistema. */
 export const construirReporteAuditoria = ({ filas, filtros }) => {
   const doc = new DocumentoPDF({
     titulo: 'Bitacora de Auditoria del Sistema',
@@ -169,7 +160,6 @@ export const construirReporteAuditoria = ({ filas, filtros }) => {
   return doc;
 };
 
-/** Documento de la matriz de roles y permisos vigente. */
 export const construirMatrizRoles = ({ roles, permisos }) => {
   const doc = new DocumentoPDF({
     titulo: 'Matriz de Roles y Permisos',
@@ -205,7 +195,6 @@ export const construirMatrizRoles = ({ roles, permisos }) => {
   return doc;
 };
 
-/** Reporte del catalogo de inventario vigente. */
 export const construirReporteInventario = ({ filas, resumen }) => {
   const doc = new DocumentoPDF({
     titulo: 'Inventario de Sistemas',
@@ -241,7 +230,6 @@ export const construirReporteInventario = ({ filas, resumen }) => {
   return doc;
 };
 
-/** Kardex de movimientos de un articulo. */
 export const construirKardex = ({ articulo, movimientos }) => {
   const doc = new DocumentoPDF({
     titulo: 'Kardex de ' + articulo.nombre,
@@ -279,7 +267,6 @@ export const construirKardex = ({ articulo, movimientos }) => {
   return doc;
 };
 
-/** Reporte del parque informatico. No incluye credenciales de acceso remoto. */
 export const construirReporteEquipos = ({ filas, resumen }) => {
   const doc = new DocumentoPDF({
     titulo: 'Parque de Equipos',
@@ -317,7 +304,6 @@ export const construirReporteEquipos = ({ filas, resumen }) => {
   return doc;
 };
 
-/** Ficha tecnica individual del equipo. */
 export const construirFichaEquipo = ({ equipo }) => {
   const doc = new DocumentoPDF({
     titulo: 'Equipo ' + equipo.codigo,
@@ -384,7 +370,6 @@ const colorEstadoCompra = (estado) => ({
   'Rechazada': PALETA.critico
 }[estado] ?? PALETA.texto);
 
-/** Reporte consolidado de las solicitudes de compra. */
 export const construirReporteCompras = ({ filas, resumen }) => {
   const doc = new DocumentoPDF({
     titulo: 'Solicitudes de Compra de Equipos',
@@ -419,7 +404,6 @@ export const construirReporteCompras = ({ filas, resumen }) => {
   return doc;
 };
 
-/** Ficha individual con la trazabilidad completa de la solicitud. */
 export const construirFichaCompra = ({ solicitud }) => {
   const doc = new DocumentoPDF({
     titulo: 'Solicitud ' + codigoCompra(solicitud.id),
@@ -493,7 +477,6 @@ export const construirFichaCompra = ({ solicitud }) => {
     }
   ]);
 
-  // Constancia destacada de la aprobacion presupuestaria
   if (solicitud.aprobado_por_nombre) {
     doc.nota('Aprobacion presupuestaria otorgada por ' + solicitud.aprobado_por_nombre
       + ', ' + (solicitud.aprobado_por_area ?? 'Gerencia')

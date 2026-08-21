@@ -1,6 +1,4 @@
 const BASE = 'http://localhost:4000/api/v1';
-// El servidor exige que toda escritura con cookie declare un origen autorizado,
-// tal como lo hace un navegador. Las pruebas se presentan igual.
 const ORIGEN = 'http://localhost:5173';
 
 const resultados = [];

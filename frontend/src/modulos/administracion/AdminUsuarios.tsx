@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, Users } from 'lucide-react';
-import { api } from '../lib/api';
+import { api } from '../../lib/api';
 import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio
-} from '../components/Ui';
-import { usarConfirmacion } from '../components/Confirmacion';
-import { Paginacion } from '../components/Paginacion';
-import { CampoPassword } from '../components/CampoPassword';
-import { fechaCorta } from '../lib/formato';
-import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Sucursal, Usuario } from '../lib/tipos';
+} from '../../components/Ui';
+import { usarConfirmacion } from '../../components/Confirmacion';
+import { Paginacion } from '../../components/Paginacion';
+import { CampoPassword } from '../../components/CampoPassword';
+import { fechaCorta } from '../../lib/formato';
+import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Sucursal, Usuario } from '../../lib/tipos';
 
 interface Formulario {
   id: number | null;

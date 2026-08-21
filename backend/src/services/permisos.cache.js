@@ -1,9 +1,8 @@
 import { query } from '../config/db.js';
 
 const TTL_MS = 60_000;
-const cache = new Map(); // rol_id -> { permisos: Set<string>, expira: number }
+const cache = new Map();
 
-/** Devuelve el conjunto de codigos de permiso vigentes para un rol. */
 export const permisosDeRol = async (rolId) => {
   const hit = cache.get(rolId);
   if (hit && hit.expira > Date.now()) return hit.permisos;
@@ -21,7 +20,6 @@ export const permisosDeRol = async (rolId) => {
   return permisos;
 };
 
-/** Invalida la cache tras modificar la matriz de permisos de un rol. */
 export const invalidarCachePermisos = (rolId = null) => {
   if (rolId === null) cache.clear();
   else cache.delete(Number(rolId));

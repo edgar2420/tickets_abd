@@ -11,7 +11,6 @@ import type { Adjunto, Comentario } from '../lib/tipos';
 
 const esImagen = (tipo: string) => tipo.startsWith('image/');
 
-/** Miniatura de un adjunto; las imagenes se abren en tamano completo. */
 const Miniatura = ({ adjunto, alAmpliar }: { adjunto: Adjunto; alAmpliar: (url: string, nombre: string) => void }) => {
   const [url, setUrl] = useState<string | null>(null);
 
@@ -93,7 +92,6 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
     void cargar();
   }, [cargar]);
 
-  // Los mensajes de la contraparte llegan por el canal de tiempo real
   useEffect(() => {
     const socket = obtenerSocket();
     if (!socket) return;
@@ -289,7 +287,7 @@ export const Conversacion = ({ ticketId }: { ticketId: number }) => {
         </div>
       </footer>
 
-      {/* Visor de imagen a tamano completo */}
+      {}
       {ampliada && (
         <div
           className="fixed inset-0 z-[70] flex flex-col items-center justify-center bg-slate-900/85 p-6 backdrop-blur-sm"

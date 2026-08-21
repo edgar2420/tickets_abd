@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { FileDown, Filter, ScrollText } from 'lucide-react';
-import { api, descargarPdf } from '../lib/api';
-import { Alerta, Cargando, EncabezadoPagina, Panel, Vacio } from '../components/Ui';
-import { Paginacion } from '../components/Paginacion';
-import { fechaHora } from '../lib/formato';
-import type { InfoPaginacion, RegistroAuditoria, RespuestaPaginada } from '../lib/tipos';
+import { api, descargarPdf } from '../../lib/api';
+import { Alerta, Cargando, EncabezadoPagina, Panel, Vacio } from '../../components/Ui';
+import { Paginacion } from '../../components/Paginacion';
+import { fechaHora } from '../../lib/formato';
+import type { InfoPaginacion, RegistroAuditoria, RespuestaPaginada } from '../../lib/tipos';
 
 const ENTIDADES = ['TICKET', 'USUARIO', 'ROL', 'AREA', 'SESION', 'REPORTE'];
 

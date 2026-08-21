@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, CheckCircle2, PencilLine, PlusCircle, RotateCcw, Tags } from 'lucide-react';
-import { api } from '../lib/api';
+import { api } from '../../lib/api';
 import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, IconoCategoria, Modal, Panel,
   Vacio, nombresIconos
-} from '../components/Ui';
-import { usarConfirmacion } from '../components/Confirmacion';
-import { estiloCategoria, fondoCategoria, fechaCorta } from '../lib/formato';
-import type { Categoria } from '../lib/tipos';
+} from '../../components/Ui';
+import { usarConfirmacion } from '../../components/Confirmacion';
+import { estiloCategoria, fondoCategoria, fechaCorta } from '../../lib/formato';
+import type { Categoria } from '../../lib/tipos';
 
 const COLORES = ['celeste', 'violeta', 'esmeralda', 'ambar', 'rosa', 'pizarra'];
 

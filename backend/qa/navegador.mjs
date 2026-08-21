@@ -1,12 +1,5 @@
 const WEB = process.env.QA_WEB ?? 'http://localhost:5173';
 
-/**
- * Recorre el sistema exactamente por donde pasa el navegador: contra el
- * servidor web, atravesando su proxy hacia la API, con cookies propias y
- * declarando el origen. Es la prueba que confirma que la aplicacion web
- * funciona de punta a punta, no solo que la API responde.
- */
-
 let fallos = 0;
 const marca = (ok, detalle) => {
   if (!ok) fallos += 1;

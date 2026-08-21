@@ -1,9 +1,3 @@
--- =====================================================================
--- CATALOGO ADMINISTRABLE DE CATEGORIAS DE TICKET
--- Convierte la categoria en un catalogo mantenible desde el panel de
--- administracion, en lugar de una lista fija en el codigo.
--- =====================================================================
-
 CREATE TABLE IF NOT EXISTS categorias (
     id             SERIAL PRIMARY KEY,
     nombre         VARCHAR(50) NOT NULL UNIQUE,
@@ -14,8 +8,6 @@ CREATE TABLE IF NOT EXISTS categorias (
     fecha_creacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- La categoria del ticket deja de validarse contra una lista fija:
--- ahora el backend la contrasta contra este catalogo.
 ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_categoria;
 
 INSERT INTO categorias (nombre, descripcion, color, icono) VALUES
@@ -25,7 +17,6 @@ INSERT INTO categorias (nombre, descripcion, color, icono) VALUES
     ('Accesos',  'Cuentas y permisos: alta o baja de usuarios, restablecimiento de contrasenas y acceso a carpetas compartidas o sistemas.',            'esmeralda','llave')
 ON CONFLICT (nombre) DO NOTHING;
 
--- Permiso atomico para administrar el catalogo
 INSERT INTO permisos (codigo, descripcion, modulo)
 VALUES ('admin.categorias', 'Gestion del catalogo de categorias de tickets.', 'ADMIN')
 ON CONFLICT (codigo) DO NOTHING;
