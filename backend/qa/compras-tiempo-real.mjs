@@ -66,13 +66,18 @@ marca(Boolean(recibidaAlta), `Gerencia ve la solicitud nueva al instante (${soli
 
 const avisoTi = esperar(socketGerente, 'compra:actualizada');
 await pedir(ti, `/compras/${solicitud.id}/aprobar-ti`, 'PUT', {
-  observacion_ti: 'Viabilidad tecnica confirmada.', monto_estimado: 7350.5
+  observacion_ti: 'Viabilidad tecnica confirmada.', monto_estimado: 7350.5,
+  equipo_sugerido: 'Laptop de 14 pulgadas, procesador de gama media, 16 GB de memoria y disco solido de 512 GB'
 });
 const trasTi = await avisoTi;
 marca(trasTi?.estado === 'Aprobada por TI',
   `Gerencia ve que TI aprobo, sin recargar: ${trasTi?.estado ?? 'no llego'}`);
 marca(Number(trasTi?.monto_estimado) === 7350.5,
-  `el monto cotizado viaja en el aviso: ${trasTi?.monto_estimado}`);
+  `el monto referencial viaja en el aviso: ${trasTi?.monto_estimado}`);
+marca(typeof trasTi?.equipo_sugerido === 'string' && trasTi.equipo_sugerido.length > 10,
+  `el equipo sugerido por TI llega a Gerencia: ${trasTi?.equipo_sugerido?.slice(0, 45)}...`);
+marca(!('proveedor_sugerido' in (trasTi ?? {})),
+  'la solicitud ya no arrastra un proveedor');
 
 const avisoSolicitante = esperar(socketTi, 'compra:actualizada');
 await pedir(gerente, `/compras/${solicitud.id}/aprobar-gerencia`, 'PUT', {

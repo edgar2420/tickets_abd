@@ -28,7 +28,7 @@ const solicitudSchema = z.object({
 const revisionSchema = z.object({
   observacion_ti: z.string().max(500).optional().nullable(),
   monto_estimado: z.number().nonnegative().optional().nullable(),
-  proveedor_sugerido: z.string().max(150).optional().nullable()
+  equipo_sugerido: z.string().max(200).optional().nullable()
 });
 
 const gerenciaSchema = z.object({
@@ -55,7 +55,7 @@ const SELECT_SOLICITUD = `
          c.sucursal_id, suc.nombre AS sucursal_nombre,
          c.area_id, a.nombre AS area_nombre,
          c.revisado_por_id, rev.nombre AS revisado_por_nombre, rrev.nombre AS revisado_por_rol, c.fecha_revision,
-         c.observacion_ti, c.monto_estimado, c.proveedor_sugerido,
+         c.observacion_ti, c.monto_estimado, c.equipo_sugerido,
          c.aprobado_por_id, apr.nombre AS aprobado_por_nombre, rapr.nombre AS aprobado_por_rol,
          aar.nombre AS aprobado_por_area, c.fecha_aprobacion, c.observacion_gerencia,
          c.rechazado_por_id, rec.nombre AS rechazado_por_nombre, c.fecha_rechazo, c.motivo_rechazo,
@@ -194,19 +194,19 @@ comprasRouter.put('/:id/revisar', requierePermiso('compras.revisar'), validate(r
     const actual = await obtener(id);
     exigirEstado(actual, ['Solicitada', 'En revision']);
 
-    const { observacion_ti, monto_estimado, proveedor_sugerido } = req.body;
+    const { observacion_ti, monto_estimado, equipo_sugerido } = req.body;
     await query(
       `UPDATE solicitudes_compra
           SET estado = 'En revision', revisado_por_id = $1, fecha_revision = CURRENT_TIMESTAMP,
-              observacion_ti = $2, monto_estimado = $3, proveedor_sugerido = $4
+              observacion_ti = $2, monto_estimado = $3, equipo_sugerido = $4
         WHERE id = $5`,
-      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, proveedor_sugerido ?? null, id]
+      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null, id]
     );
     const solicitud = await obtener(id);
 
     await registrarAuditoria({
       usuarioId: req.usuario.id, entidad: 'COMPRA', entidadId: id, accion: 'REVISAR',
-      detalle: { monto_estimado, proveedor_sugerido }, ip: req.ip
+      detalle: { monto_estimado, equipo_sugerido }, ip: req.ip
     });
     await notificarUsuario({
       usuarioId: solicitud.solicitante_id, tipo: 'COMPRA_EN_REVISION',
@@ -225,7 +225,7 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
     const actual = await obtener(id);
     exigirEstado(actual, ['Solicitada', 'En revision']);
 
-    const { observacion_ti, monto_estimado, proveedor_sugerido } = req.body;
+    const { observacion_ti, monto_estimado, equipo_sugerido } = req.body;
     await query(
       `UPDATE solicitudes_compra
           SET estado = 'Aprobada por TI',
@@ -233,9 +233,9 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
               fecha_revision = COALESCE(fecha_revision, CURRENT_TIMESTAMP),
               observacion_ti = COALESCE($2, observacion_ti),
               monto_estimado = COALESCE($3, monto_estimado),
-              proveedor_sugerido = COALESCE($4, proveedor_sugerido)
+              equipo_sugerido = COALESCE($4, equipo_sugerido)
         WHERE id = $5`,
-      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, proveedor_sugerido ?? null, id]
+      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null, id]
     );
     const solicitud = await obtener(id);
 
