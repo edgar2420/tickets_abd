@@ -20,7 +20,6 @@ export const crearTicketSchema = z.object({
   prioridad: z.enum(PRIORIDADES).default('Media')
 });
 
-/** La categoria se valida contra el catalogo administrable, no contra una lista fija. */
 const validarCategoria = async (nombre) => {
   const { rows } = await query('SELECT nombre FROM categorias WHERE nombre = $1 AND activo = TRUE', [nombre]);
   if (!rows[0]) throw HttpError.badRequest(`La categoria "${nombre}" no existe o no esta habilitada`);
@@ -35,7 +34,6 @@ export const asignarSchema = z.object({
   asignado_id: z.number().int().positive()
 });
 
-/** Difunde el cambio de un ticket a las salas involucradas. */
 const difundirTicket = (ticket, evento) => {
   const salas = [SALA_TECNICOS, salaTicket(ticket.id), salaUsuario(ticket.solicitante_id)];
   if (ticket.asignado_id) salas.push(salaUsuario(ticket.asignado_id));
@@ -61,7 +59,6 @@ export const detalle = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: { ...ticket, bitacora } });
 });
 
-/** ESTADO ABIERTO: el solicitante se toma del JWT, sin confiar en el cliente. */
 export const crear = asyncHandler(async (req, res) => {
   const { titulo, descripcion, prioridad } = req.body;
   const categoria = await validarCategoria(req.body.categoria);
@@ -88,7 +85,6 @@ export const crear = asyncHandler(async (req, res) => {
   res.status(201).json({ ok: true, datos: ticket });
 });
 
-/** ESTADO EN PROCESO: el tecnico se autoasigna la atencion del ticket. */
 export const tomar = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const actual = await obtenerTicket(id);
@@ -113,7 +109,6 @@ export const tomar = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: ticket });
 });
 
-/** Asignacion manual a otro tecnico (mesa de ayuda o supervisor). */
 export const asignar = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const { asignado_id } = req.body;
@@ -146,7 +141,6 @@ export const asignar = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: ticket });
 });
 
-/** ESTADO RESUELTO: se registra la solucion tecnica y su responsable. */
 export const resolver = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const actual = await obtenerTicket(id);
@@ -180,7 +174,6 @@ export const resolver = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: ticket });
 });
 
-/** Cierre conforme por parte del solicitante o de la mesa de ayuda. */
 export const cerrar = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const actual = await obtenerTicket(id);
@@ -205,7 +198,6 @@ export const tablero = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: { resumen, graficos } });
 });
 
-/** Descarga del acta PDF individual del ticket. */
 export const actaPdf = asyncHandler(async (req, res) => {
   const ticket = await obtenerTicket(req.params.id);
   if (!req.usuario.permisos.includes('tickets.ver_todos') && ticket.solicitante_id !== req.usuario.id) {
@@ -221,7 +213,6 @@ export const actaPdf = asyncHandler(async (req, res) => {
   res.send(buffer);
 });
 
-/** Reporte consolidado en PDF con los filtros vigentes del listado. */
 export const reportePdf = asyncHandler(async (req, res) => {
   const filas = await listarTickets({ ...req.query, limite: 2000, desplazamiento: 0 }, req.usuario);
   const resumen = await indicadores(req.query, req.usuario);

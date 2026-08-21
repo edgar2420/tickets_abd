@@ -6,14 +6,6 @@ const VENTANA_MS = 15 * 60 * 1000;
 
 const registro = new Map();
 
-/**
- * Bloqueo temporal por usuario tras varios intentos fallidos.
- *
- * El limitador por direccion ya frena la fuerza bruta masiva, pero no
- * protege a una cuenta concreta cuando el atacante rota de origen. Este
- * control cuenta los fallos por nombre de usuario y lo bloquea un rato,
- * sin llegar a inhabilitar la cuenta: pasado el plazo vuelve a operar.
- */
 export const verificarBloqueo = (usuario) => {
   const clave = String(usuario).toLowerCase();
   const estado = registro.get(clave);

@@ -3,11 +3,6 @@ import type { InfoPaginacion } from '../lib/tipos';
 
 const OPCIONES_LIMITE = [10, 25, 50, 100];
 
-/**
- * Control de paginacion de las tablas.
- * El servidor acota el limite maximo, de modo que ninguna consulta puede
- * traer la tabla completa y saturar la vista.
- */
 export const Paginacion = ({ info, alCambiarPagina, alCambiarLimite }: {
   info: InfoPaginacion;
   alCambiarPagina: (pagina: number) => void;

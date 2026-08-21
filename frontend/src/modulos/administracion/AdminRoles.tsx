@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from 'react';
 import { CheckCircle2, FileDown, PencilLine, PlusCircle, ShieldCheck, Trash2 } from 'lucide-react';
-import { api, descargarPdf } from '../lib/api';
-import { Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Panel, Vacio } from '../components/Ui';
-import { usarConfirmacion } from '../components/Confirmacion';
-import type { Permiso, Rol } from '../lib/tipos';
+import { api, descargarPdf } from '../../lib/api';
+import { Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Panel, Vacio } from '../../components/Ui';
+import { usarConfirmacion } from '../../components/Confirmacion';
+import type { Permiso, Rol } from '../../lib/tipos';
 
 interface Formulario {
   id: number | null;
@@ -48,7 +48,6 @@ export const AdminRoles = () => {
     void cargar();
   }, [cargar]);
 
-  // Matriz de permisos agrupada por modulo, tal como exige la especificacion.
   const porModulo = useMemo(() => {
     return permisos.reduce<Record<string, Permiso[]>>((acumulado, permiso) => {
       acumulado[permiso.modulo] = acumulado[permiso.modulo] ?? [];

@@ -11,5 +11,4 @@ export class HttpError extends Error {
   static conflict(msg) { return new HttpError(409, msg); }
 }
 
-/** Envuelve un handler async para propagar errores al middleware central. */
 export const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);

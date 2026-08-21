@@ -1,6 +1,5 @@
 export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
-/** La categoria proviene del catalogo administrable. */
 export type CategoriaTicket = string;
 
 export interface Usuario {

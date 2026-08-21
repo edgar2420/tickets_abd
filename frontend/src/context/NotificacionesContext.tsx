@@ -32,7 +32,6 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
     void recargar();
   }, [recargar]);
 
-  // Suscripcion a los eventos de tiempo real emitidos por el servidor.
   useEffect(() => {
     const socket = obtenerSocket();
     if (!socket || !usuario) return;

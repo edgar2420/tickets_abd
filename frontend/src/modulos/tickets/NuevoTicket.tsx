@@ -1,10 +1,10 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ClipboardList, Loader2, Save } from 'lucide-react';
-import { api } from '../lib/api';
-import { Alerta, Cargando, EncabezadoPagina, IconoCategoria } from '../components/Ui';
-import { estiloPrioridad } from '../lib/formato';
-import type { Categoria, PrioridadTicket, Ticket } from '../lib/tipos';
+import { api } from '../../lib/api';
+import { Alerta, Cargando, EncabezadoPagina, IconoCategoria } from '../../components/Ui';
+import { estiloPrioridad } from '../../lib/formato';
+import type { Categoria, PrioridadTicket, Ticket } from '../../lib/tipos';
 
 const PRIORIDADES: PrioridadTicket[] = ['Baja', 'Media', 'Alta', 'Critica'];
 
@@ -27,7 +27,6 @@ export const NuevoTicket = () => {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
-  // El catalogo de categorias se administra desde el panel, no esta fijo en el codigo
   useEffect(() => {
     void api<{ datos: Categoria[] }>('/categorias', { parametros: { activas: true } })
       .then(({ datos }) => {
@@ -63,7 +62,7 @@ export const NuevoTicket = () => {
         icono={ClipboardList}
       />
 
-      {/* Dos columnas para que el formulario completo entre en una sola pantalla */}
+      {}
       <form onSubmit={enviar} className="panel animar-entrada">
         <div className="grid gap-6 p-5 lg:grid-cols-5">
 
@@ -130,7 +129,7 @@ export const NuevoTicket = () => {
                   );
                 })}
               </div>
-              {/* Explicacion de la categoria elegida, para orientar al solicitante */}
+              {}
               {formulario.categoria && (
                 <p className="mt-2.5 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 dark:bg-noche-800 dark:border-noche-700 dark:text-slate-200">
                   {categorias?.find((c) => c.nombre === formulario.categoria)?.descripcion
@@ -165,7 +164,7 @@ export const NuevoTicket = () => {
               </p>
             </div>
 
-            {/* Resumen de lo que quedara registrado */}
+            {}
             <dl className="rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs dark:bg-noche-800 dark:border-noche-700">
               <div className="flex justify-between gap-3 py-1">
                 <dt className="font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-400">Categoria</dt>

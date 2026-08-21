@@ -1,9 +1,3 @@
--- =====================================================================
--- MODULO DE INVENTARIO DE SISTEMAS
--- Catalogo de articulos y kardex de movimientos (entradas y salidas).
--- El stock nunca se edita a mano: resulta de los movimientos registrados.
--- =====================================================================
-
 CREATE TABLE IF NOT EXISTS inventario_articulos (
     id             SERIAL PRIMARY KEY,
     codigo         VARCHAR(40)  NOT NULL UNIQUE,
@@ -31,7 +25,6 @@ CREATE TABLE IF NOT EXISTS inventario_movimientos (
     fecha            TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- RESTRICCIONES DE DOMINIO
 ALTER TABLE inventario_articulos DROP CONSTRAINT IF EXISTS chk_articulo_tipo;
 ALTER TABLE inventario_articulos ADD  CONSTRAINT chk_articulo_tipo
     CHECK (tipo IN ('Equipo','Consumible','Repuesto','Licencia','Accesorio'));
@@ -52,20 +45,17 @@ CREATE INDEX IF NOT EXISTS idx_articulos_activo     ON inventario_articulos(acti
 CREATE INDEX IF NOT EXISTS idx_movimientos_articulo ON inventario_movimientos(articulo_id, fecha DESC);
 CREATE INDEX IF NOT EXISTS idx_movimientos_fecha    ON inventario_movimientos(fecha DESC);
 
--- PERMISOS ATOMICOS DEL MODULO
 INSERT INTO permisos (codigo, descripcion, modulo) VALUES
     ('inventario.ver',         'Consultar el catalogo de articulos y el kardex de movimientos.', 'INVENTARIO'),
     ('inventario.articulos',   'Gestion CRUD de los articulos del inventario.',                  'INVENTARIO'),
     ('inventario.movimientos', 'Registrar entradas y salidas de inventario.',                    'INVENTARIO')
 ON CONFLICT (codigo) DO NOTHING;
 
--- El administrador recibe el modulo completo
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r CROSS JOIN permisos p
 WHERE r.nombre = 'admin' AND p.modulo = 'INVENTARIO'
 ON CONFLICT DO NOTHING;
 
--- Los tecnicos consultan y registran movimientos, pero no administran el catalogo
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo IN ('inventario.ver','inventario.movimientos')
 WHERE r.nombre IN ('tecnico_l1','tecnico_l2')

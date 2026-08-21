@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState, type FormEvent } from 'react';
 import { Ban, Building2, CheckCircle2, PencilLine, PlusCircle } from 'lucide-react';
-import { api } from '../lib/api';
+import { api } from '../../lib/api';
 import {
   Acciones, Alerta, BotonAccion, Cargando, EncabezadoPagina, Etiqueta, Modal, Vacio
-} from '../components/Ui';
-import { usarConfirmacion } from '../components/Confirmacion';
-import { fechaCorta } from '../lib/formato';
-import type { Area } from '../lib/tipos';
+} from '../../components/Ui';
+import { usarConfirmacion } from '../../components/Confirmacion';
+import { fechaCorta } from '../../lib/formato';
+import type { Area } from '../../lib/tipos';
 
 export const AdminAreas = () => {
   const [areas, setAreas] = useState<Area[] | null>(null);

@@ -15,7 +15,6 @@ interface Opciones {
   parametros?: Record<string, string | number | boolean | undefined | null>;
 }
 
-/** Cliente HTTP con inyeccion automatica del token JWT almacenado. */
 export const api = async <T,>(ruta: string, opciones: Opciones = {}): Promise<T> => {
   const token = await almacenToken.obtener();
   const consulta = Object.entries(opciones.parametros ?? {})

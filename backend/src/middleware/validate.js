@@ -1,6 +1,5 @@
 import { HttpError } from '../utils/httpError.js';
 
-/** Valida req[source] contra un esquema zod y reemplaza el valor por el parseado. */
 export const validate = (schema, source = 'body') => (req, _res, next) => {
   const result = schema.safeParse(req[source]);
   if (!result.success) {

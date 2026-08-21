@@ -1,9 +1,3 @@
--- =====================================================================
--- MODULO DE EQUIPOS DE LA EMPRESA
--- Parque informatico con su asignacion, caracteristicas tecnicas y
--- datos de acceso remoto. La contrasena de AnyDesk se guarda cifrada.
--- =====================================================================
-
 CREATE TABLE IF NOT EXISTS equipos (
     id                  SERIAL PRIMARY KEY,
     codigo              VARCHAR(40)  NOT NULL UNIQUE,
@@ -13,21 +7,17 @@ CREATE TABLE IF NOT EXISTS equipos (
     modelo              VARCHAR(80),
     numero_serie        VARCHAR(80),
 
-    -- Caracteristicas tecnicas
     sistema_operativo   VARCHAR(80),
     procesador          VARCHAR(100),
     ram_gb              INT,
     almacenamiento      VARCHAR(80),
 
-    -- Conectividad
     direccion_ip        VARCHAR(45),
     direccion_mac       VARCHAR(17),
 
-    -- Acceso remoto (la contrasena se almacena cifrada, nunca en claro)
     anydesk_id          VARCHAR(40),
     anydesk_password    TEXT,
 
-    -- Asignacion y situacion
     usuario_id          INT REFERENCES usuarios(id) ON DELETE SET NULL,
     area_id             INT REFERENCES areas(id),
     ubicacion           VARCHAR(120),
@@ -55,26 +45,22 @@ CREATE INDEX IF NOT EXISTS idx_equipos_usuario ON equipos(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_equipos_area    ON equipos(area_id);
 CREATE INDEX IF NOT EXISTS idx_equipos_estado  ON equipos(estado);
 
--- PERMISOS ATOMICOS DEL MODULO
 INSERT INTO permisos (codigo, descripcion, modulo) VALUES
     ('equipos.ver',          'Consultar el parque de equipos y sus caracteristicas.',        'EQUIPOS'),
     ('equipos.gestionar',    'Alta, edicion y baja de equipos y su asignacion.',             'EQUIPOS'),
     ('equipos.credenciales', 'Revelar la contrasena de acceso remoto de un equipo.',         'EQUIPOS')
 ON CONFLICT (codigo) DO NOTHING;
 
--- El administrador recibe el modulo completo
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r CROSS JOIN permisos p
 WHERE r.nombre = 'admin' AND p.modulo = 'EQUIPOS'
 ON CONFLICT DO NOTHING;
 
--- Los tecnicos consultan y usan el acceso remoto para dar soporte
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo IN ('equipos.ver','equipos.credenciales')
 WHERE r.nombre IN ('tecnico_l1','tecnico_l2')
 ON CONFLICT DO NOTHING;
 
--- El tecnico de segundo nivel ademas administra el parque
 INSERT INTO rol_permisos (rol_id, permiso_id)
 SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo = 'equipos.gestionar'
 WHERE r.nombre = 'tecnico_l2'

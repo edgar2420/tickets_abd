@@ -29,22 +29,11 @@ export const env = {
       .map((o) => o.trim())
       .filter(Boolean)
   },
-  /**
-   * Reconducir a HTTPS toda peticion en claro. Obligatorio de cara a
-   * internet; debe quedar apagado en una red interna sin certificado.
-   */
   httpsObligatorio: (process.env.FORZAR_HTTPS ?? 'false') === 'true',
   cookies: {
-    /**
-     * El atributo "secure" impide que la cookie viaje por HTTP. Es lo
-     * correcto de cara a internet, pero una instalacion interna que
-     * todavia no tiene certificado debe poder desactivarlo de forma
-     * explicita, o el navegador jamas enviaria la sesion.
-     */
     seguras: (process.env.COOKIE_SECURE ?? (process.env.NODE_ENV === 'production' ? 'true' : 'false')) === 'true'
   },
   cifrado: {
-    // Semilla del cifrado de credenciales de acceso remoto
     semilla: required('CLAVE_CIFRADO', 'cambiar-esta-semilla-de-cifrado-en-produccion')
   },
   docs: {
@@ -54,12 +43,6 @@ export const env = {
   autorRol: 'Desarrollo de Modulo de Tickets'
 };
 
-/**
- * En produccion el servicio no debe arrancar con los valores de ejemplo.
- * Un despliegue que conserve la clave del archivo de muestra permitiria a
- * cualquiera firmar sus propias credenciales de administrador, de modo que
- * es preferible detener el arranque antes que exponer el sistema.
- */
 const SECRETOS = [
   ['JWT_SECRET', env.jwt.secret, 'cambiar-esta-clave-en-produccion'],
   ['CLAVE_CIFRADO', env.cifrado.semilla, 'cambiar-esta-semilla-de-cifrado-en-produccion'],

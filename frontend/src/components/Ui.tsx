@@ -11,7 +11,6 @@ export const Etiqueta = ({ texto, clase }: { texto: string; clase: string }) => 
   </span>
 );
 
-/** Iconos disponibles para las categorias administrables del catalogo. */
 const ICONOS_CATEGORIA: Record<string, LucideIcon> = {
   monitor: Monitor,
   codigo: Code2,
@@ -31,7 +30,6 @@ export const IconoCategoria = ({ icono, color = 'pizarra', clase = 'h-4 w-4' }:
 
 export const nombresIconos = Object.keys(ICONOS_CATEGORIA);
 
-/** Encabezado uniforme de cada seccion, con titulo, descripcion y acciones. */
 export const EncabezadoPagina = ({ titulo, descripcion, icono: Icono, children }:
   { titulo: string; descripcion?: string; icono?: LucideIcon; children?: ReactNode }) => (
   <header className="flex flex-wrap items-start justify-between gap-4">
@@ -68,7 +66,6 @@ export const Panel = ({ titulo, icono: Icono, acciones, children, clase = '' }:
 
 type Tono = 'neutro' | 'info' | 'advertencia' | 'exito' | 'critico';
 
-/** Tonos semanticos resueltos para tema claro y oscuro. */
 const TONOS: Record<Tono, { fondo: string; icono: string }> = {
   neutro: { fondo: 'bg-institucional-50 dark:bg-institucional-500/15', icono: 'text-institucional-700 dark:text-institucional-300' },
   info: { fondo: 'bg-sky-50 dark:bg-sky-500/15', icono: 'text-sky-700 dark:text-sky-300' },
@@ -109,6 +106,15 @@ export const Vacio = ({ texto, icono: Icono = Info, accion }:
   </div>
 );
 
+export const Dato = ({ etiqueta, valor }: { etiqueta: string; valor?: string | number | null }) => (
+  <div>
+    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{etiqueta}</p>
+    <p className="mt-0.5 text-sm font-medium text-slate-800 dark:text-slate-100">
+      {valor === null || valor === undefined || valor === '' ? 'Pendiente' : valor}
+    </p>
+  </div>
+);
+
 export const Alerta = ({ mensaje }: { mensaje: string }) => (
   <div className="animar-entrada flex items-start gap-2.5 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
     <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -142,7 +148,6 @@ export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, ancho
   );
 };
 
-/** Grupo de opciones en forma de fichas, alternativa visual al selector nativo. */
 export const BotonAccion = ({ icono: Icono, rotulo, alPulsar, tono = 'neutro', deshabilitado = false }: {
   icono: LucideIcon;
   rotulo: string;
@@ -181,11 +186,6 @@ export const BotonAccion = ({ icono: Icono, rotulo, alPulsar, tono = 'neutro', d
   );
 };
 
-/**
- * Contenedor uniforme de la columna de acciones.
- * Detiene la propagacion del clic para que pulsar un boton no dispare
- * ademas la apertura de la fila que lo contiene.
- */
 export const Acciones = ({ children }: { children: ReactNode }) => (
   <div
     className="flex items-center justify-end gap-1.5"
@@ -197,11 +197,6 @@ export const Acciones = ({ children }: { children: ReactNode }) => (
   </div>
 );
 
-/**
- * Propiedades que vuelven accionable una fila completa de tabla.
- * Se abre con un clic en cualquier parte y tambien desde el teclado,
- * en lugar de exigir el clic exacto sobre el titulo.
- */
 export const filaAccionable = (alAbrir: () => void, rotulo = 'Abrir detalle') => ({
   onClick: alAbrir,
   onKeyDown: (evento: KeyboardEvent<HTMLTableRowElement>) => {

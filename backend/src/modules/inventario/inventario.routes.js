@@ -27,7 +27,6 @@ const articuloSchema = z.object({
   activo: z.boolean().optional()
 });
 
-/** Cambio rapido de la situacion del articulo, sin abrir la edicion completa. */
 const estadoSchema = z.object({
   estado: z.enum(ESTADOS),
   motivo: z.string().max(255).optional().nullable()
@@ -50,7 +49,6 @@ const SELECT_ARTICULO = `
 export const inventarioRouter = Router();
 inventarioRouter.use(autenticar);
 
-/** Resumen del modulo para las tarjetas del panel. */
 inventarioRouter.get('/resumen', requierePermiso('inventario.ver'), asyncHandler(async (_req, res) => {
   const { rows } = await query(
     `SELECT
@@ -69,7 +67,6 @@ inventarioRouter.get('/resumen', requierePermiso('inventario.ver'), asyncHandler
   res.json({ ok: true, datos: { ...rows[0], ...movimientos[0] } });
 }));
 
-/** Catalogo de articulos con filtros y paginacion. */
 inventarioRouter.get('/articulos', requierePermiso('inventario.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
   const { busqueda = null, tipo = null, estado = null, activo = null, solo_criticos = null } = req.query;
@@ -117,7 +114,6 @@ inventarioRouter.post('/articulos', requierePermiso('inventario.articulos'), val
     res.status(201).json({ ok: true, datos: creado[0] });
   }));
 
-/** El stock no se edita aqui: solo cambia mediante movimientos registrados. */
 inventarioRouter.put('/articulos/:id', requierePermiso('inventario.articulos'), validate(articuloSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -139,7 +135,6 @@ inventarioRouter.put('/articulos/:id', requierePermiso('inventario.articulos'), 
     res.json({ ok: true, datos: rows[0] });
   }));
 
-/** Baja logica: el kardex historico se conserva. */
 inventarioRouter.delete('/articulos/:id', requierePermiso('inventario.articulos'), asyncHandler(async (req, res) => {
   const { rows } = await query(
     `UPDATE inventario_articulos SET activo = FALSE, estado = 'De baja' WHERE id = $1 RETURNING id, nombre`,
@@ -165,7 +160,6 @@ inventarioRouter.put('/articulos/:id/activar', requierePermiso('inventario.artic
   res.json({ ok: true, datos: articulo[0] });
 }));
 
-/** Cambia la situacion del articulo dejando constancia del motivo. */
 inventarioRouter.put('/articulos/:id/estado', requierePermiso('inventario.articulos'), validate(estadoSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -173,7 +167,6 @@ inventarioRouter.put('/articulos/:id/estado', requierePermiso('inventario.articu
     const { rows: previa } = await query('SELECT estado, nombre FROM inventario_articulos WHERE id = $1', [id]);
     if (!previa[0]) throw HttpError.notFound('El articulo indicado no existe');
 
-    // Un articulo dado de baja deja de figurar entre los activos
     await query(
       `UPDATE inventario_articulos
           SET estado = $1::varchar,
@@ -199,7 +192,6 @@ const SELECT_MOVIMIENTO = `
     JOIN inventario_articulos a ON a.id = m.articulo_id
     JOIN usuarios u             ON u.id = m.usuario_id`;
 
-/** Kardex con filtros y paginacion. */
 inventarioRouter.get('/movimientos', requierePermiso('inventario.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
   const { articulo_id = null, tipo = null, desde = null, hasta = null } = req.query;
@@ -221,11 +213,6 @@ inventarioRouter.get('/movimientos', requierePermiso('inventario.ver'), asyncHan
   res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
 }));
 
-/**
- * Registra una entrada, salida o ajuste.
- * El stock se recalcula dentro de la transaccion y se bloquea la fila del
- * articulo para evitar que dos movimientos simultaneos dejen un saldo erroneo.
- */
 inventarioRouter.post('/articulos/:id/movimientos', requierePermiso('inventario.movimientos'),
   validate(movimientoSchema), asyncHandler(async (req, res) => {
     const articuloId = Number(req.params.id);
@@ -243,7 +230,7 @@ inventarioRouter.post('/articulos/:id/movimientos', requierePermiso('inventario.
       const anterior = articulo.stock_actual;
       const resultanteBruto = tipo === 'Salida' ? anterior - cantidad
         : tipo === 'Entrada' ? anterior + cantidad
-          : cantidad; // El ajuste fija el stock en la cantidad indicada
+          : cantidad;
 
       if (resultanteBruto < 0) {
         throw HttpError.conflict(
@@ -279,7 +266,6 @@ inventarioRouter.post('/articulos/:id/movimientos', requierePermiso('inventario.
       articulo: articuloActualizado[0], movimiento: rows[0]
     });
 
-    // Aviso al equipo cuando el saldo cae al minimo definido
     if (articuloActualizado[0].bajo_minimo && resultado.anterior > resultado.articulo.stock_minimo) {
       await notificarEquipoTecnico({
         tipo: 'INVENTARIO_MINIMO',
@@ -292,7 +278,6 @@ inventarioRouter.post('/articulos/:id/movimientos', requierePermiso('inventario.
     res.status(201).json({ ok: true, datos: { movimiento: rows[0], articulo: articuloActualizado[0] } });
   }));
 
-/** Reporte PDF del catalogo vigente. */
 inventarioRouter.get('/reporte/pdf', requierePermiso('inventario.ver'), asyncHandler(async (req, res) => {
   const { rows } = await query(`${SELECT_ARTICULO} WHERE a.activo = TRUE ORDER BY a.nombre`);
   const { rows: resumen } = await query(
@@ -309,7 +294,6 @@ inventarioRouter.get('/reporte/pdf', requierePermiso('inventario.ver'), asyncHan
   res.send(buffer);
 }));
 
-/** Kardex PDF de un articulo. */
 inventarioRouter.get('/articulos/:id/kardex/pdf', requierePermiso('inventario.ver'), asyncHandler(async (req, res) => {
   const { rows: articulo } = await query(`${SELECT_ARTICULO} WHERE a.id = $1`, [req.params.id]);
   if (!articulo[0]) throw HttpError.notFound('El articulo indicado no existe');

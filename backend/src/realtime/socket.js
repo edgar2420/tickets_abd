@@ -5,16 +5,10 @@ import { autenticarSocket } from '../middleware/auth.js';
 let io = null;
 
 export const SALA_TECNICOS = 'sala:tecnicos';
-/**
- * Sala del circuito de compras. Gerencia no forma parte del equipo tecnico
- * y por eso no entra a la sala anterior; sin esta, los cambios de estado de
- * una solicitud no le llegarian y tendria que recargar la pantalla.
- */
 export const SALA_COMPRAS = 'sala:compras';
 export const salaUsuario = (usuarioId) => `usuario:${usuarioId}`;
 export const salaTicket = (ticketId) => `ticket:${ticketId}`;
 
-/** Inicializa el servidor de WebSockets sobre el servidor HTTP existente. */
 export const inicializarSockets = (httpServer) => {
   io = new Server(httpServer, {
     cors: { origin: env.cors.origins, credentials: true },
@@ -42,7 +36,6 @@ export const inicializarSockets = (httpServer) => {
   return io;
 };
 
-/** Emite un evento a una lista de salas. */
 export const emitir = (salas, evento, payload) => {
   if (!io) return;
   const destinos = Array.isArray(salas) ? salas : [salas];

@@ -149,7 +149,6 @@ export interface Equipo {
   direccion_ip: string | null;
   direccion_mac: string | null;
   anydesk_id: string | null;
-  /** Indica si hay contrasena guardada; el valor nunca viaja en los listados. */
   tiene_password: boolean;
   usuario_id: number | null;
   usuario_nombre: string | null;
@@ -175,7 +174,6 @@ export interface ResumenEquipos {
 
 export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
-/** La categoria proviene del catalogo administrable, no de una lista fija. */
 export type CategoriaTicket = string;
 
 export interface Categoria {

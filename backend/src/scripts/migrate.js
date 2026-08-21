@@ -9,13 +9,6 @@ dotenv.config();
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const dirSql = path.resolve(aqui, '../../../db');
 
-/**
- * Las migraciones alteran la estructura, de modo que no pueden correr con el
- * rol de ejecucion: ese rol solo maneja filas, justamente para que una falla
- * en la aplicacion no alcance al esquema. Se usan aqui las credenciales
- * administradoras, y si no estan definidas se cae a las de la aplicacion,
- * que es lo correcto en una instalacion que todavia no separo los roles.
- */
 const pool = new pg.Pool({
   host: process.env.DB_HOST ?? 'localhost',
   port: Number(process.env.DB_PORT ?? 5432),
@@ -24,7 +17,6 @@ const pool = new pg.Pool({
   database: process.env.DB_NAME ?? 'tickets_ti'
 });
 
-/** Aplica el esquema y la carga inicial de datos de forma idempotente. */
 const ejecutar = async () => {
   const archivos = (await readdir(dirSql)).filter((a) => a.endsWith('.sql')).sort();
   for (const archivo of archivos) {
@@ -36,7 +28,6 @@ const ejecutar = async () => {
   const rolApp = process.env.DB_USER;
   const rolAdmin = process.env.DB_ADMIN_USER;
   if (rolApp && rolAdmin && rolApp !== rolAdmin && /^[a-z_][a-z0-9_]{2,62}$/.test(rolApp)) {
-    // Las tablas creadas en esta corrida deben quedar accesibles al rol de ejecucion
     await pool.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${rolApp}`);
     await pool.query(`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${rolApp}`);
     console.log(`[migracion] Permisos de fila concedidos a ${rolApp}`);

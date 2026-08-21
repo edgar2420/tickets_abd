@@ -58,8 +58,6 @@ export const login = asyncHandler(async (req, res) => {
 
   await registrarAuditoria({ usuarioId: encontrado.id, entidad: 'SESION', accion: 'LOGIN', ip: req.ip });
 
-  // La credencial viaja en cookie httpOnly; el token en el cuerpo sostiene
-  // a los clientes sin cookies, como la aplicacion movil.
   const csrf = abrirSesion(res, token);
 
   delete encontrado.password_hash;

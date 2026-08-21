@@ -54,7 +54,6 @@ usuariosRouter.get('/', requierePermiso('admin.usuarios'), asyncHandler(async (r
   res.json(respuestaPaginada(rows, total[0].total, limite, pagina));
 }));
 
-/** Tecnicos disponibles para asignacion manual de tickets. */
 usuariosRouter.get('/tecnicos', requierePermiso('tickets.ver_todos'), asyncHandler(async (_req, res) => {
   const { rows } = await query(
     `SELECT DISTINCT u.id, u.nombre, r.nombre AS rol
@@ -105,7 +104,6 @@ usuariosRouter.put('/:id', requierePermiso('admin.usuarios'), validate(editarUsu
   res.json({ ok: true, datos: rows[0] });
 }));
 
-/** Baja logica del usuario: nunca se elimina para preservar la trazabilidad de tickets. */
 usuariosRouter.delete('/:id', requierePermiso('admin.usuarios'), asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   if (id === req.usuario.id) throw HttpError.badRequest('No puede desactivar su propio usuario');

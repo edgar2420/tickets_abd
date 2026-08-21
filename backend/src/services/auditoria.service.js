@@ -1,9 +1,5 @@
 import { query } from '../config/db.js';
 
-/**
- * Registra una accion en la bitacora. Cada operacion registrada aqui es la
- * fuente de datos del reporte PDF de trazabilidad del sistema.
- */
 export const registrarAuditoria = async ({ usuarioId, entidad, entidadId = null, accion, detalle = null, ip = null }) => {
   try {
     await query(
