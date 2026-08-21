@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-frontend",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "private": true,
   "description": "Aplicacion web del Sistema de Gestion de Tickets TI",
   "author": "Ing. Edgar Rojas Apaza",
@@ -15,7 +15,7 @@
     "lucide-react": "^0.469.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.28.0",
+    "react-router-dom": "^7.18.2",
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
