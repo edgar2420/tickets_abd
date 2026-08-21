@@ -29,6 +29,15 @@ export const env = {
       .map((o) => o.trim())
       .filter(Boolean)
   },
+  cookies: {
+    /**
+     * El atributo "secure" impide que la cookie viaje por HTTP. Es lo
+     * correcto de cara a internet, pero una instalacion interna que
+     * todavia no tiene certificado debe poder desactivarlo de forma
+     * explicita, o el navegador jamas enviaria la sesion.
+     */
+    seguras: (process.env.COOKIE_SECURE ?? (process.env.NODE_ENV === 'production' ? 'true' : 'false')) === 'true'
+  },
   cifrado: {
     // Semilla del cifrado de credenciales de acceso remoto
     semilla: required('CLAVE_CIFRADO', 'cambiar-esta-semilla-de-cifrado-en-produccion')
@@ -39,3 +48,28 @@ export const env = {
   autor: 'Ing. Edgar Rojas Apaza',
   autorRol: 'Desarrollo de Modulo de Tickets'
 };
+
+/**
+ * En produccion el servicio no debe arrancar con los valores de ejemplo.
+ * Un despliegue que conserve la clave del archivo de muestra permitiria a
+ * cualquiera firmar sus propias credenciales de administrador, de modo que
+ * es preferible detener el arranque antes que exponer el sistema.
+ */
+const SECRETOS = [
+  ['JWT_SECRET', env.jwt.secret, 'cambiar-esta-clave-en-produccion'],
+  ['CLAVE_CIFRADO', env.cifrado.semilla, 'cambiar-esta-semilla-de-cifrado-en-produccion'],
+  ['DB_PASSWORD', env.db.password, 'tickets_app']
+];
+
+if (env.nodeEnv === 'production') {
+  const observados = SECRETOS
+    .filter(([, valor, ejemplo]) => valor === ejemplo || valor.startsWith('cambie-') || valor.length < 24)
+    .map(([nombre]) => nombre);
+
+  if (observados.length) {
+    throw new Error(
+      `No es posible iniciar en produccion con valores de ejemplo o demasiado cortos en: ${observados.join(', ')}. `
+      + 'Defina cadenas propias de al menos 24 caracteres.'
+    );
+  }
+}

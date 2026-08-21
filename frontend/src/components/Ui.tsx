@@ -143,35 +143,6 @@ export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, ancho
 };
 
 /** Grupo de opciones en forma de fichas, alternativa visual al selector nativo. */
-export const Fichas = <T extends string>({ opciones, valor, alElegir, render }: {
-  opciones: T[];
-  valor: T;
-  alElegir: (opcion: T) => void;
-  render?: (opcion: T, activo: boolean) => ReactNode;
-}) => (
-  <div className="flex flex-wrap gap-2">
-    {opciones.map((opcion) => {
-      const activo = opcion === valor;
-      return (
-        <button
-          key={opcion}
-          type="button"
-          onClick={() => alElegir(opcion)}
-          className={activo ? 'ficha-activa' : 'ficha-inactiva'}
-        >
-          {render ? render(opcion, activo) : opcion}
-        </button>
-      );
-    })}
-  </div>
-);
-
-
-/**
- * Boton de accion de una fila, con rotulo emergente propio.
- * El atributo title del navegador tarda en aparecer y no respeta el tema,
- * por eso el rotulo se dibuja aqui.
- */
 export const BotonAccion = ({ icono: Icono, rotulo, alPulsar, tono = 'neutro', deshabilitado = false }: {
   icono: LucideIcon;
   rotulo: string;

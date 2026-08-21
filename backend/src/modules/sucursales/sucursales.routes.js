@@ -6,6 +6,8 @@ import { requierePermiso } from '../../middleware/rbac.js';
 import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
+import { enCache, invalidar } from '../../services/cache.memoria.js';
+import { cachearEnCliente } from '../../middleware/cache.js';
 
 const TIPOS = ['Fabrica', 'Casa Central', 'Sucursal', 'Planta', 'Oficina', 'Deposito'];
 
@@ -29,12 +31,12 @@ export const sucursalesRouter = Router();
 sucursalesRouter.use(autenticar);
 
 /** Catalogo disponible para cualquier usuario autenticado: alimenta los selectores. */
-sucursalesRouter.get('/', asyncHandler(async (req, res) => {
+sucursalesRouter.get('/', cachearEnCliente(120), asyncHandler(async (req, res) => {
   const soloActivas = req.query.activas === 'true';
-  const { rows } = await query(
+  const rows = await enCache(`sucursales:${soloActivas}`, 120_000, async () => (await query(
     `${SELECT_SUCURSAL} WHERE ($1 = FALSE OR s.activo = TRUE) ORDER BY s.tipo, s.nombre`,
     [soloActivas]
-  );
+  )).rows);
   res.json({ ok: true, datos: rows });
 }));
 
@@ -46,7 +48,8 @@ sucursalesRouter.post('/', requierePermiso('admin.sucursales'), validate(sucursa
       [codigo.toUpperCase(), nombre, ciudad ?? null, tipo, direccion ?? null]
     );
     const { rows: creada } = await query(`${SELECT_SUCURSAL} WHERE s.id = $1`, [rows[0].id]);
-    await registrarAuditoria({
+    invalidar('sucursales');
+  await registrarAuditoria({
       usuarioId: req.usuario.id, entidad: 'SUCURSAL', entidadId: rows[0].id,
       accion: 'CREAR', detalle: creada[0], ip: req.ip
     });
@@ -65,7 +68,8 @@ sucursalesRouter.put('/:id', requierePermiso('admin.sucursales'), validate(sucur
     );
     if (!rowCount) throw HttpError.notFound('La sucursal indicada no existe');
     const { rows } = await query(`${SELECT_SUCURSAL} WHERE s.id = $1`, [id]);
-    await registrarAuditoria({
+    invalidar('sucursales');
+  await registrarAuditoria({
       usuarioId: req.usuario.id, entidad: 'SUCURSAL', entidadId: id,
       accion: 'ACTUALIZAR', detalle: rows[0], ip: req.ip
     });
@@ -76,6 +80,7 @@ sucursalesRouter.put('/:id', requierePermiso('admin.sucursales'), validate(sucur
 sucursalesRouter.delete('/:id', requierePermiso('admin.sucursales'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE sucursales SET activo = FALSE WHERE id = $1 RETURNING id, nombre', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La sucursal indicada no existe');
+  invalidar('sucursales');
   await registrarAuditoria({
     usuarioId: req.usuario.id, entidad: 'SUCURSAL', entidadId: rows[0].id, accion: 'DESACTIVAR', ip: req.ip
   });
@@ -86,6 +91,7 @@ sucursalesRouter.put('/:id/activar', requierePermiso('admin.sucursales'), asyncH
   const { rows } = await query('UPDATE sucursales SET activo = TRUE WHERE id = $1 RETURNING id', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La sucursal indicada no existe');
   const { rows: sucursal } = await query(`${SELECT_SUCURSAL} WHERE s.id = $1`, [rows[0].id]);
+  invalidar('sucursales');
   await registrarAuditoria({
     usuarioId: req.usuario.id, entidad: 'SUCURSAL', entidadId: rows[0].id, accion: 'ACTIVAR', ip: req.ip
   });

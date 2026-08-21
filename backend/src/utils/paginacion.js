@@ -32,4 +32,3 @@ export const respuestaPaginada = (datos, total, limite, pagina) => ({
   }
 });
 
-export const LIMITES = { defecto: LIMITE_POR_DEFECTO, maximo: LIMITE_MAXIMO };

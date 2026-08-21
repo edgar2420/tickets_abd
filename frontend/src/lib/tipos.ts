@@ -297,7 +297,6 @@ export interface Indicadores {
   resueltos: number;
   cerrados: number;
   criticos: number;
-  horas_promedio_resolucion: string | number;
 }
 
 export interface Distribucion {

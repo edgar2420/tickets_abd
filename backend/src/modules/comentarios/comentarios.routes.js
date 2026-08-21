@@ -6,6 +6,7 @@ import { existsSync, mkdirSync, createReadStream } from 'node:fs';
 import { unlink } from 'node:fs/promises';
 import { query, withTransaction } from '../../config/db.js';
 import { autenticar } from '../../middleware/auth.js';
+import { sinCache } from '../../middleware/cache.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { notificarUsuario } from '../../services/notificaciones.service.js';
@@ -141,7 +142,7 @@ export const adjuntosRouter = Router();
 adjuntosRouter.use(autenticar);
 
 /** Entrega el archivo tras verificar la visibilidad del ticket al que pertenece. */
-adjuntosRouter.get('/:id', asyncHandler(async (req, res) => {
+adjuntosRouter.get('/:id', sinCache, asyncHandler(async (req, res) => {
   const { rows } = await query(
     'SELECT ticket_id, nombre_original, nombre_archivo, tipo_mime FROM adjuntos WHERE id = $1',
     [req.params.id]

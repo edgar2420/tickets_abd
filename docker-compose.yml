@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${DB_USER:-tickets_app}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-tickets_app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD en el archivo .env}
       POSTGRES_DB: ${DB_NAME:-tickets_ti}
       TZ: America/La_Paz
     volumes:
@@ -42,9 +42,11 @@ services:
       DB_HOST: base_datos
       DB_PORT: 5432
       DB_USER: ${DB_USER:-tickets_app}
-      DB_PASSWORD: ${DB_PASSWORD:-tickets_app}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD en el archivo .env}
       DB_NAME: ${DB_NAME:-tickets_ti}
-      JWT_SECRET: ${JWT_SECRET:-cambie-esta-clave-en-produccion}
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET en el archivo .env}
+      CLAVE_CIFRADO: ${CLAVE_CIFRADO:?defina CLAVE_CIFRADO en el archivo .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:8081}
       DOCS_OUTPUT_DIR: storage/documentos
