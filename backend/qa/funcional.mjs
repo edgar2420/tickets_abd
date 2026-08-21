@@ -243,6 +243,60 @@ for (const entidad of ['TICKET', 'COMPRA', 'INVENTARIO', 'SESION']) {
 const auditoriaCliente = await pedir('lapaz', '/auditoria');
 marca('auditoria', auditoriaCliente.estado === 403, `el cliente no accede a la auditoria (${auditoriaCliente.estado})`);
 
+console.log('\n=== H2. ALCANCE DE GERENCIA Y REPORTE MENSUAL ===');
+const permisosGerente = sesiones.get('gerente').perfil.permisos;
+marca('gerencia', !permisosGerente.includes('auditoria.ver'),
+  'Gerencia no tiene el permiso de auditoria');
+marca('gerencia', permisosGerente.includes('tickets.crear'),
+  'Gerencia puede registrar tickets');
+
+const auditoriaGerencia = await pedir('gerente', '/auditoria');
+marca('gerencia', auditoriaGerencia.estado === 403,
+  `la bitacora le queda cerrada (${auditoriaGerencia.estado})`);
+
+const ticketGerencia = await pedir('gerente', '/tickets', {
+  metodo: 'POST',
+  cuerpo: {
+    titulo: 'QA - Gerencia registra un requerimiento propio',
+    descripcion: 'Se verifica que Gerencia pueda abrir tickets como cualquier area de la empresa.',
+    categoria: 'Software',
+    prioridad: 'Media'
+  }
+});
+marca('gerencia', ticketGerencia.estado === 201, `Gerencia abre un ticket (${ticketGerencia.estado})`);
+
+const tableroGerencia = await pedir('gerente', '/tickets/tablero');
+marca('gerencia', tableroGerencia.estado === 200, `Gerencia entra al tablero (${tableroGerencia.estado})`);
+
+const mensual = await pedir('gerente', '/tickets/mensual');
+const reporte = mensual.cuerpo.datos;
+marca('reporte', mensual.estado === 200 && reporte?.nombre !== undefined,
+  `reporte del periodo: ${reporte?.nombre}`);
+marca('reporte', typeof reporte?.totales?.creados === 'number'
+  && typeof reporte?.totales?.atendidos === 'number'
+  && typeof reporte?.totales?.resueltos === 'number'
+  && typeof reporte?.totales?.cerrados === 'number',
+  `registrados=${reporte?.totales?.creados} atendidos=${reporte?.totales?.atendidos} `
+  + `resueltos=${reporte?.totales?.resueltos} cerrados=${reporte?.totales?.cerrados}`);
+marca('reporte', reporte?.anterior?.nombre !== undefined,
+  `compara contra ${reporte?.anterior?.nombre}`);
+marca('reporte', Array.isArray(reporte?.porDia) && reporte.porDia.length >= 28,
+  `desglose diario completo (${reporte?.porDia?.length} dias)`);
+marca('reporte', Array.isArray(reporte?.categorias) && Array.isArray(reporte?.tecnicos),
+  'incluye desglose por categoria y por tecnico');
+
+const mesViejo = await pedir('gerente', '/tickets/mensual?mes=2026-01');
+marca('reporte', mesViejo.estado === 200 && mesViejo.cuerpo.datos?.mes === '2026-01',
+  `admite consultar un mes anterior (${mesViejo.cuerpo.datos?.nombre})`);
+
+const mesInvalido = await pedir('gerente', '/tickets/mensual?mes=no-es-un-mes');
+marca('reporte', mesInvalido.estado === 200 && /^\d{4}-\d{2}$/.test(mesInvalido.cuerpo.datos?.mes ?? ''),
+  'un periodo mal escrito cae al mes vigente en lugar de fallar');
+
+const mensualCliente = await pedir('lapaz', '/tickets/mensual');
+marca('reporte', mensualCliente.estado === 403,
+  `un cliente no accede al reporte mensual (${mensualCliente.estado})`);
+
 console.log('\n=== I. PAGINACION ===');
 const pagina = await pedir('admin', '/tickets?limite=2&pagina=1');
 marca('paginacion', pagina.cuerpo.datos?.length <= 2 && pagina.cuerpo.paginacion?.limite === 2,
@@ -258,6 +312,7 @@ for (const [nombre, ruta] of [
   ['reporte de tickets', '/tickets/reporte/pdf'],
   ['solicitud de compra', `/compras/${solicitud.id}/pdf`],
   ['reporte de inventario', '/inventario/reporte/pdf'],
+  ['reporte mensual', '/tickets/mensual/pdf'],
   ['reporte de auditoria', '/auditoria/pdf'],
   ['matriz de permisos', '/auditoria/matriz-rbac/pdf'],
   ['reporte de equipos', '/equipos/reporte/pdf'],

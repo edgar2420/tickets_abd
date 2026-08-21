@@ -88,6 +88,107 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   return doc;
 };
 
+const variacionLegible = (valor) => {
+  if (valor === null) return 'sin base de comparacion';
+  if (valor > 0) return `+${valor}% respecto al mes anterior`;
+  if (valor < 0) return `${valor}% respecto al mes anterior`;
+  return 'sin variacion respecto al mes anterior';
+};
+
+export const construirReporteMensual = (datos) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Reporte Mensual de la Mesa de Ayuda',
+    subtitulo: `Periodo: ${datos.nombre}`,
+    codigo: 'REP-MENSUAL',
+    icono: 'grafico'
+  });
+
+  doc.titulo1('Resumen del mes', 'grafico');
+  doc.indicadores([
+    { etiqueta: 'Registrados', valor: datos.totales.creados, icono: 'ticket', color: PALETA.primario },
+    { etiqueta: 'Atendidos', valor: datos.totales.atendidos, icono: 'reloj', color: PALETA.advertencia },
+    { etiqueta: 'Resueltos', valor: datos.totales.resueltos, icono: 'check', color: PALETA.ok },
+    { etiqueta: 'Cerrados', valor: datos.totales.cerrados, icono: 'check', color: PALETA.ok },
+    { etiqueta: 'Pendientes', valor: datos.totales.pendientes, icono: 'alerta', color: PALETA.critico }
+  ]);
+
+  doc.titulo2('Comparacion con el mes anterior');
+  doc.tabla([
+    { titulo: 'Concepto', campo: 'concepto', ancho: 0.34 },
+    { titulo: datos.nombre, campo: 'actual', ancho: 0.22 },
+    { titulo: datos.anterior.nombre, campo: 'previo', ancho: 0.22 },
+    { titulo: 'Variacion', campo: 'variacion', ancho: 0.22 }
+  ], [
+    {
+      concepto: 'Tickets registrados',
+      actual: String(datos.totales.creados),
+      previo: String(datos.anterior.totales.creados),
+      variacion: variacionLegible(datos.variacion.creados)
+    },
+    {
+      concepto: 'Tickets atendidos',
+      actual: String(datos.totales.atendidos),
+      previo: String(datos.anterior.totales.atendidos),
+      variacion: variacionLegible(datos.variacion.atendidos)
+    },
+    {
+      concepto: 'Tickets resueltos',
+      actual: String(datos.totales.resueltos),
+      previo: String(datos.anterior.totales.resueltos),
+      variacion: variacionLegible(datos.variacion.resueltos)
+    },
+    {
+      concepto: 'Tickets cerrados',
+      actual: String(datos.totales.cerrados),
+      previo: String(datos.anterior.totales.cerrados),
+      variacion: variacionLegible(datos.variacion.cerrados)
+    }
+  ]);
+
+  doc.titulo2('Tiempos de atencion');
+  doc.camposClaveValor([
+    { etiqueta: 'Demora promedio en tomar el ticket', valor: `${datos.tiempos.horas_hasta_atender} horas` },
+    { etiqueta: 'Demora promedio hasta la resolucion', valor: `${datos.tiempos.horas_hasta_resolver} horas` },
+    { etiqueta: 'Tickets criticos del mes', valor: String(datos.totales.criticos) },
+    { etiqueta: 'Pendientes al cierre del periodo', valor: String(datos.totales.pendientes) }
+  ], 2);
+
+  doc.saltoPagina();
+  doc.titulo1('Distribucion por categoria', 'engranaje');
+  doc.tabla([
+    { titulo: 'Categoria', campo: 'etiqueta', ancho: 0.5 },
+    { titulo: 'Registrados', campo: 'creados', ancho: 0.25 },
+    { titulo: 'Resueltos', campo: 'resueltos', ancho: 0.25 }
+  ], datos.categorias.length ? datos.categorias : [{ etiqueta: 'Sin registros', creados: 0, resueltos: 0 }]);
+
+  doc.titulo1('Distribucion por sucursal', 'red');
+  doc.tabla([
+    { titulo: 'Sucursal', campo: 'etiqueta', ancho: 0.5 },
+    { titulo: 'Registrados', campo: 'creados', ancho: 0.25 },
+    { titulo: 'Resueltos', campo: 'resueltos', ancho: 0.25 }
+  ], datos.sucursales.length ? datos.sucursales : [{ etiqueta: 'Sin registros', creados: 0, resueltos: 0 }]);
+
+  doc.titulo1('Distribucion por area solicitante', 'usuario');
+  doc.tabla([
+    { titulo: 'Area', campo: 'etiqueta', ancho: 0.5 },
+    { titulo: 'Registrados', campo: 'creados', ancho: 0.25 },
+    { titulo: 'Resueltos', campo: 'resueltos', ancho: 0.25 }
+  ], datos.areas.length ? datos.areas : [{ etiqueta: 'Sin registros', creados: 0, resueltos: 0 }]);
+
+  doc.titulo1('Resolucion por tecnico', 'usuario');
+  doc.tabla([
+    { titulo: 'Tecnico', campo: 'etiqueta', ancho: 0.5 },
+    { titulo: 'Resueltos', campo: 'resueltos', ancho: 0.25 },
+    { titulo: 'Horas promedio', campo: 'horas_promedio', ancho: 0.25 }
+  ], datos.tecnicos.length ? datos.tecnicos : [{ etiqueta: 'Sin resoluciones en el periodo', resueltos: 0, horas_promedio: 0 }]);
+
+  doc.nota('Los tickets atendidos son aquellos que pasaron a atencion durante el mes; los resueltos y '
+    + 'cerrados se cuentan por la fecha en que ocurrio cada accion, de modo que un ticket puede haberse '
+    + 'registrado en un mes y cerrado en el siguiente.', { icono: 'documento' });
+
+  return doc;
+};
+
 export const construirReporteTickets = ({ filas, indicadores, filtros }) => {
   const doc = new DocumentoPDF({
     titulo: 'Reporte de Gestion de Tickets',

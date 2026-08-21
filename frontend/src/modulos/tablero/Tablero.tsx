@@ -4,6 +4,8 @@ import { api, descargarPdf } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { usarNotificaciones } from '../../context/NotificacionesContext';
 import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel, Vacio } from '../../components/Ui';
+import { usarReporteMensual } from './usarReporteMensual';
+import { ReporteMensual } from './componentes/ReporteMensual';
 import type { Distribucion, Indicadores } from '../../lib/tipos';
 
 interface Ranking extends Distribucion {
@@ -81,6 +83,8 @@ export const Tablero = () => {
   const { ultimoEventoTicket } = usarNotificaciones();
   const [datos, setDatos] = useState<RespuestaTablero['datos'] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const verReporte = puede('reportes.ver', 'tickets.ver_todos');
+  const mensual = usarReporteMensual(verReporte);
 
   const cargar = useCallback(async () => {
     try {
@@ -127,6 +131,16 @@ export const Tablero = () => {
         <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} tono="exito" />
         <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} tono="critico" />
       </div>
+
+      {verReporte && (
+        <ReporteMensual
+          reporte={mensual.reporte}
+          mes={mensual.mes}
+          setMes={mensual.setMes}
+          mesTope={mensual.mesVigente}
+          error={mensual.error}
+        />
+      )}
 
       {graficos && (
         <div className="grid gap-4 lg:grid-cols-2">

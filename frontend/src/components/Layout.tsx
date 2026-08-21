@@ -32,7 +32,7 @@ const ENLACES: Enlace[] = [
   { ruta: '/admin/sucursales', texto: 'Sucursales', icono: Building, permisos: ['admin.sucursales'], grupo: 'Administracion' },
   { ruta: '/admin/areas', texto: 'Areas', icono: Building2, permisos: ['admin.areas'], grupo: 'Administracion' },
   { ruta: '/admin/categorias', texto: 'Categorias', icono: Tags, permisos: ['admin.categorias'], grupo: 'Administracion' },
-  { ruta: '/auditoria', texto: 'Auditoria', icono: ScrollText, permisos: ['reportes.ver', 'admin.usuarios'], grupo: 'Administracion' }
+  { ruta: '/auditoria', texto: 'Auditoria', icono: ScrollText, permisos: ['auditoria.ver'], grupo: 'Administracion' }
 ];
 
 const PanelNotificaciones = () => {
