@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FileDown, Filter, PlusCircle, RefreshCcw, Search, Ticket as IconoTicket } from 'lucide-react';
-import { api, descargarPdf } from '../lib/api';
-import { usarAuth } from '../context/AuthContext';
-import { usarNotificaciones } from '../context/NotificacionesContext';
-import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAccionable } from '../components/Ui';
-import { Paginacion } from '../components/Paginacion';
-import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../lib/formato';
-import type { Categoria, InfoPaginacion, RespuestaPaginada, Sucursal, Ticket } from '../lib/tipos';
+import { api, descargarPdf } from '../../lib/api';
+import { usarAuth } from '../../context/AuthContext';
+import { usarNotificaciones } from '../../context/NotificacionesContext';
+import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAccionable } from '../../components/Ui';
+import { Paginacion } from '../../components/Paginacion';
+import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
+import type { Categoria, InfoPaginacion, RespuestaPaginada, Sucursal, Ticket } from '../../lib/tipos';
 
 const ESTADOS = ['Abierto', 'En Proceso', 'Resuelto', 'Cerrado'];
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
@@ -42,7 +42,6 @@ export const Tickets = () => {
     void cargar();
   }, [cargar, ultimoEventoTicket]);
 
-  // Los filtros se alimentan de los catalogos administrables
   useEffect(() => {
     void api<{ datos: Categoria[] }>('/categorias')
       .then(({ datos }) => setCategorias(datos))

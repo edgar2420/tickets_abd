@@ -23,8 +23,6 @@ export const ProveedorAuth = ({ children }: { children: ReactNode }) => {
     setUsuario(null);
   }, []);
 
-  // La sesion se restaura contra el servidor: la credencial esta en una
-  // cookie httpOnly que la aplicacion no puede inspeccionar.
   useEffect(() => {
     if (!haySesion()) {
       setCargando(false);
@@ -39,7 +37,6 @@ export const ProveedorAuth = ({ children }: { children: ReactNode }) => {
       .finally(() => setCargando(false));
   }, []);
 
-  // El backend avisa cuando el token deja de ser valido.
   useEffect(() => {
     const manejador = () => cerrarSesion();
     window.addEventListener('sesion:expirada', manejador);

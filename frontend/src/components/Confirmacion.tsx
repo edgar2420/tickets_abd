@@ -10,11 +10,6 @@ interface Solicitud {
   alConfirmar: () => Promise<void> | void;
 }
 
-/**
- * Dialogo de confirmacion propio del sistema.
- * Reemplaza a window.confirm, que el navegador dibuja con su propio estilo
- * y rompe la identidad visual de la aplicacion.
- */
 export const usarConfirmacion = () => {
   const [solicitud, setSolicitud] = useState<Solicitud | null>(null);
   const [procesando, setProcesando] = useState(false);

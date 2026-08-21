@@ -101,7 +101,6 @@ const PanelNotificaciones = () => {
   );
 };
 
-/** Alterna entre el tema claro y el oscuro, con la preferencia persistida. */
 const InterruptorTema = () => {
   const { tema, alternar } = usarTema();
   return (
@@ -121,7 +120,6 @@ const CLAVE_MENU = 'tickets_ti_menu_visible';
 
 export const Layout = () => {
   const { usuario, cerrarSesion, puede } = usarAuth();
-  // El menu se oculta tambien en escritorio, para ganar area de trabajo
   const [menuAbierto, setMenuAbierto] = useState(() => localStorage.getItem(CLAVE_MENU) !== 'oculto');
   const navegar = useNavigate();
 
@@ -190,7 +188,6 @@ export const Layout = () => {
         >
           <nav className="flex flex-1 flex-col gap-1 overflow-y-auto p-4">
             {enlaces.map(({ ruta, texto, icono: Icono, grupo }, indice) => {
-              // Rotulo separador cada vez que cambia el grupo funcional
               const abreGrupo = indice > 0 && enlaces[indice - 1].grupo !== grupo;
 
               return (
@@ -204,8 +201,6 @@ export const Layout = () => {
                     to={ruta}
                     end={ruta === '/tickets'}
                     onClick={() => {
-                      // En pantallas angostas el menu se superpone al contenido y debe
-                      // replegarse al navegar; en escritorio la decision es del usuario.
                       if (window.innerWidth < 1024) setMenuAbierto(false);
                     }}
                     className={({ isActive }) => (isActive ? 'enlace-menu-activo' : 'enlace-menu-inactivo')}

@@ -40,13 +40,8 @@ const equipoSchema = z.object({
   activo: z.boolean().optional()
 });
 
-/** Normaliza las cadenas vacias del formulario a NULL. */
 const vacioANulo = (valor) => (valor === '' || valor === undefined ? null : valor);
 
-/**
- * La contrasena de acceso remoto nunca viaja en los listados:
- * solo se informa si existe, y su revelacion es un endpoint aparte y auditado.
- */
 const SELECT_EQUIPO = `
   SELECT e.id, e.codigo, e.nombre_equipo, e.tipo, e.marca, e.modelo, e.numero_serie,
          e.sistema_operativo, e.procesador, e.ram_gb, e.almacenamiento,
@@ -64,7 +59,6 @@ const SELECT_EQUIPO = `
 export const equiposRouter = Router();
 equiposRouter.use(autenticar);
 
-/** Indicadores del parque informatico. */
 equiposRouter.get('/resumen', requierePermiso('equipos.ver'), asyncHandler(async (_req, res) => {
   const { rows } = await query(
     `SELECT
@@ -78,7 +72,6 @@ equiposRouter.get('/resumen', requierePermiso('equipos.ver'), asyncHandler(async
   res.json({ ok: true, datos: rows[0] });
 }));
 
-/** Listado con filtros y paginacion. */
 equiposRouter.get('/', requierePermiso('equipos.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
   const { busqueda = null, tipo = null, estado = null, area_id = null, usuario_id = null,
@@ -113,11 +106,6 @@ equiposRouter.get('/:id', requierePermiso('equipos.ver'), asyncHandler(async (re
   res.json({ ok: true, datos: rows[0] });
 }));
 
-/**
- * Revela la contrasena de acceso remoto.
- * Exige un permiso propio y deja constancia en la bitacora de quien la
- * consulto y cuando, porque es informacion sensible.
- */
 equiposRouter.get('/:id/credenciales', requierePermiso('equipos.credenciales'), asyncHandler(async (req, res) => {
   const { rows } = await query('SELECT codigo, anydesk_id, anydesk_password FROM equipos WHERE id = $1', [req.params.id]);
   const equipo = rows[0];
@@ -163,7 +151,6 @@ equiposRouter.post('/', requierePermiso('equipos.gestionar'), validate(equipoSch
   res.status(201).json({ ok: true, datos: creado[0] });
 }));
 
-/** Al editar, una contrasena vacia conserva la vigente en lugar de borrarla. */
 equiposRouter.put('/:id', requierePermiso('equipos.gestionar'), validate(equipoSchema), asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
   const c = req.body;
@@ -197,7 +184,6 @@ equiposRouter.put('/:id', requierePermiso('equipos.gestionar'), validate(equipoS
   res.json({ ok: true, datos: rows[0] });
 }));
 
-/** Baja logica del equipo. */
 equiposRouter.delete('/:id', requierePermiso('equipos.gestionar'), asyncHandler(async (req, res) => {
   const { rows } = await query(
     `UPDATE equipos SET activo = FALSE, estado = 'De baja' WHERE id = $1 RETURNING id, codigo`,
@@ -224,7 +210,6 @@ equiposRouter.put('/:id/activar', requierePermiso('equipos.gestionar'), asyncHan
   res.json({ ok: true, datos: equipo[0] });
 }));
 
-/** Reporte del parque informatico. Nunca incluye contrasenas. */
 equiposRouter.get('/reporte/pdf', requierePermiso('equipos.ver'), asyncHandler(async (req, res) => {
   const { rows } = await query(`${SELECT_EQUIPO} WHERE e.activo = TRUE ORDER BY e.codigo`);
   const { rows: resumen } = await query(
@@ -241,7 +226,6 @@ equiposRouter.get('/reporte/pdf', requierePermiso('equipos.ver'), asyncHandler(a
   res.send(buffer);
 }));
 
-/** Ficha individual del equipo. */
 equiposRouter.get('/:id/ficha/pdf', requierePermiso('equipos.ver'), asyncHandler(async (req, res) => {
   const { rows } = await query(`${SELECT_EQUIPO} WHERE e.id = $1`, [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('El equipo indicado no existe');

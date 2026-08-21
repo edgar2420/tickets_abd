@@ -1,12 +1,3 @@
-/**
- * Generador de la documentacion tecnica del Sistema de Gestion de Tickets TI.
- *
- * Produce un PDF institucional (sin emojis, con iconografia vectorial y pie de
- * pagina de autoria) que documenta cada componente construido del sistema.
- *
- * Uso:  node docs/generator/generate-docs.js
- * Autor: Ing. Edgar Rojas Apaza - Desarrollo de Modulo de Tickets
- */
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -328,7 +319,6 @@ const construir = async () => {
     icono: 'documento'
   });
 
-  // 1. Resumen
   doc.titulo1('1. Resumen del sistema', 'ticket');
   doc.parrafo('Sistema centralizado de mesa de ayuda para el departamento de Tecnologias de la Informacion. '
     + 'Gestiona el ciclo de vida completo de incidencias y requerimientos garantizando trazabilidad total sobre '
@@ -345,7 +335,6 @@ const construir = async () => {
     'Despliegue contenedorizado con Docker Compose para publicacion en servidor.'
   ]);
 
-  // 2. Arquitectura
   doc.titulo1('2. Arquitectura de la solucion', 'red');
   doc.tabla([
     { titulo: 'Capa', campo: 'capa', ancho: 0.24 },
@@ -363,7 +352,6 @@ const construir = async () => {
   doc.nota('El token JWT es la unica fuente de identidad: el identificador del usuario nunca se acepta desde el cliente '
     + 'en las operaciones de creacion, atencion o resolucion de tickets.', { icono: 'escudo' });
 
-  // 3. Modelo de datos
   doc.saltoPagina();
   doc.titulo1('3. Modelo de datos', 'baseDatos');
   doc.parrafo('Estructura fisica implementada segun la especificacion, ampliada con las tablas de bitacora de '
@@ -396,7 +384,6 @@ const construir = async () => {
   doc.titulo2('Esquema DDL implementado');
   doc.codigoFuente(ddl);
 
-  // 4. Permisos
   doc.saltoPagina();
   doc.titulo1('4. Diccionario de permisos atomicos', 'engranaje');
   doc.parrafo('Permisos precargados en la base de datos. La interfaz de administracion construye los roles de forma '
@@ -418,7 +405,6 @@ const construir = async () => {
     { rol: 'cliente', permisos: 'tickets.crear, tickets.ver_propios' }
   ]);
 
-  // 5. Control de acceso
   doc.titulo1('5. Control de acceso (middleware RBAC)', 'escudo');
   doc.parrafo('Cada endpoint valida el token JWT y luego evalua el guard de permisos. Los permisos vigentes del rol '
     + 'se resuelven contra la base de datos y se mantienen en una cache de corta duracion que se invalida al modificar '
@@ -438,7 +424,6 @@ const construir = async () => {
     "};"
   ].join('\n'));
 
-  // 6. Ciclo de vida
   doc.saltoPagina();
   doc.titulo1('6. Ciclo de vida del ticket', 'flujo');
   doc.tabla([
@@ -475,7 +460,6 @@ const construir = async () => {
   doc.nota('Cada transicion registra su accion en la bitacora de auditoria, emite el evento correspondiente por '
     + 'WebSockets y archiva automaticamente un acta PDF del ticket en el repositorio documental.', { icono: 'documento' });
 
-  // 7. API
   doc.titulo1('7. Endpoints expuestos', 'red');
   doc.parrafo('Prefijo base de la API: /api/v1');
   doc.tabla([
@@ -485,7 +469,6 @@ const construir = async () => {
     { titulo: 'Descripcion', campo: 'descripcion', ancho: 0.32 }
   ], ENDPOINTS, { alturaFila: 15 });
 
-  // 8. Tiempo real
   doc.saltoPagina();
   doc.titulo1('8. Canal de tiempo real', 'red');
   doc.parrafo('El socket se autentica con el mismo token JWT en el handshake. Cada usuario se une a una sala personal '
@@ -496,7 +479,6 @@ const construir = async () => {
     { titulo: 'Descripcion', campo: 'descripcion', ancho: 0.48 }
   ], EVENTOS);
 
-  // 9. Documentacion automatica
   doc.titulo1('9. Modulo de documentacion en PDF', 'documento');
   doc.parrafo('Todas las salidas documentales del sistema se generan con un unico motor que garantiza identidad '
     + 'visual uniforme: encabezado institucional, iconografia vectorial, tablas con encabezado repetido y pie de '
@@ -519,7 +501,6 @@ const construir = async () => {
     'documento, grafico, baseDatos, flujo y red para reportes y arquitectura.'
   ], 'check');
 
-  // 9 bis. Inventario
   doc.titulo1('10. Modulo de inventario de sistemas', 'baseDatos');
   doc.parrafo('El inventario mantiene el catalogo de articulos y el kardex de movimientos. El saldo de '
     + 'un articulo nunca se edita de forma directa: resulta exclusivamente de las entradas, salidas y '
@@ -540,7 +521,6 @@ const construir = async () => {
     + '25 registros y el maximo admitido es de 200, acotado en el servidor: un cliente no puede solicitar '
     + 'la tabla completa y saturar la memoria del navegador ni la del servidor.');
 
-  // 10 bis. Equipos
   doc.saltoPagina();
   doc.titulo1('11. Modulo de equipos de la empresa', 'engranaje');
   doc.parrafo('Registra el parque informatico con su asignacion por usuario y area, las caracteristicas '
@@ -570,7 +550,6 @@ const construir = async () => {
     + 'deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.',
   { icono: 'alerta', color: PALETA.critico });
 
-  // 12. Sucursales y compras
   doc.saltoPagina();
   doc.titulo1('12. Sucursales y circuito de compras', 'red');
   doc.parrafo('El usuario pertenece a una sucursal y a un area, ambas independientes: las mismas areas '
@@ -606,9 +585,7 @@ const construir = async () => {
   doc.nota('El orden del circuito se valida en el servidor: Gerencia no puede aprobar antes que TI, ni se '
     + 'puede registrar una compra sin aprobacion previa.', { icono: 'escudo' });
 
-  // 13. Despliegue
   doc.saltoPagina();
-  // 13. Seguridad
   doc.saltoPagina();
   doc.titulo1('13. Seguridad de la plataforma', 'escudo');
   doc.parrafo('La credencial de sesion no se guarda en el almacenamiento del navegador. Al iniciar sesion el '
@@ -670,7 +647,6 @@ const construir = async () => {
     + 'transferir el cuerpo. Toda escritura sobre un catalogo descarta su clave, de modo que un cambio '
     + 'administrativo se ve de inmediato y no queda a la espera de que venza un plazo.');
 
-  // 14. Pruebas
   doc.saltoPagina();
   doc.titulo1('14. Verificacion y resultado de las pruebas', 'escudo');
   doc.parrafo('El repositorio incorpora una bateria de pruebas automatizadas que recorre el sistema de extremo a '
@@ -725,7 +701,6 @@ const construir = async () => {
     'cd ../mobile && npm install && npm start'
   ].join('\n'));
 
-  // 11. Inventario
   doc.titulo1('16. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
@@ -733,7 +708,6 @@ const construir = async () => {
     { titulo: 'Contenido', campo: 'descripcion', ancho: 0.44 }
   ], ARCHIVOS);
 
-  // 12. Credenciales y control de versiones
   doc.titulo1('17. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },

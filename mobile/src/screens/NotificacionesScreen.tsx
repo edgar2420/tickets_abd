@@ -24,7 +24,6 @@ export const NotificacionesScreen = ({ navigation }: Propiedades) => {
     void cargar();
   }, [cargar]);
 
-  // Las notificaciones llegan por el canal de tiempo real sin necesidad de recargar.
   useEffect(() => {
     const socket = obtenerSocket();
     if (!socket) return;

@@ -30,7 +30,6 @@ const SELECT_SUCURSAL = `
 export const sucursalesRouter = Router();
 sucursalesRouter.use(autenticar);
 
-/** Catalogo disponible para cualquier usuario autenticado: alimenta los selectores. */
 sucursalesRouter.get('/', cachearEnCliente(120), asyncHandler(async (req, res) => {
   const soloActivas = req.query.activas === 'true';
   const rows = await enCache(`sucursales:${soloActivas}`, 120_000, async () => (await query(
@@ -76,7 +75,6 @@ sucursalesRouter.put('/:id', requierePermiso('admin.sucursales'), validate(sucur
     res.json({ ok: true, datos: rows[0] });
   }));
 
-/** Baja logica: los usuarios y equipos ya ubicados conservan su sucursal. */
 sucursalesRouter.delete('/:id', requierePermiso('admin.sucursales'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE sucursales SET activo = FALSE WHERE id = $1 RETURNING id, nombre', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La sucursal indicada no existe');

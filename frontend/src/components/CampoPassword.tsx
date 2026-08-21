@@ -13,11 +13,6 @@ interface Propiedades {
   conIcono?: boolean;
 }
 
-/**
- * Campo de contrasena con dos ayudas para el usuario:
- * el boton de ojo alterna entre texto oculto y visible, y se avisa cuando
- * el teclado tiene activado el bloqueo de mayusculas.
- */
 export const CampoPassword = ({
   id = 'password',
   etiqueta = 'Contrasena',
@@ -32,7 +27,6 @@ export const CampoPassword = ({
   const [visible, setVisible] = useState(false);
   const [mayusculas, setMayusculas] = useState(false);
 
-  // getModifierState informa el estado real de la tecla de bloqueo de mayusculas
   const revisarMayusculas = (evento: KeyboardEvent<HTMLInputElement> | MouseEvent<HTMLInputElement>) => {
     const estado = evento.getModifierState?.('CapsLock');
     if (typeof estado === 'boolean') setMayusculas(estado);

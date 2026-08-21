@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { AlertTriangle, Building, CheckCircle2, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
-import { api, descargarPdf } from '../lib/api';
-import { usarAuth } from '../context/AuthContext';
-import { usarNotificaciones } from '../context/NotificacionesContext';
-import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel, Vacio } from '../components/Ui';
-import type { Distribucion, Indicadores } from '../lib/tipos';
+import { api, descargarPdf } from '../../lib/api';
+import { usarAuth } from '../../context/AuthContext';
+import { usarNotificaciones } from '../../context/NotificacionesContext';
+import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel, Vacio } from '../../components/Ui';
+import type { Distribucion, Indicadores } from '../../lib/tipos';
 
 interface Ranking extends Distribucion {
   detalle?: string;
@@ -23,7 +23,6 @@ interface RespuestaTablero {
   };
 }
 
-/** Barras horizontales proporcionales al valor mayor de la serie. */
 const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
   const maximo = Math.max(1, ...filas.map((f) => f.total));
   return (
@@ -47,7 +46,6 @@ const BarraDistribucion = ({ filas }: { filas: Distribucion[] }) => {
   );
 };
 
-/** Ranking numerado de quienes generan mas requerimientos. */
 const RankingSolicitantes = ({ filas }: { filas: Ranking[] }) => {
   if (filas.length === 0) return <Vacio icono={Users} texto="Todavia no hay tickets registrados" />;
   const maximo = Math.max(1, ...filas.map((f) => f.total));
@@ -94,7 +92,6 @@ export const Tablero = () => {
     }
   }, []);
 
-  // Recarga automatica ante cualquier evento de tiempo real sobre tickets
   useEffect(() => {
     void cargar();
   }, [cargar, ultimoEventoTicket]);

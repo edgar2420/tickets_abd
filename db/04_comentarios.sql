@@ -1,9 +1,3 @@
--- =====================================================================
--- CONVERSACION Y ADJUNTOS DEL TICKET
--- Permite que solicitante y tecnico intercambien mensajes sobre el
--- requerimiento y acompanen capturas de pantalla del error.
--- =====================================================================
-
 CREATE TABLE IF NOT EXISTS comentarios (
     id         SERIAL PRIMARY KEY,
     ticket_id  INT NOT NULL REFERENCES tickets(id) ON DELETE CASCADE,

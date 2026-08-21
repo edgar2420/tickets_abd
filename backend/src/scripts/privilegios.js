@@ -3,33 +3,9 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-/**
- * Crea el rol con el que la API trabaja a diario.
- *
- * Hasta ahora la aplicacion se conectaba con la cuenta dueña de las tablas,
- * capaz de borrarlas o alterarlas. Una falla de inyeccion en cualquier
- * consulta habria tenido ese alcance. El rol que se crea aqui solo puede
- * leer y escribir filas: no puede crear, alterar ni destruir estructuras,
- * ni vaciar tablas de un golpe.
- *
- * Es ademas el requisito previo para cualquier politica de seguridad por
- * fila, porque el dueño de una tabla las omite salvo que se fuercen.
- *
- * Uso:
- *   node src/scripts/privilegios.js
- *
- * Toma la clave del nuevo rol de DB_APP_PASSWORD y se conecta con las
- * credenciales administradoras de DB_ADMIN_USER y DB_ADMIN_PASSWORD.
- */
-
 const ROL = process.env.DB_APP_USER ?? 'tickets_api';
 const CLAVE = process.env.DB_APP_PASSWORD;
 
-/**
- * Una sentencia CREATE ROLE no admite parametros: la clave debe ir escrita
- * en el texto. Por eso se exige un formato acotado y se rechaza cualquier
- * caracter que pudiera cerrar la cadena y alterar la sentencia.
- */
 const FORMATO_CLAVE = /^[A-Za-z0-9._-]{16,}$/;
 const FORMATO_ROL = /^[a-z_][a-z0-9_]{2,62}$/;
 

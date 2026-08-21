@@ -82,13 +82,11 @@ const obtener = async (id) => {
   return rows[0];
 };
 
-/** Solo el solicitante y quienes ven el conjunto acceden a una solicitud. */
 const visible = (solicitud, usuario) => {
   if (usuario.permisos.includes('compras.ver_todas')) return true;
   return solicitud.solicitante_id === usuario.id;
 };
 
-/** Verifica que la solicitud este en alguno de los estados admitidos para la accion. */
 const exigirEstado = (solicitud, estados) => {
   if (!estados.includes(solicitud.estado)) {
     throw HttpError.conflict(
@@ -100,7 +98,6 @@ const exigirEstado = (solicitud, estados) => {
 export const comprasRouter = Router();
 comprasRouter.use(autenticar);
 
-/** Indicadores del modulo. */
 comprasRouter.get('/resumen', requierePermiso('compras.ver_todas', 'compras.solicitar'),
   asyncHandler(async (req, res) => {
     const verTodas = req.usuario.permisos.includes('compras.ver_todas');
@@ -122,7 +119,6 @@ comprasRouter.get('/resumen', requierePermiso('compras.ver_todas', 'compras.soli
     res.json({ ok: true, datos: rows[0] });
   }));
 
-/** Listado con alcance segun permiso: propias o todas. */
 comprasRouter.get('/', requierePermiso('compras.ver_todas', 'compras.solicitar'),
   asyncHandler(async (req, res) => {
     const { limite, pagina, desplazamiento } = paginacion(req.query);
@@ -158,7 +154,6 @@ comprasRouter.get('/:id', requierePermiso('compras.ver_todas', 'compras.solicita
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** El solicitante registra el pedido; su sucursal y area salen de su perfil. */
 comprasRouter.post('/', requierePermiso('compras.solicitar'), validate(solicitudSchema),
   asyncHandler(async (req, res) => {
     const { titulo, justificacion, tipo_equipo, cantidad, especificaciones, prioridad } = req.body;
@@ -187,7 +182,6 @@ comprasRouter.post('/', requierePermiso('compras.solicitar'), validate(solicitud
     res.status(201).json({ ok: true, datos: solicitud });
   }));
 
-/** Paso 1: TI revisa la viabilidad tecnica y cotiza. */
 comprasRouter.put('/:id/revisar', requierePermiso('compras.revisar'), validate(revisionSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -218,7 +212,6 @@ comprasRouter.put('/:id/revisar', requierePermiso('compras.revisar'), validate(r
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Paso 2: TI da el visto bueno tecnico y la eleva a Gerencia. */
 comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validate(revisionSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -243,7 +236,6 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
       usuarioId: req.usuario.id, entidad: 'COMPRA', entidadId: id, accion: 'APROBAR_TI', ip: req.ip
     });
 
-    // El aviso viaja a quienes deben aprobar el presupuesto
     const { rows: aprobadores } = await query(
       `SELECT DISTINCT u.id FROM usuarios u
          JOIN rol_permisos rp ON rp.rol_id = u.rol_id
@@ -267,7 +259,6 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Paso 3: Gerencia aprueba el presupuesto. */
 comprasRouter.put('/:id/aprobar-gerencia', requierePermiso('compras.aprobar'), validate(gerenciaSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -302,7 +293,6 @@ comprasRouter.put('/:id/aprobar-gerencia', requierePermiso('compras.aprobar'), v
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Rechazo, admitido en cualquier instancia previa a la compra. */
 comprasRouter.put('/:id/rechazar', requierePermiso('compras.revisar', 'compras.aprobar'),
   validate(rechazoSchema), asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -332,7 +322,6 @@ comprasRouter.put('/:id/rechazar', requierePermiso('compras.revisar', 'compras.a
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Paso 4: se registra la compra ejecutada. */
 comprasRouter.put('/:id/comprar', requierePermiso('compras.gestionar'), validate(compraSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -362,7 +351,6 @@ comprasRouter.put('/:id/comprar', requierePermiso('compras.gestionar'), validate
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Paso 5: entrega al solicitante, con vinculo opcional al equipo dado de alta. */
 comprasRouter.put('/:id/entregar', requierePermiso('compras.gestionar'), validate(entregaSchema),
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
@@ -397,7 +385,6 @@ comprasRouter.put('/:id/entregar', requierePermiso('compras.gestionar'), validat
     res.json({ ok: true, datos: solicitud });
   }));
 
-/** Reporte consolidado del modulo. */
 comprasRouter.get('/reporte/pdf', requierePermiso('compras.ver_todas'), asyncHandler(async (req, res) => {
   const { rows } = await query(`${SELECT_SOLICITUD} ORDER BY c.fecha_creacion DESC LIMIT 2000`);
   const { rows: resumen } = await query(
@@ -416,7 +403,6 @@ comprasRouter.get('/reporte/pdf', requierePermiso('compras.ver_todas'), asyncHan
   res.send(buffer);
 }));
 
-/** Ficha individual con toda la trazabilidad del flujo. */
 comprasRouter.get('/:id/pdf', requierePermiso('compras.ver_todas', 'compras.solicitar'),
   asyncHandler(async (req, res) => {
     const solicitud = await obtener(req.params.id);

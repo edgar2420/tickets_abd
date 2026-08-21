@@ -1,12 +1,5 @@
 import { query, pool } from '../src/config/db.js';
 
-/**
- * Retira los datos que dejan las pruebas automatizadas.
- *
- * Todo lo que crean los guiones de QA lleva el prefijo "QA - " en su
- * titulo, de modo que se puede identificar sin ambiguedad y sin tocar la
- * informacion real de la empresa.
- */
 const PREFIJO = 'QA - %';
 
 const borrar = async (descripcion, sentencia, parametros = [PREFIJO]) => {

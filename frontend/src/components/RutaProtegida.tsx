@@ -4,7 +4,6 @@ import { ShieldAlert } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { Cargando } from './Ui';
 
-/** Restringe el acceso a una ruta segun los permisos atomicos del usuario. */
 export const RutaProtegida = ({ permisos = [], children }: { permisos?: string[]; children: ReactNode }) => {
   const { usuario, cargando, puede } = usarAuth();
   const ubicacion = useLocation();

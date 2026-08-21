@@ -10,7 +10,6 @@ interface EstadoTema {
 
 const Contexto = createContext<EstadoTema | null>(null);
 
-/** Aplica la clase que activa las variantes oscuras de Tailwind. */
 const aplicar = (tema: Tema) => {
   document.documentElement.classList.toggle('dark', tema === 'oscuro');
   document.documentElement.style.colorScheme = tema === 'oscuro' ? 'dark' : 'light';
@@ -20,7 +19,6 @@ export const ProveedorTema = ({ children }: { children: ReactNode }) => {
   const [tema, setTema] = useState<Tema>(() => {
     const guardado = localStorage.getItem(CLAVE) as Tema | null;
     if (guardado === 'claro' || guardado === 'oscuro') return guardado;
-    // Sin preferencia guardada se respeta la del sistema operativo
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'oscuro' : 'claro';
   });
 

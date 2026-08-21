@@ -3,10 +3,6 @@ import http from 'node:http';
 const BASE = 'http://localhost:4000/api/v1';
 const ORIGEN = 'http://localhost:5173';
 
-/**
- * Cliente crudo para las peticiones condicionales: el fetch de Node
- * gestiona la cache por su cuenta y no reenvia la cabecera tal cual.
- */
 const pedirCrudo = (ruta, cabeceras) => new Promise((resolve) => {
   const peticion = http.request(
     { host: 'localhost', port: 4000, path: ruta, method: 'GET', headers: cabeceras },

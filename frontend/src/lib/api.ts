@@ -2,12 +2,6 @@ const BASE = import.meta.env.VITE_API_URL ?? '/api/v1';
 const COOKIE_CSRF = 'tickets_csrf';
 const CABECERA_CSRF = 'X-CSRF-Token';
 
-/**
- * La credencial vive en una cookie httpOnly que el navegador envia sola y
- * que ningun script puede leer. De la sesion solo se conserva aqui el
- * token de verificacion de origen, que debe reenviarse por cabecera en
- * cada operacion de escritura.
- */
 const leerCookie = (nombre: string): string | null => {
   const par = document.cookie
     .split(';')
@@ -69,7 +63,6 @@ export const api = async <T,>(ruta: string, opciones: Opciones = {}): Promise<T>
   return datos as T;
 };
 
-/** Envia un formulario con archivos adjuntos. */
 export const apiFormData = async <T,>(ruta: string, formulario: FormData): Promise<T> => {
   const respuesta = await fetch(construirUrl(ruta), {
     method: 'POST',
@@ -87,11 +80,6 @@ export const apiFormData = async <T,>(ruta: string, formulario: FormData): Promi
   return datos as T;
 };
 
-/**
- * Descarga un adjunto protegido y devuelve una URL temporal utilizable en
- * una etiqueta de imagen. El endpoint exige sesion, por eso no puede
- * referenciarse directamente desde el atributo src.
- */
 export const urlAdjunto = async (id: number): Promise<string> => {
   const respuesta = await fetch(construirUrl(`/adjuntos/${id}`), { credentials: 'include' });
   alExpirar(respuesta);
@@ -99,7 +87,6 @@ export const urlAdjunto = async (id: number): Promise<string> => {
   return URL.createObjectURL(await respuesta.blob());
 };
 
-/** Descarga un documento PDF y lo entrega al navegador. */
 export const descargarPdf = async (
   ruta: string,
   parametros?: Opciones['parametros'],

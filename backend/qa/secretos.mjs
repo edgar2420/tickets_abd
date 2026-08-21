@@ -1,14 +1,6 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 
-/**
- * Rastrea credenciales escritas en el codigo y en el historial de git.
- *
- * Una clave publicada en un repositorio queda comprometida aunque se borre
- * despues: el commit anterior sigue ahi. Por eso se revisan las dos cosas,
- * el arbol de trabajo y todo lo que alguna vez se versiono.
- */
-
 const RAIZ = new URL('../..', import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1');
 
 let fallos = 0;

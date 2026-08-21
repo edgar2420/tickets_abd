@@ -23,7 +23,6 @@ if (!existsSync(DIRECTORIO)) mkdirSync(DIRECTORIO, { recursive: true });
 
 const almacenamiento = multer.diskStorage({
   destination: (_req, _file, cb) => cb(null, DIRECTORIO),
-  // Nombre opaco en disco: evita colisiones y no expone el nombre original
   filename: (_req, file, cb) => cb(null, `${randomUUID()}${path.extname(file.originalname).toLowerCase()}`)
 });
 
@@ -38,7 +37,6 @@ const subida = multer({
   }
 });
 
-/** Traduce los errores propios de multer a respuestas del sistema. */
 const recibirArchivos = (req, res, next) => subida.array('archivos', MAXIMO_ARCHIVOS)(req, res, (error) => {
   if (!error) return next();
   if (error instanceof multer.MulterError) {
@@ -49,7 +47,6 @@ const recibirArchivos = (req, res, next) => subida.array('archivos', MAXIMO_ARCH
   return next(error);
 });
 
-/** Comprueba que el usuario tenga visibilidad sobre el ticket indicado. */
 const ticketVisible = async (ticketId, usuario) => {
   const ticket = await obtenerTicket(ticketId);
   const esPropio = ticket.solicitante_id === usuario.id;
@@ -76,14 +73,12 @@ const SELECT_COMENTARIOS = `
 export const comentariosRouter = Router({ mergeParams: true });
 comentariosRouter.use(autenticar);
 
-/** Conversacion completa del ticket. */
 comentariosRouter.get('/', asyncHandler(async (req, res) => {
   await ticketVisible(req.params.id, req.usuario);
   const { rows } = await query(SELECT_COMENTARIOS, [req.params.id]);
   res.json({ ok: true, datos: rows });
 }));
 
-/** Nuevo mensaje, con hasta cinco imagenes o documentos adjuntos. */
 comentariosRouter.post('/', recibirArchivos, asyncHandler(async (req, res) => {
   const ticketId = Number(req.params.id);
   const ticket = await ticketVisible(ticketId, req.usuario);
@@ -119,7 +114,6 @@ comentariosRouter.post('/', recibirArchivos, asyncHandler(async (req, res) => {
     detalle: { adjuntos: archivos.length }, ip: req.ip
   });
 
-  // El aviso viaja a la contraparte: si escribe el solicitante avisa al tecnico y viceversa
   const destinatarios = new Set();
   if (ticket.solicitante_id !== req.usuario.id) destinatarios.add(ticket.solicitante_id);
   if (ticket.asignado_id && ticket.asignado_id !== req.usuario.id) destinatarios.add(ticket.asignado_id);
@@ -141,7 +135,6 @@ comentariosRouter.post('/', recibirArchivos, asyncHandler(async (req, res) => {
 export const adjuntosRouter = Router();
 adjuntosRouter.use(autenticar);
 
-/** Entrega el archivo tras verificar la visibilidad del ticket al que pertenece. */
 adjuntosRouter.get('/:id', sinCache, asyncHandler(async (req, res) => {
   const { rows } = await query(
     'SELECT ticket_id, nombre_original, nombre_archivo, tipo_mime FROM adjuntos WHERE id = $1',

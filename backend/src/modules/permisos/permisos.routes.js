@@ -7,7 +7,6 @@ import { asyncHandler } from '../../utils/httpError.js';
 export const permisosRouter = Router();
 permisosRouter.use(autenticar);
 
-/** Catalogo de permisos atomicos agrupado por modulo (alimenta la matriz de checkboxes). */
 permisosRouter.get('/', requierePermiso('admin.roles'), asyncHandler(async (_req, res) => {
   const { rows } = await query('SELECT id, codigo, descripcion, modulo FROM permisos ORDER BY modulo, codigo');
   const agrupados = rows.reduce((acumulado, permiso) => {

@@ -17,7 +17,6 @@ const areaSchema = z.object({
 export const areasRouter = Router();
 areasRouter.use(autenticar);
 
-// Listado disponible para cualquier usuario autenticado (alimenta selectores del formulario)
 areasRouter.get('/', cachearEnCliente(120), asyncHandler(async (req, res) => {
   const soloActivas = req.query.activas === 'true';
   const rows = await enCache(`areas:${soloActivas}`, 120_000, async () => (await query(
@@ -49,7 +48,6 @@ areasRouter.put('/:id', requierePermiso('admin.areas'), validate(areaSchema), as
   res.json({ ok: true, datos: rows[0] });
 }));
 
-// Baja logica: se preserva la integridad referencial con usuarios existentes
 areasRouter.delete('/:id', requierePermiso('admin.areas'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE areas SET activo = FALSE WHERE id = $1 RETURNING *', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('El area indicada no existe');

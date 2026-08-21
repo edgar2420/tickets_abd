@@ -2,10 +2,6 @@ import type { EstadoTicket, PrioridadTicket } from './tipos';
 
 export const codigoTicket = (id: number) => `TI-${String(id).padStart(5, '0')}`;
 
-/**
- * Importes en bolivianos. El sistema opera en Bolivia y todos los montos
- * del circuito de compras se expresan en esa moneda.
- */
 export const montoBs = (valor: string | number | null | undefined) => {
   if (valor === null || valor === undefined || valor === '') return null;
   const numero = Number(valor);
@@ -19,7 +15,6 @@ export const fechaHora = (valor: string | null | undefined) =>
 export const fechaCorta = (valor: string | null | undefined) =>
   valor ? new Date(valor).toLocaleDateString('es-BO') : '-';
 
-/** Convierte horas decimales en un texto legible: "2 h 15 min". */
 export const duracionLegible = (horas: number | null | undefined) => {
   if (horas === null || horas === undefined) return 'No registrado';
   const minutosTotales = Math.max(0, Math.round(Number(horas) * 60));
@@ -31,7 +26,6 @@ export const duracionLegible = (horas: number | null | undefined) => {
   return `${minutos} min`;
 };
 
-/** Tamano de archivo legible. */
 export const pesoLegible = (bytes: number) => {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -58,11 +52,9 @@ export const estiloPrioridad: Record<PrioridadTicket, string> = {
   'Baja': 'bg-green-100 text-green-800 border-green-300 dark:bg-green-500/15 dark:text-green-300 dark:border-green-500/30',
   'Media': 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-500/15 dark:text-yellow-300 dark:border-yellow-500/30',
   'Alta': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/30',
-  // La prioridad critica parpadea para destacar sobre el resto del listado
   'Critica': 'bg-red-100 text-red-800 border-red-300 animate-pulse dark:bg-red-500/20 dark:text-red-300 dark:border-red-500/40'
 };
 
-/** Paleta de las categorias administrables, resuelta desde el token guardado en la base. */
 export const estiloCategoria: Record<string, string> = {
   celeste: 'bg-sky-100 text-sky-800 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
   violeta: 'bg-violet-100 text-violet-800 border-violet-300 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30',

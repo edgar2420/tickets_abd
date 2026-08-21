@@ -1,7 +1,6 @@
 import { query } from '../config/db.js';
 import { emitir, salaUsuario, SALA_TECNICOS } from '../realtime/socket.js';
 
-/** Persiste una notificacion y la emite en tiempo real al destinatario. */
 export const notificarUsuario = async ({ usuarioId, ticketId = null, tipo, titulo, mensaje }) => {
   const { rows } = await query(
     `INSERT INTO notificaciones (usuario_id, ticket_id, tipo, titulo, mensaje)
@@ -13,7 +12,6 @@ export const notificarUsuario = async ({ usuarioId, ticketId = null, tipo, titul
   return rows[0];
 };
 
-/** Notifica a todo el equipo tecnico (usuarios con permiso tickets.ver_todos). */
 export const notificarEquipoTecnico = async ({ ticketId = null, tipo, titulo, mensaje, excluirUsuarioId = null }) => {
   const { rows } = await query(
     `SELECT DISTINCT u.id

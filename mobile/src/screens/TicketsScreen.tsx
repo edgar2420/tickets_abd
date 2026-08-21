@@ -32,7 +32,6 @@ export const TicketsScreen = ({ navigation }: Propiedades) => {
     void cargar();
   }, [cargar]);
 
-  // Recarga automatica ante eventos de tiempo real.
   useEffect(() => {
     const socket = obtenerSocket();
     if (!socket) return;

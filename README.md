@@ -5,6 +5,15 @@ centralizada para el departamento de Tecnologias de la Informacion, con trazabil
 sobre quien solicito, quien atendio y quien resolvio cada ticket, sobre una arquitectura de
 seguridad basada en roles con asignacion dinamica de permisos.
 
+## Arquitectura
+
+El codigo esta organizado por modulos: todo lo de un tema vive en su propia carpeta.
+La guia completa, con la anatomia de un modulo y los pasos para agregar una pantalla
+o un endpoint, esta en [ARQUITECTURA.md](ARQUITECTURA.md).
+
+El codigo no lleva comentarios: cuando un bloque necesita explicacion se parte en
+funciones con nombre propio hasta que se lea solo.
+
 ## Contenido del repositorio
 
 | Carpeta | Contenido |
@@ -572,4 +581,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: STD-2026-TI - Version 1.11.0
+Documento de referencia: STD-2026-TI - Version 2.0.0

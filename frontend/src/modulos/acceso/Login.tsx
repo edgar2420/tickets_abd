@@ -3,9 +3,9 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import {
   BellRing, FileText, Loader2, LockKeyhole, LogIn, ShieldCheck, TicketCheck, User
 } from 'lucide-react';
-import { usarAuth } from '../context/AuthContext';
-import { Alerta } from '../components/Ui';
-import { CampoPassword } from '../components/CampoPassword';
+import { usarAuth } from '../../context/AuthContext';
+import { Alerta } from '../../components/Ui';
+import { CampoPassword } from '../../components/CampoPassword';
 
 const CARACTERISTICAS = [
   { icono: TicketCheck, titulo: 'Trazabilidad completa', detalle: 'Quien solicito, quien atendio y quien resolvio cada requerimiento.' },
@@ -39,7 +39,7 @@ export const Login = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-institucional-900">
-      {/* Fondo institucional: se mantiene legible con un velo lateral, sin cubrir el arte */}
+      {}
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: 'url(/fondo.jpg)' }}
@@ -54,7 +54,7 @@ export const Login = () => {
         <main className="flex flex-1 items-center justify-center px-4 py-10 sm:px-8">
           <div className="grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_minmax(380px,420px)] lg:gap-16">
 
-            {/* Presentacion institucional */}
+            {}
             <section className="hidden lg:block">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-institucional-100 backdrop-blur">
                 <ShieldCheck className="h-3.5 w-3.5" />
@@ -85,7 +85,7 @@ export const Login = () => {
               </ul>
             </section>
 
-            {/* Formulario de acceso */}
+            {}
             <section className="mx-auto w-full max-w-md">
               <div className="mb-6 text-center lg:hidden">
                 <ShieldCheck className="mx-auto h-10 w-10 text-institucional-200" />

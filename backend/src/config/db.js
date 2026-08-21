@@ -17,7 +17,6 @@ pool.on('error', (err) => {
 
 export const query = (text, params) => pool.query(text, params);
 
-/** Ejecuta una funcion dentro de una transaccion SQL. */
 export const withTransaction = async (fn) => {
   const client = await pool.connect();
   try {

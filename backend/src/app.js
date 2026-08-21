@@ -26,7 +26,6 @@ import { inventarioRouter } from './modules/inventario/inventario.routes.js';
 import { equiposRouter } from './modules/equipos/equipos.routes.js';
 import { comprasRouter } from './modules/compras/compras.routes.js';
 
-/** Techo general de peticiones, para que un cliente no sature el servicio. */
 const limitadorGeneral = rateLimit({
   windowMs: 60 * 1000,
   max: 300,
@@ -43,7 +42,6 @@ export const crearApp = () => {
   app.use(forzarHttps);
 
   app.use(helmet({
-    // La interfaz se sirve aparte; la API solo responde datos y documentos
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'none'"],
@@ -72,7 +70,7 @@ export const crearApp = () => {
   app.get('/salud', (_req, res) => res.json({
     ok: true,
     servicio: 'API Sistema de Tickets TI',
-    version: '1.11.0',
+    version: '2.0.0',
     autor: env.autor,
     modulo: env.autorRol,
     fecha: new Date().toISOString()
