@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-backend",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "API REST + WebSockets del Sistema de Gestion de Tickets TI (STD-2026-TI)",
   "author": "Ing. Edgar Rojas Apaza",
   "license": "UNLICENSED",
