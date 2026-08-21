@@ -10,7 +10,7 @@ export const PiePagina = () => (
         <span className="text-slate-400 dark:text-slate-400">|</span>
         <span>Desarrollo de Modulo de Tickets</span>
       </p>
-      <p>Sistema de Gestion de Tickets TI - Version 1.0.0 - Documento STD-2026-TI</p>
+      <p>Sistema de Gestion de Tickets TI - Version 1.10.0 - Documento STD-2026-TI</p>
     </div>
   </footer>
 );
