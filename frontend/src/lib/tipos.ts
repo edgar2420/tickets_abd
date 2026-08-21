@@ -99,7 +99,7 @@ export interface SolicitudCompra {
   fecha_revision: string | null;
   observacion_ti: string | null;
   monto_estimado: string | null;
-  proveedor_sugerido: string | null;
+  equipo_sugerido: string | null;
   aprobado_por_nombre: string | null;
   aprobado_por_rol: string | null;
   aprobado_por_area: string | null;

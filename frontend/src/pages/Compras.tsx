@@ -222,7 +222,7 @@ export const Compras = () => {
   const abrirAccion = (solicitud: SolicitudCompra, tipo: string) => {
     setDatosAccion({
       monto_estimado: solicitud.monto_estimado ?? '',
-      proveedor_sugerido: solicitud.proveedor_sugerido ?? '',
+      equipo_sugerido: solicitud.equipo_sugerido ?? '',
       observacion_ti: solicitud.observacion_ti ?? ''
     });
     if (tipo === 'entregar' && equipos.length === 0) {
@@ -243,12 +243,12 @@ export const Compras = () => {
       revisar: {
         observacion_ti: datosAccion.observacion_ti || null,
         monto_estimado: datosAccion.monto_estimado ? Number(datosAccion.monto_estimado) : null,
-        proveedor_sugerido: datosAccion.proveedor_sugerido || null
+        equipo_sugerido: datosAccion.equipo_sugerido || null
       },
       'aprobar-ti': {
         observacion_ti: datosAccion.observacion_ti || null,
         monto_estimado: datosAccion.monto_estimado ? Number(datosAccion.monto_estimado) : null,
-        proveedor_sugerido: datosAccion.proveedor_sugerido || null
+        equipo_sugerido: datosAccion.equipo_sugerido || null
       },
       'aprobar-gerencia': { observacion_gerencia: datosAccion.observacion_gerencia || null },
       rechazar: { motivo_rechazo: datosAccion.motivo_rechazo ?? '' },
@@ -284,7 +284,7 @@ export const Compras = () => {
   );
 
   const TITULOS: Record<string, string> = {
-    revisar: 'Revision tecnica de TI',
+    revisar: 'Revision tecnica: sugerir el equipo',
     'aprobar-ti': 'Aprobar tecnicamente y elevar a Gerencia',
     'aprobar-gerencia': 'Aprobacion de Gerencia',
     rechazar: 'Rechazar la solicitud',
@@ -433,7 +433,7 @@ export const Compras = () => {
                         <BotonAccion icono={Info} rotulo="Ver ficha" alPulsar={() => setFicha(s)} />
                         {puede('compras.revisar') && ['Solicitada', 'En revision'].includes(s.estado) && (
                           <>
-                            <BotonAccion icono={ClipboardCheck} rotulo="Revisar y cotizar" alPulsar={() => abrirAccion(s, 'revisar')} />
+                            <BotonAccion icono={ClipboardCheck} rotulo="Revisar y sugerir equipo" alPulsar={() => abrirAccion(s, 'revisar')} />
                             <BotonAccion icono={ThumbsUp} rotulo="Aprobar tecnicamente" tono="exito" alPulsar={() => abrirAccion(s, 'aprobar-ti')} />
                           </>
                         )}
@@ -532,7 +532,7 @@ export const Compras = () => {
 
       {/* Ficha con el circuito completo */}
       <Modal titulo={ficha ? `Solicitud ${codigoCompra(ficha.id)}` : 'Solicitud'} icono={Info}
-        abierto={ficha !== null} alCerrar={() => setFicha(null)} ancho="max-w-2xl">
+        abierto={ficha !== null} alCerrar={() => setFicha(null)} ancho="max-w-5xl">
         {ficha && (
           <div className="space-y-5">
             <div className="superficie flex flex-wrap items-start justify-between gap-3 p-4">
@@ -547,17 +547,33 @@ export const Compras = () => {
 
             <Recorrido estado={ficha.estado} />
 
-            <div>
-              <p className="etiqueta">Justificacion</p>
-              <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ficha.justificacion}</p>
-            </div>
+            <div className="grid gap-5 lg:grid-cols-2">
+              <div className="space-y-4">
+                <div>
+                  <p className="etiqueta">Justificacion</p>
+                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ficha.justificacion}</p>
+                </div>
 
-            {ficha.especificaciones && (
-              <div>
-                <p className="etiqueta">Especificaciones sugeridas</p>
-                <p className="text-sm text-slate-700 dark:text-slate-200">{ficha.especificaciones}</p>
+                {ficha.especificaciones && (
+                  <div>
+                    <p className="etiqueta">Especificaciones que pidio el solicitante</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-200">{ficha.especificaciones}</p>
+                  </div>
+                )}
+
+                {ficha.equipo_sugerido && (
+                  <div>
+                    <p className="etiqueta">Equipo sugerido por TI</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-200">{ficha.equipo_sugerido}</p>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-3 gap-3">
+                  <Dato etiqueta="Cantidad" valor={ficha.cantidad} />
+                  <Dato etiqueta="Referencial" valor={montoBs(ficha.monto_estimado)} />
+                  <Dato etiqueta="Monto final" valor={montoBs(ficha.monto_final)} />
+                </div>
               </div>
-            )}
 
             <div>
               <p className="etiqueta">Circuito de aprobacion</p>
@@ -581,12 +597,6 @@ export const Compras = () => {
                 ))}
               </ol>
             </div>
-
-            <div className="grid gap-4 sm:grid-cols-4">
-              <Dato etiqueta="Cantidad" valor={ficha.cantidad} />
-              <Dato etiqueta="Monto estimado" valor={montoBs(ficha.monto_estimado)} />
-              <Dato etiqueta="Monto final" valor={montoBs(ficha.monto_final)} />
-              <Dato etiqueta="Proveedor" valor={ficha.proveedor_sugerido} />
             </div>
 
             {ficha.aprobado_por_nombre && (
@@ -618,7 +628,8 @@ export const Compras = () => {
 
       {/* Acciones del circuito */}
       <Modal titulo={accion ? TITULOS[accion.tipo] : ''} icono={ClipboardCheck}
-        abierto={accion !== null} alCerrar={() => setAccion(null)} ancho="max-w-lg">
+        abierto={accion !== null} alCerrar={() => setAccion(null)}
+        ancho={['revisar', 'aprobar-ti', 'aprobar-gerencia'].includes(accion?.tipo ?? '') ? 'max-w-4xl' : 'max-w-xl'}>
         {accion && (
           <form onSubmit={ejecutarAccion} className="space-y-4">
             <div className="superficie p-4">
@@ -630,35 +641,99 @@ export const Compras = () => {
 
             {['revisar', 'aprobar-ti'].includes(accion.tipo) && (
               <>
-                {campoAccion('monto_estimado', 'Monto estimado (Bs)', { type: 'number', min: 0, step: '0.01', placeholder: '4500.00' })}
-                {campoAccion('proveedor_sugerido', 'Proveedor sugerido', { maxLength: 150 })}
-                <div>
-                  <label className="etiqueta">Observacion tecnica</label>
-                  <textarea className="campo min-h-24" maxLength={500}
-                    placeholder="Viabilidad tecnica, alternativas evaluadas o condiciones"
-                    value={datosAccion.observacion_ti ?? ''}
-                    onChange={(e) => setDatosAccion((d) => ({ ...d, observacion_ti: e.target.value }))} />
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="space-y-3">
+                    <p className="etiqueta">Lo que pidio el solicitante</p>
+                    <div className="superficie space-y-3 p-4">
+                      <Dato etiqueta="Tipo de equipo" valor={accion.solicitud.tipo_equipo} />
+                      <Dato etiqueta="Cantidad" valor={accion.solicitud.cantidad} />
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          Especificaciones que sugirio
+                        </p>
+                        <p className="mt-0.5 text-sm text-slate-700 dark:text-slate-200">
+                          {accion.solicitud.especificaciones ?? 'No indico ninguna'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                          Justificacion
+                        </p>
+                        <p className="mt-0.5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                          {accion.solicitud.justificacion}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <p className="etiqueta">Lo que recomienda Tecnologias de la Informacion</p>
+                    <div>
+                      <label className="etiqueta">Equipo sugerido</label>
+                      <textarea
+                        className="campo min-h-20"
+                        maxLength={200}
+                        placeholder="Computadora de escritorio, procesador de gama media, 16 GB de memoria y disco solido de 512 GB"
+                        value={datosAccion.equipo_sugerido ?? ''}
+                        onChange={(e) => setDatosAccion((d) => ({ ...d, equipo_sugerido: e.target.value }))}
+                      />
+                      <p className="mt-1 text-xs text-slate-400 dark:text-slate-400">
+                        Describa que maquina conviene comprar. A quien se le compra lo resuelve despues
+                        el area encargada, no la revision tecnica.
+                      </p>
+                    </div>
+                    {campoAccion('monto_estimado', 'Monto referencial (Bs)', {
+                      type: 'number', min: 0, step: '0.01', placeholder: '4500.00'
+                    })}
+                    <p className="-mt-2 text-xs text-slate-400 dark:text-slate-400">
+                      Valor aproximado de mercado, para que Gerencia sepa que monto esta autorizando.
+                    </p>
+                    <div>
+                      <label className="etiqueta">Observacion tecnica</label>
+                      <textarea className="campo min-h-24" maxLength={500}
+                        placeholder="Viabilidad tecnica, alternativas evaluadas o condiciones"
+                        value={datosAccion.observacion_ti ?? ''}
+                        onChange={(e) => setDatosAccion((d) => ({ ...d, observacion_ti: e.target.value }))} />
+                    </div>
+                  </div>
                 </div>
               </>
             )}
 
             {accion.tipo === 'aprobar-gerencia' && (
               <>
-                <div className="grid grid-cols-2 gap-3">
-                  <Dato etiqueta="Monto estimado por TI" valor={montoBs(accion.solicitud.monto_estimado)} />
-                  <Dato etiqueta="Proveedor sugerido" valor={accion.solicitud.proveedor_sugerido} />
-                </div>
-                {accion.solicitud.observacion_ti && (
-                  <div>
-                    <p className="etiqueta">Observacion tecnica de TI</p>
-                    <p className="text-sm text-slate-700 dark:text-slate-200">{accion.solicitud.observacion_ti}</p>
+                <div className="grid gap-4 lg:grid-cols-2">
+                  <div className="superficie space-y-3 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-institucional-700 dark:text-institucional-300">
+                      Lo que pide el solicitante
+                    </p>
+                    <Dato etiqueta="Tipo y cantidad"
+                      valor={`${accion.solicitud.tipo_equipo} - ${accion.solicitud.cantidad} unidad(es)`} />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Justificacion
+                      </p>
+                      <p className="mt-0.5 text-sm leading-relaxed text-slate-700 dark:text-slate-200">
+                        {accion.solicitud.justificacion}
+                      </p>
+                    </div>
                   </div>
-                )}
-                <div>
-                  <p className="etiqueta">Justificacion del solicitante</p>
-                  <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-200">
-                    {accion.solicitud.justificacion}
-                  </p>
+
+                  <div className="superficie space-y-3 p-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-institucional-700 dark:text-institucional-300">
+                      Lo que recomienda TI
+                    </p>
+                    <Dato etiqueta="Equipo sugerido" valor={accion.solicitud.equipo_sugerido} />
+                    <Dato etiqueta="Monto referencial" valor={montoBs(accion.solicitud.monto_estimado)} />
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Observacion tecnica
+                      </p>
+                      <p className="mt-0.5 text-sm text-slate-700 dark:text-slate-200">
+                        {accion.solicitud.observacion_ti ?? 'Sin observaciones'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </>
             )}

@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS solicitudes_compra (
     fecha_revision      TIMESTAMP,
     observacion_ti      VARCHAR(500),
     monto_estimado      NUMERIC(12,2),
-    proveedor_sugerido  VARCHAR(150),
+    equipo_sugerido     VARCHAR(200),
 
     -- Aprobacion presupuestaria de Gerencia
     aprobado_por_id       INT REFERENCES usuarios(id),

@@ -774,9 +774,16 @@ const construir = async () => {
     },
     {
       version: '1.9.0',
-      fecha: new Date().toLocaleDateString('es-BO'),
+      fecha: '21/08/2026',
       descripcion: 'Rol de base sin privilegios de estructura, API cerrada por omision, verificacion del origen '
         + 'declarado, retardo progresivo ante automatismos, reconducido a HTTPS y rastreo de secretos',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '1.11.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Recorrido visible de la solicitud de compra, actualizacion en tiempo real para Gerencia, '
+        + 'importes en bolivianos y revision tecnica centrada en sugerir el equipo',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });

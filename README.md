@@ -572,4 +572,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: STD-2026-TI - Version 1.10.0
+Documento de referencia: STD-2026-TI - Version 1.11.0
