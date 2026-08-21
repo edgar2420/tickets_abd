@@ -420,6 +420,14 @@ explotable por peticiones forjadas entre sitios y por eso queda exento de la ver
 - Freno por direccion: 300 peticiones por minuto en general y 40 intentos **fallidos** de
   acceso cada diez minutos. Los ingresos correctos no consumen el cupo, para que una oficina
   entera detras de una sola direccion publica no se quede fuera.
+- Retardo progresivo ante intentos fallidos: a partir del quinto, cada intento adicional
+  responde medio segundo mas lento, hasta cinco segundos. Una persona no lo nota; un
+  automatismo pasa de miles de pruebas por minuto a unas pocas decenas.
+- Verificacion del origen declarado: toda escritura hecha con cookie debe partir de un origen
+  autorizado. El navegador no permite falsear `Origin` desde la pagina, de modo que es una
+  segunda barrera independiente del token de verificacion.
+- La API esta **cerrada por omision**: una ruta que nadie declaro publica exige credencial
+  aunque su autor haya olvidado el guardia. La unica ruta abierta es `POST /auth/login`.
 - Politica de contenido restrictiva, `nosniff`, `SAMEORIGIN`, referente suprimido, HSTS en
   produccion y ocultamiento de la tecnologia del servidor.
 - CORS restringido por lista de origenes, con credenciales habilitadas.
@@ -445,24 +453,95 @@ La cookie de sesion se marca `Secure` en produccion, lo que exige HTTPS. En una 
 interna que todavia no tiene certificado, defina `COOKIE_SECURE=false` de forma explicita; de
 lo contrario el navegador nunca enviara la sesion.
 
+### Conexiones cifradas
+
+Con `FORZAR_HTTPS=true` toda peticion que llegue en claro se reconduce: las lecturas responden
+un redireccion permanente a `https://`, y las escrituras se rechazan en lugar de redirigirse,
+porque un redireccion perderia el cuerpo y el cliente no sabria que su dato viajo sin cifrar.
+
+Detras de un balanceador la conexion interna siempre parece HTTP; la aplicacion confia en el
+primer proxy y consulta `X-Forwarded-Proto` para saber como llego realmente el visitante.
+
+**Es recomendable de cara a internet, si.** Sin HTTPS la sesion viaja legible por cualquier
+punto intermedio de la red y toda la proteccion de la cookie deja de tener sentido. En una red
+interna sin certificado, dejelo en `false` junto con `COOKIE_SECURE=false`.
+
+### La API no se conecta como dueña de las tablas
+
+Hasta la version 1.8.0 la aplicacion usaba la cuenta propietaria del esquema, capaz de borrar
+o alterar cualquier tabla. Ahora existe un rol de trabajo con privilegios recortados:
+
+```bash
+cd backend
+# Genere una clave y creela con las credenciales administradoras
+npm run privilegios
+# Luego apunte DB_USER y DB_PASSWORD de .env al rol creado
+```
+
+| Puede | No puede |
+|---|---|
+| Leer, insertar, modificar y borrar filas | Crear, alterar o destruir tablas |
+| Usar los contadores de identidad | Vaciar tablas de un golpe (`TRUNCATE`) |
+| Conectarse a la base | Crear roles, bases ni omitir politicas de seguridad |
+
+Asi, una falla de inyeccion en cualquier consulta queda acotada a los datos: no puede llevarse
+por delante la estructura. Las tablas que se creen en el futuro heredan el mismo criterio.
+
+### Sobre la seguridad por fila (RLS): no es lo que hace falta aqui
+
+**No la recomiendo para esta arquitectura, y la razon es concreta.** La seguridad por fila
+tiene sentido cuando el cliente habla directamente con la base de datos, como en Supabase o
+PostgREST: ahi es la unica frontera que queda. En este sistema la base **nunca es alcanzable
+por el cliente**; la API es la unica puerta, y la autorizacion ya se decide en ella con
+permisos atomicos por endpoint mas verificacion de propiedad, comprobado por 70 pruebas.
+
+Hay ademas un detalle tecnico decisivo: **el dueño de una tabla omite las politicas de
+seguridad por fila** salvo que se declaren forzadas. Mientras la API se conectara como
+propietaria, activar RLS habria dado una falsa sensacion de proteccion sin efecto real. Por eso
+lo que se hizo fue quitarle esa propiedad, que es el requisito previo y, por si solo, aporta
+mas que la politica.
+
+Si en el futuro se decide exponer PostgreSQL directamente a algun cliente, entonces si
+corresponde: el rol `tickets_api` ya esta preparado con `NOBYPASSRLS` y bastaria agregar las
+politicas y fijar la identidad del usuario por transaccion.
+
+### Proteccion contra automatismos
+
+No se usa un desafio visual de terceros: obligaria a cargar codigo externo, romperia la
+politica de contenido y entregaria el trafico de la empresa a un tercero. En su lugar actuan
+tres controles propios que no dependen de nadie:
+
+| Control | Efecto sobre un automatismo |
+|---|---|
+| Retardo progresivo | Cada intento fallido adicional responde mas lento, hasta cinco segundos |
+| Bloqueo por cuenta | Cinco fallos en quince minutos dejan la cuenta fuera otros quince |
+| Origen obligatorio | Un guion que no imita un navegador completo no supera la verificacion |
+
+Los tres castigan unicamente el fracaso: quien entra bien nunca los nota.
+
 ## Pruebas automatizadas
 
 La bateria recorre el sistema de extremo a extremo contra la API en ejecucion.
 
 ```bash
 cd backend
-npm run qa            # las tres baterias, una tras otra
-npm run qa:seguridad  # cookies, verificacion de origen, cabeceras, bloqueo y cache
-npm run qa:funcional  # los once accesos y todos los modulos del sistema
+npm run qa             # las cuatro baterias, una tras otra
+npm run qa:secretos    # credenciales en el codigo y en todo el historial de git
+npm run qa:seguridad   # cookies, origen, cabeceras, bloqueo, cache y acceso cerrado
+npm run qa:funcional   # los once accesos y todos los modulos del sistema
 npm run qa:tiempo-real # canal de WebSockets y reparto por salas
-npm run qa:limpiar    # retira de la base los datos que dejan las pruebas
+npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 ```
 
 | Bateria | Que comprueba | Resultado |
 |---|---|---|
-| Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache y cierre de sesion | 22 de 22 |
+| Secretos | Configuracion fuera del control de versiones, historial completo del repositorio, credenciales incrustadas y claves de ejemplo | 7 de 7 |
+| Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache, acceso cerrado por omision y cierre de sesion | 34 de 34 |
 | Funcional | Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada | 70 de 70 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
+
+**115 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
+recortados.
 
 Todo lo que crean las pruebas lleva el prefijo `QA - ` en el titulo, de modo que
 `npm run qa:limpiar` lo identifica sin tocar la informacion real de la empresa.
@@ -475,15 +554,17 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 | Punto | Situacion actual | Prioridad |
 |---|---|---|
 | Aplicacion movil | El codigo esta escrito y consume la API con cabecera `Authorization`, pero no se ha compilado ni probado sobre un dispositivo real | Alta si se usara en campo |
-| Certificado HTTPS | Sin certificado hay que desactivar `COOKIE_SECURE` de forma explicita | Alta antes de publicar |
+| Certificado HTTPS | Sin certificado hay que desactivar `COOKIE_SECURE` y `FORZAR_HTTPS` de forma explicita | Alta antes de publicar |
 | Respaldo de la base | No hay tarea programada de respaldo ni prueba de restauracion | Alta antes de publicar |
 | Revocacion de sesiones | El token vale hasta su vencimiento; desactivar un usuario no corta la sesion ya abierta | Media |
 | Estado entre instancias | Cache, bloqueo por intentos y freno por origen viven en memoria del proceso; con varias instancias haria falta un almacen comun | Media si se escala |
 | Cambio de clave obligatorio | Las cuentas se entregan con una contrasena inicial conocida y el sistema no exige cambiarla al primer ingreso | Media |
 | Aviso por correo | Los avisos llegan por el canal en tiempo real y la bandeja interna, no por correo | Baja |
 | Pruebas unitarias | La verificacion es de extremo a extremo; no hay pruebas unitarias por funcion | Baja |
+| Dependencias de la app movil | No se instalaron nunca, de modo que no se pudo auditar su arbol de dependencias | Media |
+| Revision periodica de dependencias | `npm audit` esta limpio hoy; no hay revision automatica que avise de un aviso nuevo | Media |
 
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: STD-2026-TI - Version 1.8.0
+Documento de referencia: STD-2026-TI - Version 1.9.0

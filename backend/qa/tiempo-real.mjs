@@ -1,6 +1,7 @@
 import { io } from 'socket.io-client';
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000';
+const ORIGEN = 'http://localhost:5173';
 
 let fallos = 0;
 const marca = (ok, detalle) => {
@@ -40,7 +41,7 @@ marca(conexion?.salas?.includes('sala:tecnicos'), 'queda suscrito a la sala del 
 const aviso = esperar('ticket:creado', 8000);
 const creado = await fetch(`${BASE}/api/v1/tickets`, {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', Cookie: cliente.cookie, 'X-CSRF-Token': cliente.csrf },
+  headers: { 'Content-Type': 'application/json', Cookie: cliente.cookie, 'X-CSRF-Token': cliente.csrf, Origin: ORIGEN },
   body: JSON.stringify({
     titulo: 'QA - aviso en tiempo real hacia el equipo tecnico',
     descripcion: 'Se verifica que el ticket llega al canal de notificaciones sin recargar la pantalla.',

@@ -8,6 +8,9 @@ import rateLimit from 'express-rate-limit';
 import { env } from './config/env.js';
 import { notFoundHandler, errorHandler } from './middleware/error.js';
 import { verificarCsrf } from './middleware/csrf.js';
+import { verificarOrigen } from './middleware/origen.js';
+import { forzarHttps } from './middleware/https.js';
+import { accesoCerrado } from './middleware/accesoCerrado.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { areasRouter } from './modules/areas/areas.routes.js';
 import { sucursalesRouter } from './modules/sucursales/sucursales.routes.js';
@@ -37,6 +40,7 @@ export const crearApp = () => {
 
   app.set('trust proxy', 1);
   app.disable('x-powered-by');
+  app.use(forzarHttps);
 
   app.use(helmet({
     // La interfaz se sirve aparte; la API solo responde datos y documentos
@@ -68,7 +72,7 @@ export const crearApp = () => {
   app.get('/salud', (_req, res) => res.json({
     ok: true,
     servicio: 'API Sistema de Tickets TI',
-    version: '1.8.0',
+    version: '1.9.0',
     autor: env.autor,
     modulo: env.autorRol,
     fecha: new Date().toISOString()
@@ -76,7 +80,9 @@ export const crearApp = () => {
 
   const api = express.Router();
   api.use(limitadorGeneral);
+  api.use(accesoCerrado);
   api.use(verificarCsrf);
+  api.use(verificarOrigen);
 
   api.use('/auth', authRouter);
   api.use('/areas', areasRouter);

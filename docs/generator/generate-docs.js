@@ -185,6 +185,31 @@ const CONTROLES_SEGURIDAD = [
     como: 'Trescientas peticiones por minuto y cuarenta intentos fallidos de acceso cada diez minutos'
   },
   {
+    control: 'Retardo progresivo',
+    riesgo: 'Automatismos que prueban claves de forma sistematica',
+    como: 'Desde el quinto fallo cada intento responde medio segundo mas lento, hasta cinco segundos'
+  },
+  {
+    control: 'Origen declarado',
+    riesgo: 'Escrituras emitidas desde un sitio ajeno o desde un guion que no es un navegador',
+    como: 'Toda escritura con cookie debe partir de un origen de la lista autorizada'
+  },
+  {
+    control: 'Acceso cerrado por omision',
+    riesgo: 'Una ruta nueva publicada sin guardia por descuido',
+    como: 'La API exige credencial salvo en las rutas declaradas abiertas de forma explicita'
+  },
+  {
+    control: 'Rol de base sin privilegios de estructura',
+    riesgo: 'Que una falla de inyeccion alcance a destruir o alterar las tablas',
+    como: 'La API se conecta con un rol que solo lee y escribe filas, no dueño del esquema'
+  },
+  {
+    control: 'Conexiones cifradas',
+    riesgo: 'Lectura de la sesion en cualquier punto intermedio de la red',
+    como: 'Con FORZAR_HTTPS las lecturas se reconducen a HTTPS y las escrituras en claro se rechazan'
+  },
+  {
     control: 'Cabeceras de proteccion',
     riesgo: 'Enmarcado del sitio, interpretacion indebida de archivos y fuga por el referente',
     como: 'Politica de contenido restrictiva, nosniff, SAMEORIGIN, referente suprimido y HSTS'
@@ -213,9 +238,16 @@ const CONTROLES_SEGURIDAD = [
 
 const RESULTADO_PRUEBAS = [
   {
+    bateria: 'Secretos',
+    que: 'Configuracion fuera del control de versiones, historial completo del repositorio, credenciales '
+      + 'incrustadas en el codigo y valores del archivo de ejemplo',
+    resultado: '7 de 7'
+  },
+  {
     bateria: 'Seguridad',
-    que: 'Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache y cierre de sesion',
-    resultado: '22 de 22'
+    que: 'Cookies de sesion, verificacion del origen declarado, cabeceras, bloqueo por intentos, cache, '
+      + 'acceso cerrado por omision y cierre de sesion',
+    resultado: '34 de 34'
   },
   {
     bateria: 'Funcional',
@@ -239,9 +271,19 @@ const PENDIENTES = [
   },
   {
     punto: 'Certificado HTTPS',
-    situacion: 'La cookie de sesion se marca segura en produccion; sin certificado hay que desactivarlo de forma '
-      + 'explicita con COOKIE_SECURE',
+    situacion: 'El reconducido a HTTPS y la cookie segura estan implementados; falta el certificado. Sin el hay '
+      + 'que desactivarlos de forma explicita con FORZAR_HTTPS y COOKIE_SECURE',
     prioridad: 'Alta antes de publicar'
+  },
+  {
+    punto: 'Dependencias de la aplicacion movil',
+    situacion: 'Nunca se instalaron, de modo que no se pudo auditar su arbol de dependencias',
+    prioridad: 'Media'
+  },
+  {
+    punto: 'Revision periodica de dependencias',
+    situacion: 'La auditoria esta limpia hoy, pero no hay revision automatica que avise de un aviso nuevo',
+    prioridad: 'Media'
   },
   {
     punto: 'Revocacion de sesiones',
@@ -597,6 +639,30 @@ const construir = async () => {
   doc.nota('En produccion el servicio se niega a arrancar si JWT_SECRET, CLAVE_CIFRADO o la contrasena de la base '
     + 'de datos conservan el valor de ejemplo o tienen menos de 24 caracteres.', { icono: 'alerta', color: PALETA.critico });
 
+  doc.titulo2('La API no se conecta como dueña de las tablas');
+  doc.parrafo('La aplicacion trabaja con un rol de privilegios recortados que solo puede leer, insertar, '
+    + 'modificar y borrar filas. No puede crear, alterar ni destruir tablas, ni vaciarlas de un golpe, ni crear '
+    + 'roles. De ese modo una eventual falla de inyeccion queda acotada a los datos y no alcanza a la estructura. '
+    + 'El rol se crea con "npm run privilegios" y las tablas que se agreguen en el futuro heredan el mismo criterio.');
+
+  doc.titulo2('Sobre la seguridad por fila');
+  doc.parrafo('La seguridad por fila de PostgreSQL tiene sentido cuando el cliente habla directamente con la base '
+    + 'de datos, porque ahi es la unica frontera que queda. En esta instalacion la base nunca es alcanzable por el '
+    + 'cliente: la API es la unica puerta y la autorizacion se decide en ella, con permisos atomicos por endpoint y '
+    + 'verificacion de propiedad sobre cada registro.');
+  doc.parrafo('Hay ademas un detalle tecnico determinante: el dueño de una tabla omite las politicas de seguridad '
+    + 'por fila salvo que se declaren forzadas. Mientras la aplicacion se conectara con la cuenta propietaria, '
+    + 'activarlas habria dado una falsa sensacion de proteccion sin efecto real. Por eso se opto por quitarle esa '
+    + 'propiedad, que es el requisito previo y aporta mas por si solo. El rol de trabajo queda preparado con '
+    + 'NOBYPASSRLS, de modo que si en el futuro se decide exponer la base a algun cliente, basta con agregar las '
+    + 'politicas y fijar la identidad del usuario por transaccion.');
+
+  doc.titulo2('Proteccion contra automatismos');
+  doc.parrafo('No se emplea un desafio visual de terceros: obligaria a cargar codigo externo, romperia la politica '
+    + 'de contenido y entregaria el trafico de la empresa a un proveedor ajeno. En su lugar actuan tres controles '
+    + 'propios que castigan unicamente el fracaso, de modo que quien entra bien no los nota: el retardo progresivo, '
+    + 'el bloqueo por cuenta y la exigencia de un origen declarado y autorizado.');
+
   doc.titulo2('Aprovechamiento de cache');
   doc.parrafo('Los catalogos que se consultan en casi toda navegacion y cambian pocas veces (areas, sucursales y '
     + 'categorias) se resuelven desde una cache en memoria de dos minutos y se acompanan de una cabecera '
@@ -701,9 +767,16 @@ const construir = async () => {
     },
     {
       version: '1.8.0',
-      fecha: new Date().toLocaleDateString('es-BO'),
+      fecha: '21/08/2026',
       descripcion: 'Sesion en cookie httpOnly con verificacion de origen, cache de catalogos, bloqueo por '
         + 'intentos fallidos, secretos obligatorios en produccion y bateria de pruebas automatizadas',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '1.9.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Rol de base sin privilegios de estructura, API cerrada por omision, verificacion del origen '
+        + 'declarado, retardo progresivo ante automatismos, reconducido a HTTPS y rastreo de secretos',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
