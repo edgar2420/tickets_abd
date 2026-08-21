@@ -509,7 +509,7 @@ export const construirFichaCompra = ({ solicitud }) => {
   doc.camposClaveValor([
     { etiqueta: 'Monto estimado', valor: solicitud.monto_estimado },
     { etiqueta: 'Monto final', valor: solicitud.monto_final },
-    { etiqueta: 'Proveedor sugerido', valor: solicitud.proveedor_sugerido },
+    { etiqueta: 'Equipo sugerido por TI', valor: solicitud.equipo_sugerido },
     { etiqueta: 'Orden de compra', valor: solicitud.numero_orden }
   ], 4);
 

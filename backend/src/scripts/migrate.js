@@ -1,20 +1,47 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { pool } from '../config/db.js';
+import pg from 'pg';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const aqui = path.dirname(fileURLToPath(import.meta.url));
 const dirSql = path.resolve(aqui, '../../../db');
 
+/**
+ * Las migraciones alteran la estructura, de modo que no pueden correr con el
+ * rol de ejecucion: ese rol solo maneja filas, justamente para que una falla
+ * en la aplicacion no alcance al esquema. Se usan aqui las credenciales
+ * administradoras, y si no estan definidas se cae a las de la aplicacion,
+ * que es lo correcto en una instalacion que todavia no separo los roles.
+ */
+const pool = new pg.Pool({
+  host: process.env.DB_HOST ?? 'localhost',
+  port: Number(process.env.DB_PORT ?? 5432),
+  user: process.env.DB_ADMIN_USER ?? process.env.DB_USER ?? 'tickets_app',
+  password: process.env.DB_ADMIN_PASSWORD ?? process.env.DB_PASSWORD ?? 'tickets_app',
+  database: process.env.DB_NAME ?? 'tickets_ti'
+});
+
 /** Aplica el esquema y la carga inicial de datos de forma idempotente. */
 const ejecutar = async () => {
-  const { readdir } = await import('node:fs/promises');
   const archivos = (await readdir(dirSql)).filter((a) => a.endsWith('.sql')).sort();
   for (const archivo of archivos) {
     const sql = await readFile(path.join(dirSql, archivo), 'utf8');
     console.log('[migracion] Aplicando ' + archivo);
     await pool.query(sql);
   }
+
+  const rolApp = process.env.DB_USER;
+  const rolAdmin = process.env.DB_ADMIN_USER;
+  if (rolApp && rolAdmin && rolApp !== rolAdmin && /^[a-z_][a-z0-9_]{2,62}$/.test(rolApp)) {
+    // Las tablas creadas en esta corrida deben quedar accesibles al rol de ejecucion
+    await pool.query(`GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO ${rolApp}`);
+    await pool.query(`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO ${rolApp}`);
+    console.log(`[migracion] Permisos de fila concedidos a ${rolApp}`);
+  }
+
   console.log('[migracion] Base de datos lista');
   await pool.end();
 };
