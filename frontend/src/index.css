@@ -46,6 +46,18 @@
   }
   textarea.campo { @apply leading-relaxed; }
 
+  input.campo[type='date']::-webkit-calendar-picker-indicator,
+  input.campo[type='month']::-webkit-calendar-picker-indicator,
+  input.campo[type='time']::-webkit-calendar-picker-indicator {
+    @apply cursor-pointer opacity-60 transition hover:opacity-100;
+  }
+
+  .dark input.campo[type='date']::-webkit-calendar-picker-indicator,
+  .dark input.campo[type='month']::-webkit-calendar-picker-indicator,
+  .dark input.campo[type='time']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
   .etiqueta {
     @apply mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300;
   }

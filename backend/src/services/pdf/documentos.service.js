@@ -153,7 +153,6 @@ export const construirReporteMensual = (datos) => {
     variacion: variacionLegible(datos.variacion[clave])
   })));
 
-  doc.saltoPagina();
   doc.titulo1('Distribucion por categoria', 'engranaje');
   doc.tabla(COLUMNAS_DESGLOSE, conDatos(datos.categorias));
 
@@ -163,7 +162,6 @@ export const construirReporteMensual = (datos) => {
   doc.titulo1('Distribucion por area solicitante', 'usuario');
   doc.tabla(COLUMNAS_DESGLOSE, conDatos(datos.areas));
 
-  doc.saltoPagina();
   doc.titulo1('Quien solicito mas tickets', 'usuario');
   doc.tabla(COLUMNAS_DESGLOSE, conDatos(datos.solicitantes));
 
@@ -177,7 +175,6 @@ export const construirReporteMensual = (datos) => {
     ? datos.tecnicos
     : [{ etiqueta: 'Sin atencion registrada en el periodo', atendidos: 0, resueltos: 0, cerrados: 0 }]);
 
-  doc.saltoPagina();
   doc.titulo1('Detalle de los tickets del periodo', 'documento');
   doc.tabla([
     { titulo: 'Codigo', ancho: 0.08, render: (f) => codigoTicket(f.id) },
@@ -257,6 +254,9 @@ export const construirReporteAuditoria = ({ filas, filtros }) => {
       + (filtros.hasta ? soloFecha(filtros.hasta) : 'sin limite final'),
     'Entidad: ' + (filtros.entidad ?? 'todas'),
     'Registros incluidos: ' + filas.length
+      + (filas.length >= (filtros.limite ?? Infinity)
+        ? ' (tope alcanzado, acote el periodo para ver el resto)'
+        : '')
   ]);
 
   doc.titulo1('Detalle de acciones registradas', 'documento');

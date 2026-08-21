@@ -26,13 +26,17 @@ auditoriaRouter.get('/', requierePermiso('auditoria.ver'), asyncHandler(async (r
 }));
 
 auditoriaRouter.get('/pdf', requierePermiso('auditoria.ver'), asyncHandler(async (req, res) => {
+  const hace30Dias = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().slice(0, 10);
+  const desde = req.query.desde || (req.query.hasta || req.query.entidad ? null : hace30Dias);
+  const filtros = { ...req.query, desde, limite: 500 };
+
   const filas = await listarAuditoria({
-    desde: req.query.desde ?? null,
+    desde,
     hasta: req.query.hasta ?? null,
     entidad: req.query.entidad ?? null,
-    limite: 3000
+    limite: 500
   });
-  const buffer = await construirReporteAuditoria({ filas, filtros: req.query }).aBuffer();
+  const buffer = await construirReporteAuditoria({ filas, filtros }).aBuffer();
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'REPORTE', accion: 'EXPORTAR_AUDITORIA_PDF', ip: req.ip });
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', 'attachment; filename="bitacora-auditoria.pdf"');

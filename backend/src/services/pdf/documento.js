@@ -292,6 +292,8 @@ export class DocumentoPDF {
     for (let i = rango.start; i < rango.start + rango.count; i += 1) {
       d.switchToPage(i);
       const yPie = d.page.height - MARGEN - 22;
+      const margenInferior = d.page.margins.bottom;
+      d.page.margins.bottom = 0;
       d.save();
       d.moveTo(MARGEN, yPie).lineTo(d.page.width - MARGEN, yPie).lineWidth(0.7).strokeColor(PALETA.linea).stroke();
       dibujarIcono(d, 'escudo', MARGEN, yPie + 6, 11, PALETA.acento);
@@ -303,6 +305,7 @@ export class DocumentoPDF {
         .text('Pagina ' + (i + 1) + ' de ' + rango.count, d.page.width - MARGEN - 160, yPie + 11,
           { width: 160, align: 'right', lineBreak: false });
       d.restore();
+      d.page.margins.bottom = margenInferior;
     }
     d.flushPages();
     d.end();

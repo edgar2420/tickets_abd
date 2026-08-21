@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-backend",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "API REST + WebSockets del Sistema de Gestion de Tickets TI (STD-2026-TI)",
   "author": "Ing. Edgar Rojas Apaza",
   "license": "UNLICENSED",
@@ -14,8 +14,9 @@
     "privilegios": "node src/scripts/privilegios.js",
     "demo": "node src/scripts/demo.js",
     "docs:pdf": "node ../docs/generator/generate-docs.js",
-    "qa": "npm run qa:secretos && npm run qa:seguridad && npm run qa:funcional && npm run qa:tiempo-real && npm run qa:compras",
+    "qa": "npm run qa:secretos && npm run qa:seguridad && npm run qa:funcional && npm run qa:tiempo-real && npm run qa:compras && npm run qa:documentos",
     "qa:navegador": "node qa/navegador.mjs",
+    "qa:documentos": "node qa/documentos.mjs",
     "qa:compras": "node qa/compras-tiempo-real.mjs",
     "qa:secretos": "node qa/secretos.mjs",
     "qa:seguridad": "node qa/seguridad.mjs",

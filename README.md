@@ -540,6 +540,7 @@ npm run qa:seguridad   # cookies, origen, cabeceras, bloqueo, cache y acceso cer
 npm run qa:funcional   # los once accesos y todos los modulos del sistema
 npm run qa:tiempo-real # canal de WebSockets y reparto por salas
 npm run qa:compras     # el circuito de compras avanzando en tiempo real
+npm run qa:documentos  # que los PDF salgan al tamano pedido, sin hojas en blanco
 npm run qa:navegador   # recorrido completo atravesando el servidor web
 npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 ```
@@ -551,9 +552,10 @@ npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 | Funcional | Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada, alcance de Gerencia y reporte mensual | 91 de 91 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
 | Compras en tiempo real | Que Gerencia entre a la sala del circuito y vea cada cambio de estado sin recargar | 6 de 6 |
+| Documentos | Que cada PDF salga al tamano de lo que se pide y sin hojas en blanco | 15 de 15 |
 | Navegador | Recorrido de punta a punta contra el servidor web: portada, acceso, las doce pantallas, ciclo del ticket, descarga de PDF y cierre de sesion | 28 de 28 |
 
-**170 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
+**185 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
 recortados. La bateria del navegador requiere el servidor web levantado (`npm run dev` en
 `frontend`); las otras cuatro solo necesitan la API.
 
@@ -581,4 +583,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.2.0
+Documento de referencia: Version 2.2.1

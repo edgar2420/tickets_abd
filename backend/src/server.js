@@ -11,7 +11,7 @@ inicializarSockets(servidor);
 
 servidor.listen(env.port, () => {
   console.log('--------------------------------------------------------');
-  console.log(' Sistema de Gestion de Tickets TI - API v2.2.0');
+  console.log(' Sistema de Gestion de Tickets TI - API v2.2.1');
   console.log(' Autor: ' + env.autor + ' | ' + env.autorRol);
   console.log(' Entorno: ' + env.nodeEnv);
   console.log(' HTTP:    http://localhost:' + env.port + env.apiPrefix);
