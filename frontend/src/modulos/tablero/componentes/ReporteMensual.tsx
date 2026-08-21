@@ -307,7 +307,7 @@ export const ReporteMensual = ({
           onClick={() => void descargarPdf('/tickets/mensual/pdf', { mes, ...filtros }, `reporte-mensual-${mes}.pdf`)}
         >
           <FileDown className="h-4 w-4" />
-          Descargar el reporte
+          Descargar reporte mensual
         </button>
       </div>
     </div>
