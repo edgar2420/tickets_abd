@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Building, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
-import { api, descargarPdf } from '../../lib/api';
+import { AlertTriangle, Building, Clock, Gauge, Layers, Ticket, Users } from 'lucide-react';
+import { api } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { usarNotificaciones } from '../../context/NotificacionesContext';
 import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel, Vacio } from '../../components/Ui';
@@ -111,18 +111,7 @@ export const Tablero = () => {
         titulo="Tablero de control"
         descripcion="Estado consolidado de la mesa de ayuda"
         icono={Gauge}
-      >
-        {puede('reportes.exportar', 'tickets.ver_todos') && (
-          <button
-            type="button"
-            className="boton-acento"
-            onClick={() => void descargarPdf('/tickets/reporte/pdf', {}, 'reporte-tickets.pdf')}
-          >
-            <FileDown className="h-4 w-4" />
-            Exportar reporte PDF
-          </button>
-        )}
-      </EncabezadoPagina>
+      />
 
       <div>
         <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
