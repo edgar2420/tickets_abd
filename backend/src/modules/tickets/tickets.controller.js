@@ -4,12 +4,15 @@ import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { notificarUsuario, notificarEquipoTecnico } from '../../services/notificaciones.service.js';
 import { emitir, salaTicket, salaUsuario, SALA_TECNICOS } from '../../realtime/socket.js';
-import { construirActaTicket, construirReporteTickets, codigoTicket } from '../../services/pdf/documentos.service.js';
+import {
+  construirActaTicket, construirReporteTickets, construirReporteMensual, codigoTicket
+} from '../../services/pdf/documentos.service.js';
 import {
   SELECT_TICKET, obtenerTicket, listarTickets, contarTickets, indicadores, distribuciones,
   bitacoraTicket, archivarActaTicket
 } from './tickets.service.js';
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
+import { reporteMensual, mesValido, mesVigente } from './reporteMensual.service.js';
 
 const PRIORIDADES = ['Baja', 'Media', 'Alta', 'Critica'];
 
@@ -182,7 +185,7 @@ export const cerrar = asyncHandler(async (req, res) => {
   if (!esSolicitante && !esMesaDeAyuda) throw HttpError.forbidden('Solo el solicitante o la mesa de ayuda pueden cerrar el ticket');
   if (actual.estado !== 'Resuelto') throw HttpError.conflict('Solo puede cerrarse un ticket previamente resuelto');
 
-  await query(`UPDATE tickets SET estado = 'Cerrado' WHERE id = $1`, [id]);
+  await query(`UPDATE tickets SET estado = 'Cerrado', fecha_cierre = CURRENT_TIMESTAMP WHERE id = $1`, [id]);
   const ticket = await obtenerTicket(id);
 
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'TICKET', entidadId: id, accion: 'CERRAR', ip: req.ip });
@@ -196,6 +199,27 @@ export const tablero = asyncHandler(async (req, res) => {
   const resumen = await indicadores(req.query, req.usuario);
   const graficos = req.usuario.permisos.includes('tickets.ver_todos') ? await distribuciones() : null;
   res.json({ ok: true, datos: { resumen, graficos } });
+});
+
+export const mensual = asyncHandler(async (req, res) => {
+  const mes = mesValido(req.query.mes) ? req.query.mes : mesVigente();
+  const datos = await reporteMensual(mes);
+  res.json({ ok: true, datos });
+});
+
+export const mensualPdf = asyncHandler(async (req, res) => {
+  const mes = mesValido(req.query.mes) ? req.query.mes : mesVigente();
+  const datos = await reporteMensual(mes);
+  const documento = construirReporteMensual(datos);
+  const buffer = await documento.aBuffer();
+
+  await registrarAuditoria({
+    usuarioId: req.usuario.id, entidad: 'REPORTE', accion: 'EXPORTAR_MENSUAL_PDF',
+    detalle: { mes }, ip: req.ip
+  });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="reporte-mensual-${mes}.pdf"`);
+  res.send(buffer);
 });
 
 export const actaPdf = asyncHandler(async (req, res) => {

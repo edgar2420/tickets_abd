@@ -313,3 +313,43 @@ export interface RegistroAuditoria {
   usuario_nombre: string | null;
   usuario_login: string | null;
 }
+
+export interface FilaMensual {
+  etiqueta: string;
+  creados: number;
+  resueltos: number;
+}
+
+export interface FilaTecnico {
+  etiqueta: string;
+  resueltos: number;
+  horas_promedio: string | number;
+}
+
+export interface TotalesMensuales {
+  creados: number;
+  atendidos: number;
+  resueltos: number;
+  cerrados: number;
+  pendientes: number;
+  criticos: number;
+}
+
+export interface ReporteMensual {
+  mes: string;
+  nombre: string;
+  totales: TotalesMensuales;
+  anterior: { mes: string; nombre: string; totales: TotalesMensuales };
+  variacion: {
+    creados: number | null;
+    atendidos: number | null;
+    resueltos: number | null;
+    cerrados: number | null;
+  };
+  tiempos: { horas_hasta_atender: string | number; horas_hasta_resolver: string | number };
+  categorias: FilaMensual[];
+  sucursales: FilaMensual[];
+  areas: FilaMensual[];
+  tecnicos: FilaTecnico[];
+  porDia: { etiqueta: string; creados: number; resueltos: number }[];
+}

@@ -28,7 +28,7 @@ export const RUTAS: Ruta[] = [
   { path: '/inventario', elemento: <Inventario />, permisos: ['inventario.ver'] },
   { path: '/equipos', elemento: <Equipos />, permisos: ['equipos.ver'] },
   { path: '/compras', elemento: <Compras />, permisos: ['compras.solicitar', 'compras.ver_todas'] },
-  { path: '/auditoria', elemento: <Auditoria />, permisos: ['reportes.ver', 'admin.usuarios'] },
+  { path: '/auditoria', elemento: <Auditoria />, permisos: ['auditoria.ver'] },
   { path: '/admin/usuarios', elemento: <AdminUsuarios />, permisos: ['admin.usuarios'] },
   { path: '/admin/roles', elemento: <AdminRoles />, permisos: ['admin.roles'] },
   { path: '/admin/areas', elemento: <AdminAreas />, permisos: ['admin.areas'] },

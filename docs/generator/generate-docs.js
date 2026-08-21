@@ -755,9 +755,22 @@ const construir = async () => {
     },
     {
       version: '1.11.0',
-      fecha: new Date().toLocaleDateString('es-BO'),
+      fecha: '21/08/2026',
       descripcion: 'Recorrido visible de la solicitud de compra, actualizacion en tiempo real para Gerencia, '
         + 'importes en bolivianos y revision tecnica centrada en sugerir el equipo',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.0.0',
+      fecha: '21/08/2026',
+      descripcion: 'Arquitectura por modulos, tabla declarativa de rutas y codigo sin comentarios',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.1.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Reporte mensual de la mesa de ayuda en el tablero, Gerencia habilitada para registrar '
+        + 'tickets y bitacora de auditoria con permiso propio',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
