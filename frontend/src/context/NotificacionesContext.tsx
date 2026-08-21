@@ -11,6 +11,7 @@ interface EstadoNotificaciones {
   marcarTodas: () => Promise<void>;
   recargar: () => Promise<void>;
   ultimoEventoTicket: number;
+  ultimoEventoCompra: number;
 }
 
 const Contexto = createContext<EstadoNotificaciones | null>(null);
@@ -19,6 +20,7 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
   const { usuario } = usarAuth();
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [ultimoEventoTicket, setUltimoEventoTicket] = useState(0);
+  const [ultimoEventoCompra, setUltimoEventoCompra] = useState(0);
 
   const recargar = useCallback(async () => {
     if (!usuario) return;
@@ -39,17 +41,22 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
       setNotificaciones((previas) => [{ ...notificacion, leida: false }, ...previas].slice(0, 100));
     };
     const alCambiarTicket = (_ticket: Ticket) => setUltimoEventoTicket(Date.now());
+    const alCambiarCompra = () => setUltimoEventoCompra(Date.now());
 
     socket.on('notificacion:nueva', alNotificar);
     socket.on('ticket:creado', alCambiarTicket);
     socket.on('ticket:actualizado', alCambiarTicket);
     socket.on('ticket:resuelto', alCambiarTicket);
+    socket.on('compra:creada', alCambiarCompra);
+    socket.on('compra:actualizada', alCambiarCompra);
 
     return () => {
       socket.off('notificacion:nueva', alNotificar);
       socket.off('ticket:creado', alCambiarTicket);
       socket.off('ticket:actualizado', alCambiarTicket);
       socket.off('ticket:resuelto', alCambiarTicket);
+      socket.off('compra:creada', alCambiarCompra);
+      socket.off('compra:actualizada', alCambiarCompra);
     };
   }, [usuario]);
 
@@ -70,9 +77,10 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
       marcarLeida,
       marcarTodas,
       recargar,
-      ultimoEventoTicket
+      ultimoEventoTicket,
+      ultimoEventoCompra
     }),
-    [notificaciones, marcarLeida, marcarTodas, recargar, ultimoEventoTicket]
+    [notificaciones, marcarLeida, marcarTodas, recargar, ultimoEventoTicket, ultimoEventoCompra]
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;

@@ -72,7 +72,7 @@ export const crearApp = () => {
   app.get('/salud', (_req, res) => res.json({
     ok: true,
     servicio: 'API Sistema de Tickets TI',
-    version: '1.9.0',
+    version: '1.10.0',
     autor: env.autor,
     modulo: env.autorRol,
     fecha: new Date().toISOString()

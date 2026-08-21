@@ -7,7 +7,7 @@ import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { notificarUsuario, notificarEquipoTecnico } from '../../services/notificaciones.service.js';
-import { emitir, salaUsuario, SALA_TECNICOS } from '../../realtime/socket.js';
+import { emitir, salaUsuario, SALA_TECNICOS, SALA_COMPRAS } from '../../realtime/socket.js';
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { construirReporteCompras, construirFichaCompra } from '../../services/pdf/documentos.service.js';
 
@@ -182,7 +182,7 @@ comprasRouter.post('/', requierePermiso('compras.solicitar'), validate(solicitud
       mensaje: `${req.usuario.nombre} (${solicitud.sucursal_nombre ?? 'sin sucursal'}) solicita: ${titulo}`,
       excluirUsuarioId: req.usuario.id
     });
-    emitir(SALA_TECNICOS, 'compra:creada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS], 'compra:creada', solicitud);
 
     res.status(201).json({ ok: true, datos: solicitud });
   }));
@@ -213,7 +213,7 @@ comprasRouter.put('/:id/revisar', requierePermiso('compras.revisar'), validate(r
       titulo: 'Su solicitud ' + codigoCompra(id) + ' esta en revision',
       mensaje: `${req.usuario.nombre} tomo la revision tecnica de su pedido.`
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
@@ -262,7 +262,7 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
       titulo: 'Su solicitud ' + codigoCompra(id) + ' paso a Gerencia',
       mensaje: 'TI aprobo la viabilidad tecnica. Queda pendiente la aprobacion presupuestaria.'
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
@@ -297,7 +297,7 @@ comprasRouter.put('/:id/aprobar-gerencia', requierePermiso('compras.aprobar'), v
       mensaje: `Gerencia aprobo: ${solicitud.titulo}. Corresponde ejecutar la compra.`,
       excluirUsuarioId: req.usuario.id
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
@@ -327,7 +327,7 @@ comprasRouter.put('/:id/rechazar', requierePermiso('compras.revisar', 'compras.a
       titulo: 'Su solicitud ' + codigoCompra(id) + ' fue rechazada',
       mensaje: req.body.motivo_rechazo.slice(0, 200)
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
@@ -357,7 +357,7 @@ comprasRouter.put('/:id/comprar', requierePermiso('compras.gestionar'), validate
       titulo: 'Se compro el equipo de la solicitud ' + codigoCompra(id),
       mensaje: 'El equipo fue adquirido y sera entregado en breve.'
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
@@ -392,7 +392,7 @@ comprasRouter.put('/:id/entregar', requierePermiso('compras.gestionar'), validat
       titulo: 'Equipo entregado - solicitud ' + codigoCompra(id),
       mensaje: 'Su equipo fue entregado. La solicitud queda cerrada.'
     });
-    emitir([SALA_TECNICOS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
+    emitir([SALA_TECNICOS, SALA_COMPRAS, salaUsuario(solicitud.solicitante_id)], 'compra:actualizada', solicitud);
 
     res.json({ ok: true, datos: solicitud });
   }));
