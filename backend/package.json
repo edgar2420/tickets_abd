@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-backend",
-  "version": "1.0.0",
+  "version": "1.8.0",
   "description": "API REST + WebSockets del Sistema de Gestion de Tickets TI (STD-2026-TI)",
   "author": "Ing. Edgar Rojas Apaza",
   "license": "UNLICENSED",
@@ -12,11 +12,17 @@
     "migrate": "node src/scripts/migrate.js",
     "seed": "node src/scripts/seed.js",
     "demo": "node src/scripts/demo.js",
-    "docs:pdf": "node ../docs/generator/generate-docs.js"
+    "docs:pdf": "node ../docs/generator/generate-docs.js",
+    "qa": "npm run qa:seguridad && npm run qa:funcional && npm run qa:tiempo-real",
+    "qa:seguridad": "node qa/seguridad.mjs",
+    "qa:funcional": "node qa/funcional.mjs",
+    "qa:tiempo-real": "node qa/tiempo-real.mjs",
+    "qa:limpiar": "node qa/limpiar.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "compression": "^1.7.5",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
@@ -32,5 +38,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.3"
   }
 }

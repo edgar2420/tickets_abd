@@ -3,18 +3,13 @@ import { env } from '../config/env.js';
 import { query } from '../config/db.js';
 import { HttpError } from '../utils/httpError.js';
 import { permisosDeRol } from '../services/permisos.cache.js';
-
-const extraerToken = (req) => {
-  const header = req.headers.authorization ?? '';
-  if (header.startsWith('Bearer ')) return header.slice(7).trim();
-  return null;
-};
+import { tokenDeLaPeticion, tokenDeCookies } from '../utils/sesion.js';
 
 /** Verifica el JWT y carga req.usuario con su rol, area y permisos vigentes. */
 export const autenticar = async (req, _res, next) => {
   try {
-    const token = extraerToken(req);
-    if (!token) throw HttpError.unauthorized('Token de autenticacion no proporcionado');
+    const { token } = tokenDeLaPeticion(req);
+    if (!token) throw HttpError.unauthorized('Sesion no iniciada');
 
     const payload = jwt.verify(token, env.jwt.secret);
     const { rows } = await query(
@@ -45,8 +40,11 @@ export const autenticar = async (req, _res, next) => {
 /** Autenticacion de sockets: valida el JWT recibido en el handshake. */
 export const autenticarSocket = async (socket, next) => {
   try {
-    const token = socket.handshake.auth?.token ?? socket.handshake.query?.token;
-    if (!token) return next(new Error('Token no proporcionado'));
+    // El navegador viaja con la cookie de sesion; el movil manda el token en el handshake
+    const token = tokenDeCookies(socket.handshake.headers?.cookie)
+      ?? socket.handshake.auth?.token
+      ?? socket.handshake.query?.token;
+    if (!token) return next(new Error('Sesion no iniciada'));
     const payload = jwt.verify(token, env.jwt.secret);
     const { rows } = await query(
       `SELECT u.id, u.nombre, u.usuario, u.rol_id, u.area_id, r.nombre AS rol
