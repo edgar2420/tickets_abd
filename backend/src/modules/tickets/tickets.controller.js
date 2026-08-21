@@ -201,15 +201,21 @@ export const tablero = asyncHandler(async (req, res) => {
   res.json({ ok: true, datos: { resumen, graficos } });
 });
 
+const filtrosDelReporte = (consulta) => ({
+  sucursal_id: consulta.sucursal_id || null,
+  categoria: consulta.categoria || null,
+  prioridad: consulta.prioridad || null
+});
+
 export const mensual = asyncHandler(async (req, res) => {
   const mes = mesValido(req.query.mes) ? req.query.mes : mesVigente();
-  const datos = await reporteMensual(mes);
+  const datos = await reporteMensual(mes, filtrosDelReporte(req.query));
   res.json({ ok: true, datos });
 });
 
 export const mensualPdf = asyncHandler(async (req, res) => {
   const mes = mesValido(req.query.mes) ? req.query.mes : mesVigente();
-  const datos = await reporteMensual(mes);
+  const datos = await reporteMensual(mes, filtrosDelReporte(req.query));
   const documento = construirReporteMensual(datos);
   const buffer = await documento.aBuffer();
 

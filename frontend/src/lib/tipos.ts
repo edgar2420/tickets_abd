@@ -317,13 +317,31 @@ export interface RegistroAuditoria {
 export interface FilaMensual {
   etiqueta: string;
   creados: number;
+  abiertos: number;
+  en_proceso: number;
   resueltos: number;
+  cerrados: number;
 }
 
 export interface FilaTecnico {
   etiqueta: string;
+  atendidos: number;
   resueltos: number;
-  horas_promedio: string | number;
+  cerrados: number;
+}
+
+export interface TicketDelPeriodo {
+  id: number;
+  titulo: string;
+  categoria: string;
+  prioridad: PrioridadTicket;
+  estado: EstadoTicket;
+  solicitante_nombre: string;
+  sucursal_nombre: string;
+  atendido_por: string | null;
+  fecha_creacion: string;
+  fecha_resolucion: string | null;
+  fecha_cierre: string | null;
 }
 
 export interface TotalesMensuales {
@@ -338,6 +356,8 @@ export interface TotalesMensuales {
 export interface ReporteMensual {
   mes: string;
   nombre: string;
+  filtros: { sucursal_id: string; categoria: string; prioridad: string };
+  filtroSucursal: string | null;
   totales: TotalesMensuales;
   anterior: { mes: string; nombre: string; totales: TotalesMensuales };
   variacion: {
@@ -346,10 +366,11 @@ export interface ReporteMensual {
     resueltos: number | null;
     cerrados: number | null;
   };
-  tiempos: { horas_hasta_atender: string | number; horas_hasta_resolver: string | number };
   categorias: FilaMensual[];
   sucursales: FilaMensual[];
   areas: FilaMensual[];
+  solicitantes: FilaMensual[];
   tecnicos: FilaTecnico[];
   porDia: { etiqueta: string; creados: number; resueltos: number }[];
+  tickets: TicketDelPeriodo[];
 }

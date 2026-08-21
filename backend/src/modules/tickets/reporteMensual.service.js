@@ -16,118 +16,151 @@ export const nombreDelMes = (mes) => {
 
 const mesAnterior = (mes) => {
   const [anio, numero] = mes.split('-').map(Number);
-  const fecha = new Date(Date.UTC(anio, numero - 2, 1));
-  return fecha.toISOString().slice(0, 7);
+  return new Date(Date.UTC(anio, numero - 2, 1)).toISOString().slice(0, 7);
 };
 
 const rango = (mes) => {
-  const desde = `${mes}-01`;
   const [anio, numero] = mes.split('-').map(Number);
-  const siguiente = new Date(Date.UTC(anio, numero, 1)).toISOString().slice(0, 10);
-  return [desde, siguiente];
+  return [`${mes}-01`, new Date(Date.UTC(anio, numero, 1)).toISOString().slice(0, 10)];
 };
 
-const totales = async (mes) => {
+const CONDICION = `
+  AND ($3::int IS NULL OR t.sucursal_id = $3)
+  AND ($4::varchar IS NULL OR t.categoria = $4)
+  AND ($5::varchar IS NULL OR t.prioridad = $5)`;
+
+const parametros = (mes, filtros) => {
   const [desde, hasta] = rango(mes);
+  return [
+    desde,
+    hasta,
+    filtros.sucursal_id ? Number(filtros.sucursal_id) : null,
+    filtros.categoria || null,
+    filtros.prioridad || null
+  ];
+};
+
+const totales = async (mes, filtros) => {
   const { rows } = await query(
     `SELECT
-       COUNT(*) FILTER (WHERE fecha_creacion >= $1 AND fecha_creacion < $2)::int      AS creados,
-       COUNT(*) FILTER (WHERE fecha_asignacion >= $1 AND fecha_asignacion < $2)::int  AS atendidos,
-       COUNT(*) FILTER (WHERE fecha_resolucion >= $1 AND fecha_resolucion < $2)::int  AS resueltos,
-       COUNT(*) FILTER (WHERE fecha_cierre >= $1 AND fecha_cierre < $2)::int          AS cerrados,
-       COUNT(*) FILTER (WHERE fecha_creacion < $2
-                          AND estado IN ('Abierto', 'En Proceso'))::int               AS pendientes,
-       COUNT(*) FILTER (WHERE fecha_creacion >= $1 AND fecha_creacion < $2
-                          AND prioridad = 'Critica')::int                             AS criticos
-      FROM tickets`,
-    [desde, hasta]
+       COUNT(*) FILTER (WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2)::int     AS creados,
+       COUNT(*) FILTER (WHERE t.fecha_asignacion >= $1 AND t.fecha_asignacion < $2)::int AS atendidos,
+       COUNT(*) FILTER (WHERE t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2)::int AS resueltos,
+       COUNT(*) FILTER (WHERE t.fecha_cierre >= $1 AND t.fecha_cierre < $2)::int         AS cerrados,
+       COUNT(*) FILTER (WHERE t.fecha_creacion < $2
+                          AND t.estado IN ('Abierto', 'En Proceso'))::int                AS pendientes,
+       COUNT(*) FILTER (WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2
+                          AND t.prioridad = 'Critica')::int                              AS criticos
+      FROM tickets t
+     WHERE TRUE ${CONDICION}`,
+    parametros(mes, filtros)
   );
   return rows[0];
 };
 
-const promedios = async (mes) => {
-  const [desde, hasta] = rango(mes);
-  const { rows } = await query(
-    `SELECT
-       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (fecha_asignacion - fecha_creacion)) / 3600)::numeric, 1), 0)  AS horas_hasta_atender,
-       COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (fecha_resolucion - fecha_creacion)) / 3600)::numeric, 1), 0)  AS horas_hasta_resolver
-      FROM tickets
-     WHERE fecha_resolucion >= $1 AND fecha_resolucion < $2`,
-    [desde, hasta]
-  );
-  return rows[0];
-};
-
-const desglose = async (mes, columna, etiqueta, union = '') => {
-  const [desde, hasta] = rango(mes);
+const desglose = async (mes, filtros, agrupacion, etiqueta, union = '') => {
   const { rows } = await query(
     `SELECT ${etiqueta} AS etiqueta,
-            COUNT(*)::int AS creados,
-            COUNT(*) FILTER (WHERE t.estado IN ('Resuelto', 'Cerrado'))::int AS resueltos
+            COUNT(*)::int                                                        AS creados,
+            COUNT(*) FILTER (WHERE t.estado = 'Abierto')::int                    AS abiertos,
+            COUNT(*) FILTER (WHERE t.estado = 'En Proceso')::int                  AS en_proceso,
+            COUNT(*) FILTER (WHERE t.estado = 'Resuelto')::int                    AS resueltos,
+            COUNT(*) FILTER (WHERE t.estado = 'Cerrado')::int                     AS cerrados
        FROM tickets t
        ${union}
-      WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2
-      GROUP BY ${columna}
+      WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2 ${CONDICION}
+      GROUP BY ${agrupacion}
       ORDER BY creados DESC
-      LIMIT 15`,
-    [desde, hasta]
+      LIMIT 20`,
+    parametros(mes, filtros)
   );
   return rows;
 };
 
-const porTecnico = async (mes) => {
-  const [desde, hasta] = rango(mes);
+const porTecnico = async (mes, filtros) => {
   const { rows } = await query(
     `SELECT u.nombre AS etiqueta,
-            COUNT(*)::int AS resueltos,
-            COALESCE(ROUND(AVG(EXTRACT(EPOCH FROM (t.fecha_resolucion - t.fecha_creacion)) / 3600)::numeric, 1), 0) AS horas_promedio
+            COUNT(*) FILTER (WHERE t.fecha_asignacion >= $1 AND t.fecha_asignacion < $2)::int AS atendidos,
+            COUNT(*) FILTER (WHERE t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2)::int AS resueltos,
+            COUNT(*) FILTER (WHERE t.fecha_cierre >= $1 AND t.fecha_cierre < $2)::int         AS cerrados
        FROM tickets t
-       JOIN usuarios u ON u.id = t.resuelto_por_id
-      WHERE t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2
+       JOIN usuarios u ON u.id = COALESCE(t.resuelto_por_id, t.asignado_id)
+      WHERE (t.fecha_asignacion >= $1 AND t.fecha_asignacion < $2
+             OR t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2) ${CONDICION}
       GROUP BY u.nombre
-      ORDER BY resueltos DESC
-      LIMIT 15`,
-    [desde, hasta]
+      ORDER BY resueltos DESC, atendidos DESC
+      LIMIT 20`,
+    parametros(mes, filtros)
   );
   return rows;
 };
 
-const diario = async (mes) => {
-  const [desde, hasta] = rango(mes);
+const detalle = async (mes, filtros) => {
+  const { rows } = await query(
+    `SELECT t.id, t.titulo, t.categoria, t.prioridad, t.estado,
+            sol.nombre AS solicitante_nombre,
+            COALESCE(s.nombre, 'Sin sucursal') AS sucursal_nombre,
+            asi.nombre AS atendido_por,
+            t.fecha_creacion, t.fecha_resolucion, t.fecha_cierre
+       FROM tickets t
+       JOIN usuarios sol ON sol.id = t.solicitante_id
+       LEFT JOIN usuarios asi ON asi.id = COALESCE(t.resuelto_por_id, t.asignado_id)
+       LEFT JOIN sucursales s ON s.id = t.sucursal_id
+      WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2 ${CONDICION}
+      ORDER BY t.fecha_creacion
+      LIMIT 500`,
+    parametros(mes, filtros)
+  );
+  return rows;
+};
+
+const diario = async (mes, filtros) => {
   const { rows } = await query(
     `SELECT to_char(dia, 'DD') AS etiqueta,
             COALESCE(c.creados, 0)::int   AS creados,
             COALESCE(r.resueltos, 0)::int AS resueltos
        FROM generate_series($1::date, ($2::date - INTERVAL '1 day'), INTERVAL '1 day') AS dia
        LEFT JOIN (
-         SELECT date_trunc('day', fecha_creacion) AS d, COUNT(*) AS creados
-           FROM tickets WHERE fecha_creacion >= $1 AND fecha_creacion < $2
+         SELECT date_trunc('day', t.fecha_creacion) AS d, COUNT(*) AS creados
+           FROM tickets t
+          WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2 ${CONDICION}
           GROUP BY 1
        ) c ON c.d = dia
        LEFT JOIN (
-         SELECT date_trunc('day', fecha_resolucion) AS d, COUNT(*) AS resueltos
-           FROM tickets WHERE fecha_resolucion >= $1 AND fecha_resolucion < $2
+         SELECT date_trunc('day', t.fecha_resolucion) AS d, COUNT(*) AS resueltos
+           FROM tickets t
+          WHERE t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2 ${CONDICION}
           GROUP BY 1
        ) r ON r.d = dia
       ORDER BY dia`,
-    [desde, hasta]
+    parametros(mes, filtros)
   );
   return rows;
 };
 
-export const reporteMensual = async (mes) => {
+const nombreSucursal = async (id) => {
+  if (!id) return null;
+  const { rows } = await query('SELECT nombre FROM sucursales WHERE id = $1', [Number(id)]);
+  return rows[0]?.nombre ?? null;
+};
+
+export const reporteMensual = async (mes, filtros = {}) => {
   const anterior = mesAnterior(mes);
 
-  const [actuales, previos, tiempos, categorias, sucursales, areas, tecnicos, porDia] = await Promise.all([
-    totales(mes),
-    totales(anterior),
-    promedios(mes),
-    desglose(mes, 't.categoria', 't.categoria'),
-    desglose(mes, 's.nombre', "COALESCE(s.nombre, 'Sin sucursal')", 'LEFT JOIN sucursales s ON s.id = t.sucursal_id'),
-    desglose(mes, 'a.nombre', 'a.nombre', 'JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id'),
-    porTecnico(mes),
-    diario(mes)
-  ]);
+  const [actuales, previos, categorias, sucursales, areas, solicitantes, tecnicos, porDia, tickets] =
+    await Promise.all([
+      totales(mes, filtros),
+      totales(anterior, filtros),
+      desglose(mes, filtros, 't.categoria', 't.categoria'),
+      desglose(mes, filtros, 's.nombre', "COALESCE(s.nombre, 'Sin sucursal')",
+        'LEFT JOIN sucursales s ON s.id = t.sucursal_id'),
+      desglose(mes, filtros, 'a.nombre', 'a.nombre',
+        'JOIN usuarios u ON u.id = t.solicitante_id JOIN areas a ON a.id = u.area_id'),
+      desglose(mes, filtros, 'u.nombre', 'u.nombre', 'JOIN usuarios u ON u.id = t.solicitante_id'),
+      porTecnico(mes, filtros),
+      diario(mes, filtros),
+      detalle(mes, filtros)
+    ]);
 
   const variacion = (clave) => {
     const hoy = Number(actuales[clave]);
@@ -139,6 +172,12 @@ export const reporteMensual = async (mes) => {
   return {
     mes,
     nombre: nombreDelMes(mes),
+    filtros: {
+      sucursal_id: filtros.sucursal_id ?? '',
+      categoria: filtros.categoria ?? '',
+      prioridad: filtros.prioridad ?? ''
+    },
+    filtroSucursal: await nombreSucursal(filtros.sucursal_id),
     totales: actuales,
     anterior: { mes: anterior, nombre: nombreDelMes(anterior), totales: previos },
     variacion: {
@@ -147,11 +186,12 @@ export const reporteMensual = async (mes) => {
       resueltos: variacion('resueltos'),
       cerrados: variacion('cerrados')
     },
-    tiempos,
     categorias,
     sucursales,
     areas,
+    solicitantes,
     tecnicos,
-    porDia
+    porDia,
+    tickets
   };
 };

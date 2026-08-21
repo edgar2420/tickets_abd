@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Building, CheckCircle2, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
+import { AlertTriangle, Building, Clock, FileDown, Gauge, Layers, Ticket, Users } from 'lucide-react';
 import { api, descargarPdf } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { usarNotificaciones } from '../../context/NotificacionesContext';
@@ -124,12 +124,15 @@ export const Tablero = () => {
         )}
       </EncabezadoPagina>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <Indicador etiqueta="Total tickets" valor={resumen.total} icono={Ticket} />
-        <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} tono="info" />
-        <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} tono="advertencia" />
-        <Indicador etiqueta="Resueltos" valor={resumen.resueltos} icono={CheckCircle2} tono="exito" />
-        <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} tono="critico" />
+      <div>
+        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+          {puede('tickets.ver_todos') ? 'Situacion actual de la mesa de ayuda' : 'Situacion actual de sus tickets'}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Indicador etiqueta="Abiertos" valor={resumen.abiertos} icono={Layers} tono="info" />
+          <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} tono="advertencia" />
+          <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} tono="critico" />
+        </div>
       </div>
 
       {verReporte && (
@@ -138,6 +141,12 @@ export const Tablero = () => {
           mes={mensual.mes}
           setMes={mensual.setMes}
           mesTope={mensual.mesVigente}
+          filtros={mensual.filtros}
+          setFiltros={mensual.setFiltros}
+          limpiar={mensual.limpiar}
+          hayFiltros={mensual.hayFiltros}
+          sucursales={mensual.sucursales}
+          categorias={mensual.categorias}
           error={mensual.error}
         />
       )}

@@ -293,6 +293,33 @@ const mesInvalido = await pedir('gerente', '/tickets/mensual?mes=no-es-un-mes');
 marca('reporte', mesInvalido.estado === 200 && /^\d{4}-\d{2}$/.test(mesInvalido.cuerpo.datos?.mes ?? ''),
   'un periodo mal escrito cae al mes vigente en lugar de fallar');
 
+marca('reporte', !('tiempos' in (reporte ?? {})),
+  'el reporte no publica tiempos ni demoras');
+marca('reporte', Array.isArray(reporte?.tickets),
+  `incluye el detalle de los tickets del periodo (${reporte?.tickets?.length})`);
+marca('reporte', Array.isArray(reporte?.solicitantes),
+  `incluye quien solicito mas tickets (${reporte?.solicitantes?.length})`);
+
+const columnasDesglose = Object.keys(reporte?.categorias?.[0] ?? {});
+marca('reporte',
+  ['creados', 'abiertos', 'en_proceso', 'resueltos', 'cerrados'].every((c) => columnasDesglose.includes(c)),
+  `cada desglose abre por estado: ${columnasDesglose.join(', ')}`);
+
+const filtradoCategoria = await pedir('gerente', '/tickets/mensual?categoria=Hardware');
+const soloHardware = (filtradoCategoria.cuerpo.datos?.tickets ?? []).every((t) => t.categoria === 'Hardware');
+marca('reporte', filtradoCategoria.estado === 200 && soloHardware,
+  `filtra por categoria (${filtradoCategoria.cuerpo.datos?.tickets?.length} tickets, todos de Hardware)`);
+
+const filtradoPrioridad = await pedir('gerente', '/tickets/mensual?prioridad=Alta');
+const soloAlta = (filtradoPrioridad.cuerpo.datos?.tickets ?? []).every((t) => t.prioridad === 'Alta');
+marca('reporte', filtradoPrioridad.estado === 200 && soloAlta,
+  `filtra por prioridad (${filtradoPrioridad.cuerpo.datos?.tickets?.length} tickets, todos de prioridad Alta)`);
+
+const sucursales = (await pedir('admin', '/sucursales')).cuerpo.datos ?? [];
+const filtradoSucursal = await pedir('gerente', `/tickets/mensual?sucursal_id=${sucursales[0]?.id}`);
+marca('reporte', filtradoSucursal.estado === 200 && filtradoSucursal.cuerpo.datos?.filtroSucursal === sucursales[0]?.nombre,
+  `filtra por sucursal (${filtradoSucursal.cuerpo.datos?.filtroSucursal})`);
+
 const mensualCliente = await pedir('lapaz', '/tickets/mensual');
 marca('reporte', mensualCliente.estado === 403,
   `un cliente no accede al reporte mensual (${mensualCliente.estado})`);
