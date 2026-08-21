@@ -30,17 +30,8 @@ export const inicializarSockets = (httpServer) => {
 
     socket.on('ticket:suscribir', (ticketId) => socket.join(salaTicket(Number(ticketId))));
     socket.on('ticket:desuscribir', (ticketId) => socket.leave(salaTicket(Number(ticketId))));
-
-    socket.on('disconnect', () => {
-      // La limpieza de salas la realiza socket.io automaticamente.
-    });
   });
 
-  return io;
-};
-
-export const obtenerIO = () => {
-  if (!io) throw new Error('El servidor de sockets no ha sido inicializado');
   return io;
 };
 

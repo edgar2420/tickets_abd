@@ -6,6 +6,8 @@ import { requierePermiso } from '../../middleware/rbac.js';
 import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
+import { enCache, invalidar } from '../../services/cache.memoria.js';
+import { cachearEnCliente } from '../../middleware/cache.js';
 
 const COLORES = ['celeste', 'violeta', 'esmeralda', 'ambar', 'rosa', 'pizarra'];
 const ICONOS = ['monitor', 'codigo', 'red', 'llave', 'etiqueta', 'herramienta', 'servidor', 'telefono'];
@@ -22,16 +24,16 @@ export const categoriasRouter = Router();
 categoriasRouter.use(autenticar);
 
 /** Catalogo disponible para cualquier usuario autenticado: alimenta los formularios. */
-categoriasRouter.get('/', asyncHandler(async (req, res) => {
+categoriasRouter.get('/', cachearEnCliente(120), asyncHandler(async (req, res) => {
   const soloActivas = req.query.activas === 'true';
-  const { rows } = await query(
+  const rows = await enCache(`categorias:${soloActivas}`, 120_000, async () => (await query(
     `SELECT c.id, c.nombre, c.descripcion, c.color, c.icono, c.activo, c.fecha_creacion,
             (SELECT COUNT(*) FROM tickets t WHERE t.categoria = c.nombre)::int AS total_tickets
        FROM categorias c
       WHERE ($1 = FALSE OR c.activo = TRUE)
       ORDER BY c.nombre`,
     [soloActivas]
-  );
+  )).rows);
   res.json({ ok: true, datos: rows });
 }));
 
@@ -45,6 +47,7 @@ categoriasRouter.post('/', requierePermiso('admin.categorias'), validate(categor
     `INSERT INTO categorias (nombre, descripcion, color, icono) VALUES ($1,$2,$3,$4) RETURNING *`,
     [nombre, descripcion ?? null, color, icono]
   );
+  invalidar('categorias');
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'CATEGORIA', entidadId: rows[0].id, accion: 'CREAR', detalle: rows[0], ip: req.ip });
   res.status(201).json({ ok: true, datos: rows[0] });
 }));
@@ -65,6 +68,7 @@ categoriasRouter.put('/:id', requierePermiso('admin.categorias'), validate(categ
   if (previa[0].nombre !== nombre) {
     await query('UPDATE tickets SET categoria = $1 WHERE categoria = $2', [nombre, previa[0].nombre]);
   }
+  invalidar('categorias');
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'CATEGORIA', entidadId: id, accion: 'ACTUALIZAR', detalle: rows[0], ip: req.ip });
   res.json({ ok: true, datos: rows[0] });
 }));
@@ -73,6 +77,7 @@ categoriasRouter.put('/:id', requierePermiso('admin.categorias'), validate(categ
 categoriasRouter.delete('/:id', requierePermiso('admin.categorias'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE categorias SET activo = FALSE WHERE id = $1 RETURNING id, nombre', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La categoria indicada no existe');
+  invalidar('categorias');
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'CATEGORIA', entidadId: rows[0].id, accion: 'DESACTIVAR', ip: req.ip });
   res.json({ ok: true, mensaje: 'Categoria desactivada' });
 }));
@@ -81,6 +86,7 @@ categoriasRouter.delete('/:id', requierePermiso('admin.categorias'), asyncHandle
 categoriasRouter.put('/:id/activar', requierePermiso('admin.categorias'), asyncHandler(async (req, res) => {
   const { rows } = await query('UPDATE categorias SET activo = TRUE WHERE id = $1 RETURNING *', [req.params.id]);
   if (!rows[0]) throw HttpError.notFound('La categoria indicada no existe');
+  invalidar('categorias');
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'CATEGORIA', entidadId: rows[0].id, accion: 'ACTIVAR', ip: req.ip });
   res.json({ ok: true, datos: rows[0] });
 }));

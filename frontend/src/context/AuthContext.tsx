@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api, almacenToken } from '../lib/api';
+import { api, haySesion } from '../lib/api';
 import { conectarSocket, desconectarSocket } from '../lib/socket';
 import type { Usuario } from '../lib/tipos';
 
@@ -18,24 +18,24 @@ export const ProveedorAuth = ({ children }: { children: ReactNode }) => {
   const [cargando, setCargando] = useState(true);
 
   const cerrarSesion = useCallback(() => {
-    almacenToken.limpiar();
+    void api('/auth/logout', { metodo: 'POST' }).catch(() => undefined);
     desconectarSocket();
     setUsuario(null);
   }, []);
 
-  // Restaura la sesion vigente al recargar la aplicacion.
+  // La sesion se restaura contra el servidor: la credencial esta en una
+  // cookie httpOnly que la aplicacion no puede inspeccionar.
   useEffect(() => {
-    const token = almacenToken.obtener();
-    if (!token) {
+    if (!haySesion()) {
       setCargando(false);
       return;
     }
     api<{ usuario: Usuario }>('/auth/perfil')
       .then(({ usuario: perfil }) => {
         setUsuario(perfil);
-        conectarSocket(token);
+        conectarSocket();
       })
-      .catch(() => almacenToken.limpiar())
+      .catch(() => undefined)
       .finally(() => setCargando(false));
   }, []);
 
@@ -47,13 +47,12 @@ export const ProveedorAuth = ({ children }: { children: ReactNode }) => {
   }, [cerrarSesion]);
 
   const iniciarSesion = useCallback(async (nombreUsuario: string, password: string) => {
-    const respuesta = await api<{ token: string; usuario: Usuario }>('/auth/login', {
+    const respuesta = await api<{ usuario: Usuario }>('/auth/login', {
       metodo: 'POST',
       cuerpo: { usuario: nombreUsuario, password }
     });
-    almacenToken.guardar(respuesta.token);
     setUsuario(respuesta.usuario);
-    conectarSocket(respuesta.token);
+    conectarSocket();
   }, []);
 
   const puede = useCallback(

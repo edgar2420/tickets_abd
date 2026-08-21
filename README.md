@@ -392,15 +392,98 @@ clasificacion aunque la categoria deje de ofrecerse.
 
 ## Seguridad aplicada
 
+### La sesion no vive en el navegador
+
+Al iniciar sesion el servidor deja dos cookies complementarias:
+
+| Cookie | Visible para la pagina | Para que sirve |
+|---|---|---|
+| `tickets_sesion` | No (`httpOnly`) | Transporta la credencial. El navegador la envia sola y ningun script puede leerla |
+| `tickets_csrf` | Si | Token de verificacion de origen que la aplicacion reenvia por cabecera |
+
+Ambas se emiten con `SameSite=Strict` y, en produccion, con `Secure`. Toda operacion de
+escritura hecha desde el navegador debe repetir el token de origen en la cabecera
+`X-CSRF-Token`; el servidor lo compara con la cookie en tiempo constante. Un sitio ajeno puede
+provocar que el navegador envie la cookie de sesion, pero no puede leer la segunda cookie para
+reproducir la cabecera, de modo que la peticion se rechaza con 403.
+
+La aplicacion movil conserva el esquema con cabecera `Authorization: Bearer`, que no es
+explotable por peticiones forjadas entre sitios y por eso queda exento de la verificacion.
+
+### Controles vigentes
+
 - Contrasenas almacenadas con hash bcrypt (10 rondas).
-- Identidad tomada exclusivamente del token JWT; el cliente nunca envia el identificador de usuario.
+- Identidad tomada exclusivamente del token; el cliente nunca envia el identificador de usuario.
 - Guard de permisos atomicos por endpoint, con verificacion adicional de propiedad del ticket.
-- Limitador de intentos de inicio de sesion.
-- Cabeceras de seguridad con Helmet y CORS restringido por lista de origenes.
+- Bloqueo temporal por cuenta: cinco intentos fallidos en quince minutos la bloquean otros
+  quince. Detiene el ataque dirigido aunque el atacante rote de direccion de origen.
+- Freno por direccion: 300 peticiones por minuto en general y 40 intentos **fallidos** de
+  acceso cada diez minutos. Los ingresos correctos no consumen el cupo, para que una oficina
+  entera detras de una sola direccion publica no se quede fuera.
+- Politica de contenido restrictiva, `nosniff`, `SAMEORIGIN`, referente suprimido, HSTS en
+  produccion y ocultamiento de la tecnologia del servidor.
+- CORS restringido por lista de origenes, con credenciales habilitadas.
+- Cuerpo de peticion limitado a 1 MB y esquemas de validacion declarativos por endpoint.
+- Consultas siempre parametrizadas.
+- Credenciales de acceso remoto cifradas con AES-256-GCM y clave derivada por scrypt; el
+  listado nunca las expone y se revelan solo bajo peticion autorizada.
+- Las respuestas del circuito de sesion y la entrega de adjuntos se marcan `no-store`.
 - Bajas logicas en usuarios y areas para preservar la trazabilidad historica de los tickets.
 - Bitacora de auditoria de cada operacion, exportable en PDF.
+
+### Secretos obligatorios en produccion
+
+Con `NODE_ENV=production` el servicio **se niega a arrancar** si `JWT_SECRET`, `CLAVE_CIFRADO`
+o `DB_PASSWORD` conservan el valor del archivo de ejemplo o tienen menos de 24 caracteres.
+Genere cada uno con:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+```
+
+La cookie de sesion se marca `Secure` en produccion, lo que exige HTTPS. En una instalacion
+interna que todavia no tiene certificado, defina `COOKIE_SECURE=false` de forma explicita; de
+lo contrario el navegador nunca enviara la sesion.
+
+## Pruebas automatizadas
+
+La bateria recorre el sistema de extremo a extremo contra la API en ejecucion.
+
+```bash
+cd backend
+npm run qa            # las tres baterias, una tras otra
+npm run qa:seguridad  # cookies, verificacion de origen, cabeceras, bloqueo y cache
+npm run qa:funcional  # los once accesos y todos los modulos del sistema
+npm run qa:tiempo-real # canal de WebSockets y reparto por salas
+npm run qa:limpiar    # retira de la base los datos que dejan las pruebas
+```
+
+| Bateria | Que comprueba | Resultado |
+|---|---|---|
+| Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache y cierre de sesion | 22 de 22 |
+| Funcional | Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada | 70 de 70 |
+| Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
+
+Todo lo que crean las pruebas lleva el prefijo `QA - ` en el titulo, de modo que
+`npm run qa:limpiar` lo identifica sin tocar la informacion real de la empresa.
+
+## Puntos pendientes conocidos
+
+No son defectos del sistema construido, sino trabajo de puesta en produccion o alcances aun no
+solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
+
+| Punto | Situacion actual | Prioridad |
+|---|---|---|
+| Aplicacion movil | El codigo esta escrito y consume la API con cabecera `Authorization`, pero no se ha compilado ni probado sobre un dispositivo real | Alta si se usara en campo |
+| Certificado HTTPS | Sin certificado hay que desactivar `COOKIE_SECURE` de forma explicita | Alta antes de publicar |
+| Respaldo de la base | No hay tarea programada de respaldo ni prueba de restauracion | Alta antes de publicar |
+| Revocacion de sesiones | El token vale hasta su vencimiento; desactivar un usuario no corta la sesion ya abierta | Media |
+| Estado entre instancias | Cache, bloqueo por intentos y freno por origen viven en memoria del proceso; con varias instancias haria falta un almacen comun | Media si se escala |
+| Cambio de clave obligatorio | Las cuentas se entregan con una contrasena inicial conocida y el sistema no exige cambiarla al primer ingreso | Media |
+| Aviso por correo | Los avisos llegan por el canal en tiempo real y la bandeja interna, no por correo | Baja |
+| Pruebas unitarias | La verificacion es de extremo a extremo; no hay pruebas unitarias por funcion | Baja |
 
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: STD-2026-TI - Version 1.0.0
+Documento de referencia: STD-2026-TI - Version 1.8.0

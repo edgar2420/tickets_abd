@@ -98,9 +98,7 @@ export const indicadores = async (filtros = {}, usuario = null) => {
         COUNT(*) FILTER (WHERE estado = 'Resuelto')::int                  AS resueltos,
         COUNT(*) FILTER (WHERE estado = 'Cerrado')::int                   AS cerrados,
         COUNT(*) FILTER (WHERE prioridad = 'Critica'
-                           AND estado IN ('Abierto','En Proceso'))::int   AS criticos,
-        COALESCE(ROUND((AVG(EXTRACT(EPOCH FROM (fecha_resolucion - fecha_creacion)) / 3600)
-                 FILTER (WHERE fecha_resolucion IS NOT NULL))::numeric, 2), 0) AS horas_promedio_resolucion
+                           AND estado IN ('Abierto','En Proceso'))::int   AS criticos
        FROM tickets t
       WHERE ($1::bool = TRUE OR t.solicitante_id = $2)
         AND ($3::timestamp IS NULL OR t.fecha_creacion >= $3)

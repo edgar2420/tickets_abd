@@ -13,5 +13,3 @@ export const requierePermiso = (...codigos) => (req, _res, next) => {
   return next();
 };
 
-/** Verificacion utilitaria dentro de un servicio o controlador. */
-export const tienePermiso = (usuario, codigo) => Boolean(usuario?.permisos?.includes(codigo));

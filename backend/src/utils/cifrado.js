@@ -41,5 +41,3 @@ export const descifrar = (guardado) => {
   }
 };
 
-/** Indica si el equipo tiene contrasena registrada, sin revelarla. */
-export const tieneValor = (guardado) => Boolean(guardado);

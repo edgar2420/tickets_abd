@@ -5,6 +5,8 @@ import { env } from '../../config/env.js';
 import { query } from '../../config/db.js';
 import { HttpError, asyncHandler } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
+import { abrirSesion, cerrarSesion } from '../../utils/sesion.js';
+import { verificarBloqueo, registrarFallo, limpiarIntentos } from '../../services/intentos.service.js';
 
 export const loginSchema = z.object({
   usuario: z.string().min(3, 'El usuario debe tener al menos 3 caracteres'),
@@ -18,6 +20,7 @@ export const cambioPasswordSchema = z.object({
 
 export const login = asyncHandler(async (req, res) => {
   const { usuario, password } = req.body;
+  verificarBloqueo(usuario);
   const { rows } = await query(
     `SELECT u.id, u.nombre, u.usuario, u.email, u.password_hash, u.activo,
             u.rol_id, r.nombre AS rol, u.area_id, a.nombre AS area,
@@ -32,6 +35,7 @@ export const login = asyncHandler(async (req, res) => {
 
   const encontrado = rows[0];
   if (!encontrado || !(await bcrypt.compare(password, encontrado.password_hash))) {
+    registrarFallo(usuario);
     await registrarAuditoria({
       usuarioId: encontrado?.id ?? null, entidad: 'SESION', accion: 'LOGIN_FALLIDO',
       detalle: { usuario }, ip: req.ip
@@ -39,6 +43,7 @@ export const login = asyncHandler(async (req, res) => {
     throw HttpError.unauthorized('Usuario o contrasena incorrectos');
   }
   if (!encontrado.activo) throw HttpError.forbidden('El usuario se encuentra desactivado');
+  limpiarIntentos(usuario);
 
   const token = jwt.sign(
     { sub: encontrado.id, usuario: encontrado.usuario, rol_id: encontrado.rol_id, area_id: encontrado.area_id },
@@ -53,8 +58,17 @@ export const login = asyncHandler(async (req, res) => {
 
   await registrarAuditoria({ usuarioId: encontrado.id, entidad: 'SESION', accion: 'LOGIN', ip: req.ip });
 
+  // La credencial viaja en cookie httpOnly; el token en el cuerpo sostiene
+  // a los clientes sin cookies, como la aplicacion movil.
+  const csrf = abrirSesion(res, token);
+
   delete encontrado.password_hash;
-  res.json({ ok: true, token, usuario: { ...encontrado, permisos: permisos.map((p) => p.codigo) } });
+  res.json({
+    ok: true,
+    token,
+    csrf,
+    usuario: { ...encontrado, permisos: permisos.map((p) => p.codigo) }
+  });
 });
 
 export const perfil = asyncHandler(async (req, res) => {
@@ -70,10 +84,12 @@ export const cambiarPassword = asyncHandler(async (req, res) => {
   const hash = await bcrypt.hash(passwordNueva, 10);
   await query('UPDATE usuarios SET password_hash = $1 WHERE id = $2', [hash, req.usuario.id]);
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: req.usuario.id, accion: 'CAMBIO_PASSWORD', ip: req.ip });
-  res.json({ ok: true, mensaje: 'Contrasena actualizada correctamente' });
+  cerrarSesion(res);
+  res.json({ ok: true, mensaje: 'Contrasena actualizada. Vuelva a iniciar sesion.' });
 });
 
 export const logout = asyncHandler(async (req, res) => {
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'SESION', accion: 'LOGOUT', ip: req.ip });
+  cerrarSesion(res);
   res.json({ ok: true, mensaje: 'Sesion finalizada' });
 });

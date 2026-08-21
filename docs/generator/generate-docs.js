@@ -163,6 +163,120 @@ const ARCHIVOS = [
   { componente: 'Despliegue', ruta: 'docker-compose.yml', descripcion: 'Orquestacion de base de datos, API y web' }
 ];
 
+const CONTROLES_SEGURIDAD = [
+  {
+    control: 'Sesion en cookie httpOnly',
+    riesgo: 'Robo de la credencial por codigo inyectado en la pagina',
+    como: 'El token viaja en una cookie que ningun script puede leer, con SameSite estricto'
+  },
+  {
+    control: 'Verificacion de origen',
+    riesgo: 'Peticiones forjadas desde otro sitio ya abierto en el navegador',
+    como: 'Doble envio: cookie legible mas cabecera X-CSRF-Token, comparadas en tiempo constante'
+  },
+  {
+    control: 'Bloqueo por cuenta',
+    riesgo: 'Adivinacion de contrasenas rotando la direccion de origen',
+    como: 'Cinco fallos en quince minutos bloquean el usuario otros quince, sin inhabilitar la cuenta'
+  },
+  {
+    control: 'Freno por origen',
+    riesgo: 'Saturacion del servicio y fuerza bruta masiva',
+    como: 'Trescientas peticiones por minuto y cuarenta intentos fallidos de acceso cada diez minutos'
+  },
+  {
+    control: 'Cabeceras de proteccion',
+    riesgo: 'Enmarcado del sitio, interpretacion indebida de archivos y fuga por el referente',
+    como: 'Politica de contenido restrictiva, nosniff, SAMEORIGIN, referente suprimido y HSTS'
+  },
+  {
+    control: 'Cifrado de credenciales',
+    riesgo: 'Exposicion de las claves de acceso remoto guardadas',
+    como: 'AES-256-GCM con clave derivada por scrypt; se revelan solo bajo peticion autorizada'
+  },
+  {
+    control: 'Validacion de entrada',
+    riesgo: 'Datos malformados, inyeccion y cuerpos desmedidos',
+    como: 'Esquemas declarativos por endpoint, consultas parametrizadas y cuerpo limitado a un megabyte'
+  },
+  {
+    control: 'Rastro de auditoria',
+    riesgo: 'Acciones sin responsable identificable',
+    como: 'Cada operacion de escritura deja usuario, entidad, accion, direccion de origen y momento'
+  },
+  {
+    control: 'Secretos obligatorios',
+    riesgo: 'Publicacion con las claves del archivo de ejemplo',
+    como: 'El arranque en produccion se detiene si un secreto conserva el valor de muestra'
+  }
+];
+
+const RESULTADO_PRUEBAS = [
+  {
+    bateria: 'Seguridad',
+    que: 'Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache y cierre de sesion',
+    resultado: '22 de 22'
+  },
+  {
+    bateria: 'Funcional',
+    que: 'Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble '
+      + 'aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada',
+    resultado: '70 de 70'
+  },
+  {
+    bateria: 'Tiempo real',
+    que: 'Ingreso al canal, reparto por salas, aviso inmediato de un ticket nuevo y rechazo de conexiones sin sesion',
+    resultado: '4 de 4'
+  }
+];
+
+const PENDIENTES = [
+  {
+    punto: 'Aplicacion movil',
+    situacion: 'El codigo esta escrito y consume la API con cabecera Authorization, pero no se ha compilado ni '
+      + 'probado sobre un dispositivo real',
+    prioridad: 'Alta si se quiere usar en campo'
+  },
+  {
+    punto: 'Certificado HTTPS',
+    situacion: 'La cookie de sesion se marca segura en produccion; sin certificado hay que desactivarlo de forma '
+      + 'explicita con COOKIE_SECURE',
+    prioridad: 'Alta antes de publicar'
+  },
+  {
+    punto: 'Revocacion de sesiones',
+    situacion: 'El token es valido hasta su vencimiento; desactivar un usuario no corta la sesion ya abierta',
+    prioridad: 'Media'
+  },
+  {
+    punto: 'Estado compartido entre instancias',
+    situacion: 'La cache, el bloqueo por intentos y el freno por origen viven en memoria del proceso: con varias '
+      + 'instancias haria falta un almacen comun',
+    prioridad: 'Media si se escala'
+  },
+  {
+    punto: 'Cambio de clave obligatorio',
+    situacion: 'Las cuentas se entregan con una contrasena inicial conocida y el sistema no exige cambiarla al '
+      + 'primer ingreso',
+    prioridad: 'Media'
+  },
+  {
+    punto: 'Aviso por correo',
+    situacion: 'Los avisos llegan por el canal en tiempo real y por la bandeja interna, no por correo electronico',
+    prioridad: 'Baja'
+  },
+  {
+    punto: 'Respaldo de la base de datos',
+    situacion: 'No hay tarea programada de respaldo ni prueba de restauracion',
+    prioridad: 'Alta antes de publicar'
+  },
+  {
+    punto: 'Pruebas unitarias',
+    situacion: 'La verificacion es de extremo a extremo contra la API; no hay pruebas unitarias por funcion',
+    prioridad: 'Baja'
+  }
+];
+
 const construir = async () => {
   const ddl = await leerSql('01_schema.sql');
   const doc = new DocumentoPDF({
@@ -452,7 +566,67 @@ const construir = async () => {
 
   // 13. Despliegue
   doc.saltoPagina();
-  doc.titulo1('13. Despliegue en servidor', 'engranaje');
+  // 13. Seguridad
+  doc.saltoPagina();
+  doc.titulo1('13. Seguridad de la plataforma', 'escudo');
+  doc.parrafo('La credencial de sesion no se guarda en el almacenamiento del navegador. Al iniciar sesion el '
+    + 'servidor deja dos cookies complementarias: una de sesion marcada httpOnly, que ningun script de la pagina '
+    + 'puede leer, y una segunda de verificacion de origen que la aplicacion si lee y reenvia por cabecera en cada '
+    + 'operacion de escritura. Un sitio ajeno puede provocar que el navegador envie la cookie de sesion, pero no '
+    + 'puede leer la segunda para reproducir la cabecera, de modo que la peticion se rechaza.');
+  doc.tabla([
+    { titulo: 'Control', campo: 'control', ancho: 0.28 },
+    { titulo: 'Riesgo que atiende', campo: 'riesgo', ancho: 0.32 },
+    { titulo: 'Implementacion', campo: 'como', ancho: 0.4 }
+  ], CONTROLES_SEGURIDAD);
+
+  doc.titulo2('Circuito de la sesion');
+  doc.codigoFuente([
+    '// Inicio de sesion',
+    'Set-Cookie: tickets_sesion=<token>; HttpOnly; SameSite=Strict; Secure; Path=/',
+    'Set-Cookie: tickets_csrf=<token de origen>; SameSite=Strict; Secure; Path=/',
+    '',
+    '// Toda escritura desde el navegador',
+    'X-CSRF-Token: <token de origen>   // debe coincidir con la cookie',
+    '',
+    '// La aplicacion movil conserva el esquema con cabecera,',
+    '// que no es explotable por peticiones forjadas entre sitios',
+    'Authorization: Bearer <token>'
+  ].join('\n'));
+
+  doc.nota('En produccion el servicio se niega a arrancar si JWT_SECRET, CLAVE_CIFRADO o la contrasena de la base '
+    + 'de datos conservan el valor de ejemplo o tienen menos de 24 caracteres.', { icono: 'alerta', color: PALETA.critico });
+
+  doc.titulo2('Aprovechamiento de cache');
+  doc.parrafo('Los catalogos que se consultan en casi toda navegacion y cambian pocas veces (areas, sucursales y '
+    + 'categorias) se resuelven desde una cache en memoria de dos minutos y se acompanan de una cabecera '
+    + 'Cache-Control privada con etiqueta de entidad. Una consulta repetida se resuelve con un 304 sin volver a '
+    + 'transferir el cuerpo. Toda escritura sobre un catalogo descarta su clave, de modo que un cambio '
+    + 'administrativo se ve de inmediato y no queda a la espera de que venza un plazo.');
+
+  // 14. Pruebas
+  doc.saltoPagina();
+  doc.titulo1('14. Verificacion y resultado de las pruebas', 'escudo');
+  doc.parrafo('El repositorio incorpora una bateria de pruebas automatizadas que recorre el sistema de extremo a '
+    + 'extremo contra la API en ejecucion. Se invocan con "npm run qa" desde la carpeta backend y dejan la base sin '
+    + 'residuos mediante "npm run qa:limpiar".');
+  doc.tabla([
+    { titulo: 'Bateria', campo: 'bateria', ancho: 0.26 },
+    { titulo: 'Que comprueba', campo: 'que', ancho: 0.54 },
+    { titulo: 'Resultado', campo: 'resultado', ancho: 0.2 }
+  ], RESULTADO_PRUEBAS);
+
+  doc.titulo2('Puntos pendientes conocidos');
+  doc.parrafo('Los siguientes puntos no son defectos del sistema construido, sino trabajo que corresponde a la '
+    + 'puesta en produccion o a alcances no solicitados hasta ahora. Se dejan enumerados para que la decision sobre '
+    + 'cada uno quede documentada.');
+  doc.tabla([
+    { titulo: 'Punto pendiente', campo: 'punto', ancho: 0.3 },
+    { titulo: 'Situacion actual', campo: 'situacion', ancho: 0.42 },
+    { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.28 }
+  ], PENDIENTES);
+
+  doc.titulo1('15. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -486,7 +660,7 @@ const construir = async () => {
   ].join('\n'));
 
   // 11. Inventario
-  doc.titulo1('14. Inventario de componentes', 'baseDatos');
+  doc.titulo1('16. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
@@ -494,7 +668,7 @@ const construir = async () => {
   ], ARCHIVOS);
 
   // 12. Credenciales y control de versiones
-  doc.titulo1('15. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('17. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Admin123*' },
@@ -509,8 +683,27 @@ const construir = async () => {
   ], [
     {
       version: '1.0.0',
-      fecha: new Date().toLocaleDateString('es-BO'),
+      fecha: '18/08/2026',
       descripcion: 'Construccion inicial completa del sistema segun STD-2026-TI',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '1.7.0',
+      fecha: '20/08/2026',
+      descripcion: 'Sucursales, circuito de compras con doble aprobacion, inventario y equipos',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '1.7.2',
+      fecha: '20/08/2026',
+      descripcion: 'Legibilidad de los documentos PDF y constancia de la aprobacion de Gerencia',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '1.8.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Sesion en cookie httpOnly con verificacion de origen, cache de catalogos, bloqueo por '
+        + 'intentos fallidos, secretos obligatorios en produccion y bateria de pruebas automatizadas',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
