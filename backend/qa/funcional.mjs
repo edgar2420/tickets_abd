@@ -1,4 +1,7 @@
 const BASE = 'http://localhost:4000/api/v1';
+// El servidor exige que toda escritura con cookie declare un origen autorizado,
+// tal como lo hace un navegador. Las pruebas se presentan igual.
+const ORIGEN = 'http://localhost:5173';
 
 const resultados = [];
 const marca = (modulo, ok, detalle) => {
@@ -25,7 +28,7 @@ const entrar = async (usuario, password) => {
 
 const pedir = async (usuario, ruta, opciones = {}) => {
   const sesion = sesiones.get(usuario);
-  const cabeceras = { Cookie: sesion.cookie, 'X-CSRF-Token': sesion.csrf };
+  const cabeceras = { Cookie: sesion.cookie, 'X-CSRF-Token': sesion.csrf, Origin: ORIGEN };
   if (opciones.cuerpo) cabeceras['Content-Type'] = 'application/json';
   const respuesta = await fetch(BASE + ruta, {
     method: opciones.metodo ?? 'GET',
@@ -262,7 +265,7 @@ for (const [nombre, ruta] of [
   ['reporte de equipos', '/equipos/reporte/pdf'],
   ['reporte de compras', '/compras/reporte/pdf']
 ]) {
-  const respuesta = await fetch(BASE + ruta, { headers: { Cookie: sesionAdmin.cookie } });
+  const respuesta = await fetch(BASE + ruta, { headers: { Cookie: sesionAdmin.cookie, Origin: ORIGEN } });
   const bytes = respuesta.ok ? (await respuesta.arrayBuffer()).byteLength : 0;
   marca('pdf', respuesta.ok && bytes > 1500, `${nombre}: ${respuesta.status}, ${bytes} bytes`);
 }

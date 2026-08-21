@@ -17,8 +17,10 @@ services:
       - datos_postgres:/var/lib/postgresql/data
       # El esquema y la carga inicial se aplican en el primer arranque
       - ./db:/docker-entrypoint-initdb.d:ro
+    # La base solo se atiende dentro de la red del despliegue. Se publica en
+    # la maquina anfitriona atada a su direccion local, nunca a la red externa.
     ports:
-      - "${DB_PORT_EXPUESTO:-5432}:5432"
+      - "127.0.0.1:${DB_PORT_EXPUESTO:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-tickets_app} -d ${DB_NAME:-tickets_ti}"]
       interval: 10s
@@ -47,6 +49,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET en el archivo .env}
       CLAVE_CIFRADO: ${CLAVE_CIFRADO:?defina CLAVE_CIFRADO en el archivo .env}
       COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      FORZAR_HTTPS: ${FORZAR_HTTPS:-false}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:8081}
       DOCS_OUTPUT_DIR: storage/documentos

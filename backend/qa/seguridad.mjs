@@ -1,6 +1,7 @@
 import http from 'node:http';
 
 const BASE = 'http://localhost:4000/api/v1';
+const ORIGEN = 'http://localhost:5173';
 
 /**
  * Cliente crudo para las peticiones condicionales: el fetch de Node
@@ -57,21 +58,21 @@ marca(sinNada.status === 401, `sin credencial se rechaza (${sinNada.status})`);
 console.log('\n=== 3. PROTECCION CONTRA PETICIONES FORJADAS ===');
 const sinCabecera = await fetch(BASE + '/tickets', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', Cookie: galleta },
+  headers: { 'Content-Type': 'application/json', Cookie: galleta, Origin: ORIGEN },
   body: JSON.stringify({ titulo: 'QA - intento de falsificacion externa', descripcion: 'Peticion sin token de origen valido.', categoria: 'Redes' })
 });
 marca(sinCabecera.status === 403, `escritura con cookie pero sin cabecera CSRF: rechazada (${sinCabecera.status})`);
 
 const cabeceraFalsa = await fetch(BASE + '/tickets', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': 'a'.repeat(48) },
+  headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': 'a'.repeat(48), Origin: ORIGEN },
   body: JSON.stringify({ titulo: 'QA - intento con token de origen invalido', descripcion: 'Peticion con cabecera falsificada.', categoria: 'Redes' })
 });
 marca(cabeceraFalsa.status === 403, `escritura con token de origen invalido: rechazada (${cabeceraFalsa.status})`);
 
 const legitima = await fetch(BASE + '/tickets', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': csrf },
+  headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': csrf, Origin: ORIGEN },
   body: JSON.stringify({
     titulo: 'QA - verificacion del circuito con proteccion de origen',
     descripcion: 'Ticket creado por la prueba de seguridad con la cabecera correcta.',
@@ -80,6 +81,24 @@ const legitima = await fetch(BASE + '/tickets', {
 });
 marca(legitima.status === 201, `escritura legitima aceptada (${legitima.status})`);
 const ticketCreado = (await legitima.json()).datos;
+
+console.log('\n=== 3b. VERIFICACION DEL ORIGEN DECLARADO ===');
+const origenAjeno = await fetch(BASE + '/tickets', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json', Cookie: galleta,
+    'X-CSRF-Token': csrf, Origin: 'https://sitio-malicioso.example'
+  },
+  body: JSON.stringify({ titulo: 'QA - escritura desde un origen ajeno', descripcion: 'Peticion emitida desde un sitio no autorizado.', categoria: 'Redes' })
+});
+marca(origenAjeno.status === 403, `una escritura desde un origen ajeno se rechaza (${origenAjeno.status})`);
+
+const sinOrigen = await fetch(BASE + '/tickets', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': csrf },
+  body: JSON.stringify({ titulo: 'QA - escritura sin declarar origen', descripcion: 'Peticion con cookie que no declara de donde parte.', categoria: 'Redes' })
+});
+marca(sinOrigen.status === 403, `una escritura con cookie que no declara origen se rechaza (${sinOrigen.status})`);
 
 console.log('\n=== 4. EL CLIENTE MOVIL SIGUE OPERANDO CON CABECERA ===');
 const conBearer = await fetch(BASE + '/tickets?limite=1', {
@@ -139,11 +158,19 @@ marca(revalidada.estado === 304, `una consulta repetida se resuelve con ${revali
 
 console.log('\n=== 8. CIERRE DE SESION ===');
 const salida = await fetch(BASE + '/auth/logout', {
-  method: 'POST', headers: { Cookie: galleta, 'X-CSRF-Token': csrf }
+  method: 'POST', headers: { Cookie: galleta, 'X-CSRF-Token': csrf, Origin: ORIGEN }
 });
 const cookiesSalida = leerCookies(salida);
 marca(salida.status === 200, 'cierre de sesion aceptado');
 marca(cookiesSalida.tickets_sesion?.valor === '', 'la cookie de sesion se vacia al salir');
+
+console.log('\n=== 9. LA API ESTA CERRADA POR OMISION ===');
+for (const ruta of ['/areas', '/usuarios', '/inventario/articulos', '/equipos', '/compras', '/auditoria', '/notificaciones']) {
+  const abierta = await fetch(BASE + ruta);
+  marca(abierta.status === 401, `${ruta} sin credencial: ${abierta.status}`);
+}
+const inexistente = await fetch(BASE + '/ruta-que-no-existe');
+marca(inexistente.status === 401, `una ruta desconocida tampoco se atiende sin sesion (${inexistente.status})`);
 
 console.log('\n========================================');
 console.log(fallos === 0 ? 'SEGURIDAD: TODAS LAS PRUEBAS PASARON' : `SEGURIDAD: ${fallos} FALLA(S)`);

@@ -29,6 +29,11 @@ export const env = {
       .map((o) => o.trim())
       .filter(Boolean)
   },
+  /**
+   * Reconducir a HTTPS toda peticion en claro. Obligatorio de cara a
+   * internet; debe quedar apagado en una red interna sin certificado.
+   */
+  httpsObligatorio: (process.env.FORZAR_HTTPS ?? 'false') === 'true',
   cookies: {
     /**
      * El atributo "secure" impide que la cookie viaje por HTTP. Es lo
