@@ -100,6 +100,19 @@ Retira tickets, comentarios, adjuntos, notificaciones, inventario, equipos, comp
 de proyecto, la bitacora y todas las cuentas, y vuelve a crear la administradora. Conserva la
 configuracion: roles, permisos, areas, sucursales y categorias.
 
+## Bitacora de auditoria
+
+Anota **unicamente las acciones que modifican algo**: inicios y cierres de sesion, intentos de
+acceso fallidos, altas, cambios, aprobaciones, descargas de documentos y consultas de
+credenciales de acceso remoto. Navegar por las pantallas no deja registro, de modo que en un
+sistema recien puesto en marcha la bitacora se ve vacia hasta que alguien opere.
+
+De cada accion queda quien la hizo, sobre que registro, cuando, con que detalle y desde que
+direccion de origen. La pantalla nunca se sirve desde la cache del navegador y se refresca sola
+cuando ocurre algo en el sistema, ademas del boton de actualizar.
+
+La bitacora no se borra al limpiar datos de prueba: es el registro permanente de lo que paso.
+
 ## Mi perfil
 
 Cada persona tiene su propia pantalla en **/perfil**, a la que se llega pulsando su nombre en la
@@ -633,4 +646,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.4.2
+Documento de referencia: Version 2.5.0
