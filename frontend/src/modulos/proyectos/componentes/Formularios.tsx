@@ -42,8 +42,8 @@ export const FormularioPeticion = ({ nueva, setNueva, guardando, alEnviar, alCan
       </span>
     </p>
 
-    <div className="grid gap-4 sm:grid-cols-3">
-      <div className="sm:col-span-2">
+    <div className="grid gap-4 lg:grid-cols-3">
+      <div className="lg:col-span-2">
         <label className="etiqueta">Como llamaria a esta idea</label>
         <input
           className="campo"
@@ -67,25 +67,32 @@ export const FormularioPeticion = ({ nueva, setNueva, guardando, alEnviar, alCan
       </div>
     </div>
 
-    {GUIA.map(({ campo, titulo, ayuda, minimo }) => (
-      <div key={campo}>
-        <label className="etiqueta">{titulo}</label>
-        <p className="mb-1.5 text-xs text-slate-500 dark:text-slate-400">{ayuda}</p>
-        <textarea
-          className="campo min-h-24"
-          required
-          minLength={minimo}
-          maxLength={2000}
-          value={nueva[campo]}
-          onChange={(e) => setNueva((previa) => ({ ...previa, [campo]: e.target.value }))}
-        />
-        <p className="mt-1 text-right text-xs text-slate-400 dark:text-slate-500">
-          {nueva[campo].trim().length} de {minimo} caracteres minimos
-        </p>
-      </div>
-    ))}
+    <div className="grid gap-x-6 gap-y-4 lg:grid-cols-2">
+      {GUIA.map(({ campo, titulo, ayuda, minimo }) => {
+        const escrito = nueva[campo].trim().length;
+        return (
+          <div key={campo}>
+            <label className="etiqueta">{titulo}</label>
+            <p className="mb-1.5 text-xs leading-snug text-slate-500 dark:text-slate-400">{ayuda}</p>
+            <textarea
+              className="campo min-h-28"
+              required
+              minLength={minimo}
+              maxLength={2000}
+              value={nueva[campo]}
+              onChange={(e) => setNueva((previa) => ({ ...previa, [campo]: e.target.value }))}
+            />
+            <p className={`mt-1 text-right text-xs ${escrito >= minimo
+              ? 'text-emerald-600 dark:text-emerald-400'
+              : 'text-slate-400 dark:text-slate-500'}`}>
+              {escrito} de {minimo} caracteres minimos
+            </p>
+          </div>
+        );
+      })}
+    </div>
 
-    <div className="grid gap-4 sm:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <div>
         <label className="etiqueta">A cuantas personas afecta</label>
         <input
@@ -117,17 +124,16 @@ export const FormularioPeticion = ({ nueva, setNueva, guardando, alEnviar, alCan
           {URGENCIAS.map((urgencia) => <option key={urgencia} value={urgencia}>{urgencia}</option>)}
         </select>
       </div>
-    </div>
-
-    <div>
-      <label className="etiqueta">Que sistemas o herramientas usa hoy para esto</label>
-      <input
-        className="campo"
-        maxLength={300}
-        placeholder="Planillas de Excel compartidas por correo, sistema contable, cuaderno"
-        value={nueva.sistemas_actuales}
-        onChange={(e) => setNueva((previa) => ({ ...previa, sistemas_actuales: e.target.value }))}
-      />
+      <div>
+        <label className="etiqueta">Que usa hoy para esto</label>
+        <input
+          className="campo"
+          maxLength={300}
+          placeholder="Planillas de Excel por correo"
+          value={nueva.sistemas_actuales}
+          onChange={(e) => setNueva((previa) => ({ ...previa, sistemas_actuales: e.target.value }))}
+        />
+      </div>
     </div>
 
     <Pie guardando={guardando} texto="Enviar la peticion" alCancelar={alCancelar} />

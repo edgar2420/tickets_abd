@@ -1,6 +1,7 @@
 import type { FormEvent, ReactNode } from 'react';
 import { Cpu, HardDrive, MemoryStick, Monitor, Network, ShieldAlert, Users } from 'lucide-react';
 import { ESTADOS, TIPOS, type FormularioEquipo } from '../constantes';
+import { CompositorCodigo } from './CompositorCodigo';
 import type { Area, EstadoEquipo, Sucursal, TipoEquipo, Usuario } from '../../../lib/tipos';
 
 type Actualizar = (actualizar: (previo: FormularioEquipo) => FormularioEquipo) => void;
@@ -56,19 +57,27 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
     <form onSubmit={alEnviar} className="space-y-5">
       <Seccion titulo="Identificacion" icono={Monitor}>
         <div className="grid gap-3 sm:grid-cols-3">
-          {campo('Codigo', 'codigo', {
-            required: true, minLength: 2, maxLength: 40, placeholder: 'PC-001', className: 'campo font-mono uppercase'
-          })}
+          <div className="sm:col-span-3">
+            <label className="etiqueta">Tipo de equipo</label>
+            <select
+              className="campo"
+              value={formulario.tipo}
+              onChange={(e) => setFormulario((previo) => ({ ...previo, tipo: e.target.value as TipoEquipo }))}
+            >
+              {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+            </select>
+          </div>
+
+          <CompositorCodigo
+            codigo={formulario.codigo}
+            tipo={formulario.tipo}
+            esNuevo={formulario.id === null}
+            alCambiar={(codigo) => setFormulario((previo) => ({ ...previo, codigo }))}
+          />
+
           {campo('Nombre del equipo', 'nombre_equipo', {
             required: true, minLength: 2, maxLength: 100, placeholder: 'CONTAB-01'
           })}
-          <Seleccion
-            etiqueta="Tipo"
-            valor={formulario.tipo}
-            alCambiar={(valor) => setFormulario((previo) => ({ ...previo, tipo: valor as TipoEquipo }))}
-          >
-            {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
-          </Seleccion>
           {campo('Marca', 'marca', { maxLength: 60, placeholder: 'Dell' })}
           {campo('Modelo', 'modelo', { maxLength: 80, placeholder: 'OptiPlex 3080' })}
           {campo('Numero de serie', 'numero_serie', { maxLength: 80 })}
