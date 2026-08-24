@@ -4,23 +4,18 @@ import { env } from '../../config/env.js';
 
 const fecha = (valor) => (valor ? new Date(valor).toLocaleString('es-BO') : null);
 
-export const duracionLegible = (horas) => {
-  if (horas === null || horas === undefined) return null;
-  const minutosTotales = Math.max(0, Math.round(Number(horas) * 60));
-  const dias = Math.floor(minutosTotales / 1440);
-  const restoHoras = Math.floor((minutosTotales % 1440) / 60);
-  const minutos = minutosTotales % 60;
-  if (dias > 0) return `${dias} d ${restoHoras} h ${minutos} min`;
-  if (restoHoras > 0) return `${restoHoras} h ${minutos} min`;
-  return `${minutos} min`;
-};
+export { duracionLegible } from '../../modules/tickets/modelo.js';
+import { duracionLegible } from '../../modules/tickets/modelo.js';
 const soloFecha = (valor) => (valor ? new Date(valor).toLocaleDateString('es-BO') : '-');
 
-export const codigoTicket = (id) => 'TI-' + String(id).padStart(5, '0');
+export { codigoTicket } from '../../modules/tickets/modelo.js';
+import { codigoTicket } from '../../modules/tickets/modelo.js';
 
 export const colorEstado = (estado) => ({
-  'Abierto': PALETA.acento,
+  'Nuevo': PALETA.acento,
+  'Asignado': PALETA.acento,
   'En Proceso': PALETA.advertencia,
+  'En Espera': PALETA.advertencia,
   'Resuelto': PALETA.ok,
   'Cerrado': PALETA.suave
 }[estado] ?? PALETA.texto);
@@ -33,8 +28,10 @@ export const colorPrioridad = (prioridad) => ({
 }[prioridad] ?? PALETA.texto);
 
 const iconoEstado = (estado) => ({
-  'Abierto': 'ticket',
+  'Nuevo': 'ticket',
+  'Asignado': 'ticket',
   'En Proceso': 'reloj',
+  'En Espera': 'reloj',
   'Resuelto': 'check',
   'Cerrado': 'check'
 }[estado] ?? 'ticket');
@@ -44,18 +41,22 @@ export const rutaDocumento = (...segmentos) => path.resolve(process.cwd(), env.d
 export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   const accion = opciones.accion ?? 'FICHA';
   const doc = new DocumentoPDF({
-    titulo: 'Ticket ' + codigoTicket(ticket.id),
+    titulo: 'Ticket ' + codigoTicket(ticket),
     subtitulo: ticket.titulo,
-    codigo: 'ACTA-' + codigoTicket(ticket.id) + '-' + accion,
+    codigo: 'ACTA-' + codigoTicket(ticket) + '-' + accion,
     icono: iconoEstado(ticket.estado)
   });
 
   doc.titulo1('Ficha del requerimiento', 'ticket');
   doc.camposClaveValor([
-    { etiqueta: 'Ticket', valor: codigoTicket(ticket.id) },
+    { etiqueta: 'Ticket', valor: codigoTicket(ticket) },
     { etiqueta: 'Estado', valor: ticket.estado },
+    { etiqueta: 'Tipo', valor: ticket.tipo },
+    { etiqueta: 'Servicio', valor: ticket.servicio },
     { etiqueta: 'Categoria', valor: ticket.categoria },
     { etiqueta: 'Prioridad', valor: ticket.prioridad },
+    { etiqueta: 'Ubicacion', valor: ticket.ubicacion },
+    { etiqueta: 'Activo relacionado', valor: ticket.equipo_codigo },
     { etiqueta: 'Solicitante', valor: ticket.solicitante_nombre },
     { etiqueta: 'Area solicitante', valor: ticket.solicitante_area },
     { etiqueta: 'Atendido por', valor: ticket.asignado_nombre },
@@ -63,11 +64,17 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
     { etiqueta: 'Creacion', valor: fecha(ticket.fecha_creacion) },
     { etiqueta: 'Asignacion', valor: fecha(ticket.fecha_asignacion) },
     { etiqueta: 'Resolucion', valor: fecha(ticket.fecha_resolucion) },
-    { etiqueta: 'Tiempo de atencion', valor: duracionLegible(ticket.horas_atencion) }
+    { etiqueta: 'Objetivo de atencion', valor: fecha(ticket.fecha_objetivo) },
+    { etiqueta: 'Tiempo empleado', valor: duracionLegible(ticket.minutos_empleados) }
   ], 4);
 
   doc.titulo1('Descripcion reportada', 'documento');
   doc.parrafo(ticket.descripcion);
+
+  if (ticket.observaciones) {
+    doc.titulo1('Observaciones', 'documento');
+    doc.parrafo(ticket.observaciones);
+  }
 
   if (ticket.solucion_detalle) {
     doc.titulo1('Solucion tecnica', 'check');
@@ -313,7 +320,7 @@ export const construirReporteMensual = (datos) => {
 
   doc.titulo1('Detalle de los tickets del periodo', 'documento');
   doc.tabla([
-    { titulo: 'Codigo', ancho: 0.08, render: (f) => codigoTicket(f.id) },
+    { titulo: 'Codigo', ancho: 0.08, render: (f) => codigoTicket(f) },
     { titulo: 'Titulo', campo: 'titulo', ancho: 0.24, truncar: true },
     { titulo: 'Categoria', campo: 'categoria', ancho: 0.1 },
     { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.08, color: (f) => colorPrioridad(f.prioridad) },
@@ -362,7 +369,7 @@ export const construirReporteTickets = ({ filas, indicadores, filtros }) => {
 
   doc.titulo1('Detalle de tickets', 'documento');
   doc.tabla([
-    { titulo: 'ID', ancho: 0.07, render: (f) => codigoTicket(f.id) },
+    { titulo: 'ID', ancho: 0.07, render: (f) => codigoTicket(f) },
     { titulo: 'Titulo', campo: 'titulo', ancho: 0.24 },
     { titulo: 'Categoria', campo: 'categoria', ancho: 0.1 },
     { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.09, color: (f) => colorPrioridad(f.prioridad) },

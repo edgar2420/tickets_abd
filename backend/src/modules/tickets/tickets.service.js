@@ -3,19 +3,29 @@ import { HttpError } from '../../utils/httpError.js';
 import { construirActaTicket, rutaDocumento, codigoTicket } from '../../services/pdf/documentos.service.js';
 
 export const SELECT_TICKET = `
-  SELECT t.id, t.titulo, t.descripcion, t.categoria, t.prioridad, t.estado,
-         t.solucion_detalle, t.fecha_creacion, t.fecha_asignacion, t.fecha_resolucion,
+  SELECT t.id, t.anio, t.numero, t.titulo, t.descripcion,
+         t.tipo, t.servicio, t.categoria, t.prioridad, t.estado,
+         t.ubicacion, t.observaciones, t.minutos_empleados,
+         t.solucion_detalle, t.motivo_espera,
+         t.fecha_creacion, t.fecha_asignacion, t.fecha_inicio, t.fecha_espera,
+         t.fecha_resolucion, t.fecha_cierre, t.fecha_objetivo, t.fecha_prioridad,
          t.solicitante_id,  s.nombre  AS solicitante_nombre,  sa.nombre AS solicitante_area,
          t.sucursal_id,     suc.nombre AS sucursal_nombre,     suc.codigo AS sucursal_codigo,
          t.asignado_id,     asg.nombre AS asignado_nombre,
          t.resuelto_por_id, res.nombre AS resuelto_por_nombre,
-         EXTRACT(EPOCH FROM (COALESCE(t.fecha_resolucion, CURRENT_TIMESTAMP) - t.fecha_creacion)) / 3600 AS horas_atencion
+         t.prioridad_por_id, pri.nombre AS prioridad_por_nombre,
+         t.equipo_id,       eq.codigo AS equipo_codigo, eq.nombre_equipo AS equipo_nombre,
+         (t.fecha_objetivo IS NOT NULL
+          AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera')
+          AND t.fecha_objetivo < CURRENT_TIMESTAMP) AS vencido
     FROM tickets t
     JOIN usuarios s       ON s.id = t.solicitante_id
     JOIN areas    sa      ON sa.id = s.area_id
     LEFT JOIN sucursales suc ON suc.id = t.sucursal_id
     LEFT JOIN usuarios asg ON asg.id = t.asignado_id
-    LEFT JOIN usuarios res ON res.id = t.resuelto_por_id`;
+    LEFT JOIN usuarios res ON res.id = t.resuelto_por_id
+    LEFT JOIN usuarios pri ON pri.id = t.prioridad_por_id
+    LEFT JOIN equipos  eq  ON eq.id = t.equipo_id`;
 
 export const obtenerTicket = async (id) => {
   const { rows } = await query(`${SELECT_TICKET} WHERE t.id = $1`, [id]);
@@ -37,6 +47,10 @@ export const listarTickets = async (filtros, usuario) => {
         AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
         AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
+        AND ($14::varchar  IS NULL OR t.tipo = $14)
+        AND ($15::varchar  IS NULL OR t.servicio = $15)
+        AND ($16::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
+             AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera')))
       ORDER BY
         CASE t.prioridad WHEN 'Critica' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Media' THEN 3 ELSE 4 END,
         t.fecha_creacion DESC
@@ -48,7 +62,10 @@ export const listarTickets = async (filtros, usuario) => {
       filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
       filtros.limite ?? 25,
       filtros.sucursal_id ?? null,
-      filtros.desplazamiento ?? 0
+      filtros.desplazamiento ?? 0,
+      filtros.tipo ?? null,
+      filtros.servicio ?? null,
+      filtros.vencidos === 'true' || filtros.vencidos === true
     ]
   );
   return rows;
@@ -69,13 +86,20 @@ export const contarTickets = async (filtros, usuario) => {
         AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
         AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
-        AND ($11::int      IS NULL OR t.sucursal_id = $11)`,
+        AND ($11::int      IS NULL OR t.sucursal_id = $11)
+        AND ($12::varchar  IS NULL OR t.tipo = $12)
+        AND ($13::varchar  IS NULL OR t.servicio = $13)
+        AND ($14::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
+             AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera')))`,
     [
       verTodos, usuario.id,
       filtros.estado ?? null, filtros.categoria ?? null, filtros.prioridad ?? null,
       filtros.asignado_id ?? null, filtros.area_id ?? null,
       filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
-      filtros.sucursal_id ?? null
+      filtros.sucursal_id ?? null,
+      filtros.tipo ?? null,
+      filtros.servicio ?? null,
+      filtros.vencidos === 'true' || filtros.vencidos === true
     ]
   );
   return rows[0].total;
@@ -85,13 +109,24 @@ export const indicadores = async (filtros = {}, usuario = null) => {
   const verTodos = usuario ? usuario.permisos.includes('tickets.ver_todos') : true;
   const { rows } = await query(
     `SELECT
-        COUNT(*)::int                                                     AS total,
-        COUNT(*) FILTER (WHERE estado = 'Abierto')::int                   AS abiertos,
-        COUNT(*) FILTER (WHERE estado = 'En Proceso')::int                AS en_proceso,
-        COUNT(*) FILTER (WHERE estado = 'Resuelto')::int                  AS resueltos,
-        COUNT(*) FILTER (WHERE estado = 'Cerrado')::int                   AS cerrados,
+        COUNT(*)::int                                                      AS total,
+        COUNT(*) FILTER (WHERE estado = 'Nuevo')::int                      AS nuevos,
+        COUNT(*) FILTER (WHERE estado = 'Asignado')::int                   AS asignados,
+        COUNT(*) FILTER (WHERE estado = 'En Proceso')::int                 AS en_proceso,
+        COUNT(*) FILTER (WHERE estado = 'En Espera')::int                  AS en_espera,
+        COUNT(*) FILTER (WHERE estado = 'Resuelto')::int                   AS resueltos,
+        COUNT(*) FILTER (WHERE estado = 'Cerrado')::int                    AS cerrados,
+        COUNT(*) FILTER (WHERE estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS abiertos,
         COUNT(*) FILTER (WHERE prioridad = 'Critica'
-                           AND estado IN ('Abierto','En Proceso'))::int   AS criticos
+                           AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS criticos,
+        COUNT(*) FILTER (WHERE prioridad = 'Alta'
+                           AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS altos,
+        COUNT(*) FILTER (WHERE fecha_objetivo < CURRENT_TIMESTAMP
+                           AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS vencidos,
+        COUNT(*) FILTER (WHERE tipo = 'Mantenimiento'
+                           AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS mantenimientos,
+        COUNT(*) FILTER (WHERE servicio = 'IBS'
+                           AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS pendientes_ibs
        FROM tickets t
       WHERE ($1::bool = TRUE OR t.solicitante_id = $2)
         AND ($3::timestamp IS NULL OR t.fecha_creacion >= $3)
@@ -123,12 +158,41 @@ export const distribuciones = async () => {
        FROM tickets t LEFT JOIN sucursales s ON s.id = t.sucursal_id
       GROUP BY s.nombre ORDER BY total DESC LIMIT 10`
   );
+  const porResponsable = await query(
+    `SELECT u.nombre AS etiqueta,
+            COUNT(*)::int AS total,
+            COUNT(*) FILTER (WHERE t.estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS detalle
+       FROM tickets t JOIN usuarios u ON u.id = t.asignado_id
+      GROUP BY u.nombre ORDER BY total DESC LIMIT 10`
+  );
+
+  const porUbicacion = await query(
+    `SELECT COALESCE(NULLIF(t.ubicacion, ''), COALESCE(s.nombre, 'Sin ubicacion')) AS etiqueta,
+            COUNT(*)::int AS total
+       FROM tickets t LEFT JOIN sucursales s ON s.id = t.sucursal_id
+      GROUP BY 1 ORDER BY total DESC LIMIT 10`
+  );
+
+  const porTipo = await query(
+    `SELECT tipo AS etiqueta, COUNT(*)::int AS total
+       FROM tickets GROUP BY tipo ORDER BY total DESC`
+  );
+
+  const porServicio = await query(
+    `SELECT servicio AS etiqueta, COUNT(*)::int AS total
+       FROM tickets GROUP BY servicio ORDER BY total DESC LIMIT 12`
+  );
+
   return {
     porSucursal: porSucursal.rows,
     porCategoria: porCategoria.rows,
     porEstado: porEstado.rows,
     porArea: porArea.rows,
-    porSolicitante: porSolicitante.rows
+    porSolicitante: porSolicitante.rows,
+    porResponsable: porResponsable.rows,
+    porUbicacion: porUbicacion.rows,
+    porTipo: porTipo.rows,
+    porServicio: porServicio.rows
   };
 };
 
@@ -148,7 +212,7 @@ export const archivarActaTicket = async (ticketId, accion) => {
     const ticket = await obtenerTicket(ticketId);
     const bitacora = await bitacoraTicket(ticketId);
     const sello = new Date().toISOString().replace(/[:.]/g, '-');
-    const destino = rutaDocumento('tickets', `${codigoTicket(ticketId)}-${accion}-${sello}.pdf`);
+    const destino = rutaDocumento('tickets', `${codigoTicket(ticket)}-${accion}-${sello}.pdf`);
     await construirActaTicket(ticket, bitacora, { accion }).aArchivo(destino);
     return destino;
   } catch (error) {

@@ -199,7 +199,7 @@ const Detalle = ({ tickets }: { tickets: Reporte['tickets'] }) => {
             {visibles.map((ticket) => (
               <tr key={ticket.id}>
                 <td className="whitespace-nowrap font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
-                  {codigoTicket(ticket.id)}
+                  {codigoTicket(ticket)}
                 </td>
                 <td className="max-w-xs truncate text-slate-700 dark:text-slate-200">{ticket.titulo}</td>
                 <td className="whitespace-nowrap text-slate-600 dark:text-slate-300">{ticket.categoria}</td>

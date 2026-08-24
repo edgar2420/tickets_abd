@@ -45,9 +45,11 @@ SELECT r.id, p.id FROM roles r JOIN permisos p ON p.codigo IN
 WHERE r.nombre = 'cliente'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
+INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, sucursal_id, rol_id)
 SELECT 'Ing. Edgar Rojas Apaza', 'admin', NULL,
        '$2a$10$lzSNZbBvBnK.uwTnvh6oo.5D41gjygykPH0WUPxXD2dT9Pw9ST5F6',
        (SELECT id FROM areas WHERE nombre = 'Sistemas'),
+       (SELECT id FROM sucursales ORDER BY id LIMIT 1),
        (SELECT id FROM roles WHERE nombre = 'admin')
-WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario = 'admin');
+WHERE NOT EXISTS (SELECT 1 FROM usuarios)
+  AND EXISTS (SELECT 1 FROM sucursales);

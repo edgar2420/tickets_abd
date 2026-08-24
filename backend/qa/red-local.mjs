@@ -46,7 +46,7 @@ const escritura = await fetch(`${WEB}/api/v1/tickets`, {
   body: JSON.stringify({
     titulo: 'QA - prueba de acceso desde otra maquina de la red',
     descripcion: 'Se verifica que una escritura desde la red local supere la verificacion de origen.',
-    categoria: 'Redes',
+    categoria: 'Red',
     prioridad: 'Baja'
   })
 });
@@ -58,7 +58,7 @@ const ajeno = await fetch(`${WEB}/api/v1/tickets`, {
     'Content-Type': 'application/json', Cookie: cookie,
     'X-CSRF-Token': csrf, Origin: 'http://maquina-intrusa.local:5173'
   },
-  body: JSON.stringify({ titulo: 'QA - desde un origen ajeno', descripcion: 'No deberia entrar.', categoria: 'Redes' })
+  body: JSON.stringify({ titulo: 'QA - desde un origen ajeno', descripcion: 'No deberia entrar.', categoria: 'Red' })
 });
 marca(ajeno.status === 403, `un origen ajeno a la red sigue rechazado (${ajeno.status})`);
 
