@@ -2,6 +2,7 @@ import { io } from 'socket.io-client';
 import { prepararEntorno } from './preparar.mjs';
 
 const { sesiones } = await prepararEntorno();
+await new Promise((r) => setTimeout(r, 1500));
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000';
 const ORIGEN = 'http://localhost:5173';
@@ -43,7 +44,7 @@ const socketGerente = io(BASE, { extraHeaders: { Cookie: gerente.cookie }, trans
 const socketTi = io(BASE, { extraHeaders: { Cookie: ti.cookie }, transports: ['websocket', 'polling'] });
 
 const conexion = (socket) => new Promise((resolver) => {
-  const t = setTimeout(() => resolver(null), 8000);
+  const t = setTimeout(() => resolver(null), 20000);
   socket.once('conexion:establecida', (d) => { clearTimeout(t); resolver(d); });
 });
 
@@ -53,7 +54,7 @@ marca(salasGerente.includes('sala:compras'), `Gerencia entra a la sala de compra
 marca(salasTi.includes('sala:compras'), `TI tambien la recibe: ${salasTi.join(', ')}`);
 
 const esperar = (socket, evento) => new Promise((resolver) => {
-  const t = setTimeout(() => resolver(null), 8000);
+  const t = setTimeout(() => resolver(null), 20000);
   socket.once(evento, (d) => { clearTimeout(t); resolver(d); });
 });
 

@@ -161,13 +161,18 @@ export const Layout = () => {
           <div className="flex items-center gap-2">
             <InterruptorTema />
             <PanelNotificaciones />
-            <div className="hidden text-right sm:block">
+            <button
+              type="button"
+              onClick={() => navegar('/perfil')}
+              className="hidden rounded-md px-2 py-1 text-right transition hover:bg-white/10 sm:block"
+              title="Ver mi perfil"
+            >
               <p className="text-sm font-semibold">{usuario?.nombre}</p>
               <p className="text-[11px] text-institucional-200">
                 {usuario?.rol} - {usuario?.area}
                 {usuario?.sucursal ? ` - ${usuario.sucursal}` : ''}
               </p>
-            </div>
+            </button>
             <button
               type="button"
               onClick={() => setModalPassword(true)}

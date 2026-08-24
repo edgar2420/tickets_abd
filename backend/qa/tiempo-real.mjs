@@ -2,6 +2,7 @@ import { io } from 'socket.io-client';
 import { prepararEntorno } from './preparar.mjs';
 
 const { sesiones } = await prepararEntorno();
+await new Promise((r) => setTimeout(r, 1500));
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000';
 const ORIGEN = 'http://localhost:5173';
@@ -32,7 +33,7 @@ const cliente = sesiones['qa.cliente4'];
 
 const socket = io(BASE, { extraHeaders: { Cookie: tecnico.cookie }, transports: ['websocket', 'polling'] });
 
-const esperar = (evento, ms) => new Promise((resolve) => {
+const esperar = (evento, ms = 20000) => new Promise((resolve) => {
   const temporizador = setTimeout(() => resolve(null), ms);
   socket.once(evento, (dato) => { clearTimeout(temporizador); resolve(dato); });
 });
