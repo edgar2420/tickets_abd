@@ -43,7 +43,7 @@ await borrar('movimientos de los articulos de prueba',
 await borrar('articulos de prueba',
   "DELETE FROM inventario_articulos WHERE codigo LIKE 'QA-%'", []);
 await borrar('equipos de prueba',
-  "DELETE FROM equipos WHERE codigo LIKE 'QA-%'", []);
+  "DELETE FROM equipos WHERE codigo LIKE '%-QA-%' OR nombre_equipo LIKE 'QA-%'", []);
 await borrar('notificaciones de las cuentas de prueba',
   "DELETE FROM notificaciones WHERE usuario_id IN (SELECT id FROM usuarios WHERE usuario LIKE 'qa.%')", []);
 await borrar('auditoria de las cuentas de prueba',

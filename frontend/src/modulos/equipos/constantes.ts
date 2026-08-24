@@ -1,6 +1,30 @@
 import type { EstadoEquipo, TipoEquipo } from '../../lib/tipos';
 
-export const TIPOS: TipoEquipo[] = ['Escritorio', 'Laptop', 'Servidor', 'Impresora', 'Monitor', 'Red', 'Otro'];
+export const TIPOS: TipoEquipo[] = [
+  'Servidor', 'PC', 'Laptop', 'Switch', 'Router', 'Telefonia',
+  'Camara', 'Impresora', 'Monitor', 'UPS', 'Otro'
+];
+
+export const PREFIJOS: Record<TipoEquipo, string> = {
+  Servidor: 'SRV',
+  PC: 'PC',
+  Laptop: 'LAP',
+  Switch: 'SW',
+  Router: 'RTR',
+  Telefonia: 'TEL',
+  Camara: 'CAM',
+  Impresora: 'IMP',
+  Monitor: 'MON',
+  UPS: 'UPS',
+  Otro: 'EQ'
+};
+
+export const FORMATO_CODIGO = /^[A-Z]{2,4}-[A-Z0-9]{2,10}-\d{3}$/;
+
+export const partesDelCodigo = (codigo: string) => {
+  const [prefijo = '', ubicacion = '', correlativo = ''] = codigo.toUpperCase().split('-');
+  return { prefijo, ubicacion, correlativo };
+};
 
 export const ESTADOS: EstadoEquipo[] = ['Operativo', 'En reparacion', 'En resguardo', 'De baja'];
 
@@ -41,7 +65,7 @@ export const EQUIPO_VACIO: FormularioEquipo = {
   id: null,
   codigo: '',
   nombre_equipo: '',
-  tipo: 'Escritorio',
+  tipo: 'PC',
   marca: '',
   modelo: '',
   numero_serie: '',

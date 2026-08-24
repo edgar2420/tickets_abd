@@ -131,7 +131,9 @@ export interface ResumenCompras {
   monto_ejecutado: number;
 }
 
-export type TipoEquipo = 'Escritorio' | 'Laptop' | 'Servidor' | 'Impresora' | 'Monitor' | 'Red' | 'Otro';
+export type TipoEquipo =
+  | 'Servidor' | 'PC' | 'Laptop' | 'Switch' | 'Router' | 'Telefonia'
+  | 'Camara' | 'Impresora' | 'Monitor' | 'UPS' | 'Otro';
 export type EstadoEquipo = 'Operativo' | 'En reparacion' | 'En resguardo' | 'De baja';
 
 export interface Equipo {
