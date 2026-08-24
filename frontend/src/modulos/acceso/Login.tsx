@@ -95,19 +95,20 @@ export const Login = () => {
 
               <form
                 onSubmit={enviar}
-                className="animar-entrada rounded-2xl border border-white/60 bg-white/95 p-7 shadow-2xl backdrop-blur-md sm:p-8"
+                className="animar-entrada rounded-2xl border border-white/60 bg-white/95 p-7 shadow-2xl backdrop-blur-md sm:p-8
+                           dark:border-noche-700 dark:bg-noche-850/95"
               >
                 <span className="inline-flex rounded-xl bg-institucional-900 p-3 text-white shadow-sm">
                   <LockKeyhole className="h-5 w-5" />
                 </span>
-                <h2 className="mt-4 text-2xl font-bold tracking-tight text-institucional-900">Iniciar sesion</h2>
-                <p className="mt-1 text-sm text-slate-500">Ingrese sus credenciales institucionales.</p>
+                <h2 className="mt-4 text-2xl font-bold tracking-tight text-institucional-900 dark:text-slate-100">Iniciar sesion</h2>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-300">Ingrese sus credenciales institucionales.</p>
 
                 <div className="mt-7 space-y-4">
                   <div>
                     <label className="etiqueta" htmlFor="usuario">Usuario</label>
                     <div className="relative">
-                      <User className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                      <User className="pointer-events-none absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-slate-400" />
                       <input
                         id="usuario"
                         className="campo pl-9"
@@ -136,9 +137,9 @@ export const Login = () => {
                   </button>
                 </div>
 
-                <p className="mt-7 border-t border-slate-200 pt-5 text-xs text-slate-500">
-                  <span className="font-semibold uppercase tracking-wide text-slate-400">Responsable</span>
-                  <span className="mt-0.5 block font-medium text-slate-600">Ing. Edgar Rojas Apaza</span>
+                <p className="mt-7 border-t border-slate-200 pt-5 text-xs text-slate-500 dark:border-noche-700 dark:text-slate-300">
+                  <span className="font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-400">Responsable</span>
+                  <span className="mt-0.5 block font-medium text-slate-600 dark:text-slate-200">Ing. Edgar Rojas Apaza</span>
                 </p>
               </form>
             </section>
