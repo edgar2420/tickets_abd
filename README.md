@@ -1,7 +1,7 @@
 # Sistema de Gestion de Tickets TI y Control de Acceso RBAC
 
 Implementacion completa de la especificacion tecnica **STD-2026-TI v1.0.0**: mesa de ayuda
-centralizada para el departamento de Tecnologias de la Informacion, con trazabilidad total
+centralizada para el departamento de Sistemas, con trazabilidad total
 sobre quien solicito, quien atendio y quien resolvio cada ticket, sobre una arquitectura de
 seguridad basada en roles con asignacion dinamica de permisos.
 
@@ -624,4 +624,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.4.0
+Documento de referencia: Version 2.4.1

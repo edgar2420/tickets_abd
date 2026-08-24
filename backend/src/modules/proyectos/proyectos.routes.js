@@ -226,7 +226,7 @@ proyectosRouter.put('/:id/evaluar', requierePermiso('proyectos.evaluar'), valida
       usuarioId: proyecto.solicitante_id,
       tipo: 'proyecto',
       titulo: `Su peticion ${codigoProyecto(id)} fue evaluada`,
-      mensaje: 'Tecnologias de la Informacion registro la evaluacion tecnica de su propuesta.'
+      mensaje: 'Sistemas registro la evaluacion tecnica de su propuesta.'
     });
     difundir(proyecto, 'proyecto:actualizado');
 
@@ -255,7 +255,7 @@ proyectosRouter.put('/:id/aprobar', requierePermiso('proyectos.gestionar'), vali
       usuarioId: proyecto.solicitante_id,
       tipo: 'proyecto',
       titulo: `Su peticion ${codigoProyecto(id)} fue aprobada`,
-      mensaje: 'La propuesta entra en la cartera de proyectos de Tecnologias de la Informacion.'
+      mensaje: 'La propuesta entra en la cartera de proyectos de Sistemas.'
     });
     difundir(proyecto, 'proyecto:actualizado');
 

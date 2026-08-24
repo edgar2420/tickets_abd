@@ -84,7 +84,7 @@ export const FormularioAccion = ({ accion, datos, setDatos, equipos, guardando, 
           <PanelPedido accion={accion} />
           <div className="space-y-3">
             <p className="text-xs font-bold uppercase tracking-wide text-institucional-700 dark:text-institucional-300">
-              Lo que recomienda Tecnologias de la Informacion
+              Lo que recomienda Sistemas
             </p>
             <Area
               clave="equipo_sugerido"

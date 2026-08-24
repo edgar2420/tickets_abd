@@ -79,7 +79,7 @@ const ejecutar = async () => {
     const { rows } = await cliente.query(
       `INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, sucursal_id, rol_id)
        SELECT $1, $2, $3, $4,
-              (SELECT id FROM areas WHERE nombre = 'Tecnologias de la Informacion'),
+              (SELECT id FROM areas WHERE nombre = 'Sistemas'),
               (SELECT id FROM sucursales ORDER BY id LIMIT 1),
               (SELECT id FROM roles WHERE nombre = 'admin')
        RETURNING id, usuario, nombre`,

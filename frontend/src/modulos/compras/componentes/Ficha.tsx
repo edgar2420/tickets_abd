@@ -17,7 +17,7 @@ const bitacora = (ficha: SolicitudCompra) => [
   {
     paso: 'Revision tecnica',
     quien: ficha.revisado_por_nombre,
-    cargo: 'Tecnologias de la Informacion',
+    cargo: 'Sistemas',
     cuando: ficha.fecha_revision,
     nota: ficha.observacion_ti
   },
@@ -31,7 +31,7 @@ const bitacora = (ficha: SolicitudCompra) => [
   {
     paso: 'Compra ejecutada',
     quien: ficha.comprado_por_nombre,
-    cargo: 'Tecnologias de la Informacion',
+    cargo: 'Sistemas',
     cuando: ficha.fecha_compra,
     nota: [ficha.numero_orden ? `Orden ${ficha.numero_orden}` : null, montoBs(ficha.monto_final)]
       .filter(Boolean).join(' - ') || null
@@ -39,7 +39,7 @@ const bitacora = (ficha: SolicitudCompra) => [
   {
     paso: 'Entrega',
     quien: ficha.entregado_por_nombre,
-    cargo: 'Tecnologias de la Informacion',
+    cargo: 'Sistemas',
     cuando: ficha.fecha_entrega,
     nota: ficha.equipo_codigo ? `Equipo ${ficha.equipo_codigo}` : null
   }
