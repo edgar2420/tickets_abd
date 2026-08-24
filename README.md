@@ -348,6 +348,29 @@ deben registrarse nuevamente. Conservela junto con el resto de los secretos del 
 
 Para cargar un parque de ejemplo: `cd backend && npm run demo`.
 
+## Codigo de los equipos
+
+Cada equipo lleva un codigo con tres partes: **TIPO-UBICACION-NUMERO**.
+
+| Tipo | Prefijo | Ejemplo |
+|---|---|---|
+| Servidor | `SRV` | `SRV-IBS-001` |
+| PC | `PC` | `PC-ADM-001` |
+| Laptop | `LAP` | `LAP-VTA-007` |
+| Switch | `SW` | `SW-RACK01-001` |
+| Router | `RTR` | `RTR-RACK01-001` |
+| Telefonia | `TEL` | `TEL-ADM-001` |
+| Camara | `CAM` | `CAM-ALM-001` |
+| Impresora | `IMP` | `IMP-CONT-001` |
+| Monitor | `MON` | `MON-ADM-014` |
+| UPS | `UPS` | `UPS-RACK01-001` |
+| Otro | `EQ` | `EQ-DEP-001` |
+
+El prefijo lo define el tipo y no se escribe a mano. La ubicacion la elige quien da de alta el
+equipo (ADM, ALM, RACK01, VTA, CONT) y el numero lo propone el sistema: consulta el ultimo
+usado para ese tipo en esa ubicacion y sugiere el siguiente. Si se elige un prefijo que no
+corresponde al tipo, la peticion se rechaza con el motivo.
+
 ## Inventario de sistemas
 
 Catalogo de articulos con kardex de movimientos. El saldo **nunca se edita a mano**: resulta
@@ -564,14 +587,14 @@ npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 |---|---|---|
 | Secretos | Configuracion fuera del control de versiones, historial completo del repositorio, credenciales incrustadas y claves de ejemplo | 7 de 7 |
 | Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache, acceso cerrado por omision y cierre de sesion | 34 de 34 |
-| Funcional | Acceso de las cuentas del entorno, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, documentos PDF, validacion de entrada, alcance de Gerencia y reporte mensual | 93 de 93 |
+| Funcional | Acceso de las cuentas del entorno, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, documentos PDF, validacion de entrada, alcance de Gerencia y reporte mensual | 104 de 104 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
 | Compras en tiempo real | Que Gerencia entre a la sala del circuito y vea cada cambio de estado sin recargar | 6 de 6 |
 | Proyectos y claves | Circuito de las peticiones, politica de contrasenas, restablecimiento por un administrador y cargas de inyeccion SQL sobre las busquedas | 44 de 44 |
 | Documentos | Que cada PDF salga al tamano de lo que se pide y sin hojas en blanco | 15 de 15 |
 | Navegador | Recorrido de punta a punta contra el servidor web: portada, acceso, las doce pantallas, ciclo del ticket, descarga de PDF y cierre de sesion | 28 de 28 |
 
-**237 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
+**248 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
 recortados. La bateria del navegador requiere el servidor web levantado (`npm run dev` en
 `frontend`); las otras cuatro solo necesitan la API.
 
@@ -601,4 +624,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.3.0
+Documento de referencia: Version 2.4.0

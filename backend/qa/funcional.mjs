@@ -148,13 +148,16 @@ console.log('\n=== E. EQUIPOS ===');
 const equiposPrevios = await pedir('admin', '/equipos');
 marca('equipos', equiposPrevios.estado === 200, `listado de equipos (${equiposPrevios.cuerpo.datos?.length ?? 0})`);
 
-if ((equiposPrevios.cuerpo.datos?.length ?? 0) === 0) {
+const conCredencial = (equiposPrevios.cuerpo.datos ?? []).find((e) => e.tiene_password);
+
+if (!conCredencial) {
+  const sugerido = await pedir('admin', '/equipos/siguiente-codigo?tipo=PC&ubicacion=QA');
   const alta = await pedir('admin', '/equipos', {
     metodo: 'POST',
     cuerpo: {
-      codigo: 'QA-PC-01',
-      nombre_equipo: 'QA-EQUIPO-01',
-      tipo: 'Escritorio',
+      codigo: sugerido.cuerpo.datos.codigo,
+      nombre_equipo: 'QA-EQUIPO-CON-CREDENCIAL',
+      tipo: 'PC',
       marca: 'Generico',
       sistema_operativo: 'Windows 11 Pro',
       ram_gb: 16,
@@ -165,11 +168,12 @@ if ((equiposPrevios.cuerpo.datos?.length ?? 0) === 0) {
       activo: true
     }
   });
-  marca('equipos', alta.estado === 201, `se da de alta un equipo de prueba (${alta.estado})`);
+  marca('equipos', alta.estado === 201, `se da de alta un equipo de prueba (${alta.cuerpo.datos?.codigo})`);
 }
 
 const equipos = await pedir('admin', '/equipos');
-const equipo = equipos.cuerpo.datos?.[0];
+const equipo = (equipos.cuerpo.datos ?? []).find((e) => e.tiene_password);
+
 if (equipo) {
   marca('equipos', !('anydesk_password' in equipo) && !('anydesk_password_cifrada' in equipo),
     'el listado no expone la contrasena de AnyDesk');
@@ -179,6 +183,70 @@ if (equipo) {
   const negada = await pedir('qa.cliente2', `/equipos/${equipo.id}/credenciales`);
   marca('equipos', negada.estado === 403, `el cliente no puede revelarla (${negada.estado})`);
 }
+
+console.log('\n=== E2. NOMENCLATURA DE LOS EQUIPOS ===');
+const nomenclatura = await pedir('admin', '/equipos/nomenclatura');
+marca('equipos', nomenclatura.estado === 200 && nomenclatura.cuerpo.datos?.prefijos?.Servidor === 'SRV',
+  `prefijos publicados: ${Object.values(nomenclatura.cuerpo.datos?.prefijos ?? {}).join(' ')}`);
+
+const ESPERADOS = [
+  ['PC', 'ADM', 'PC-ADM-001'],
+  ['Camara', 'ALM', 'CAM-ALM-001'],
+  ['Telefonia', 'ADM', 'TEL-ADM-001'],
+  ['Switch', 'RACK01', 'SW-RACK01-001'],
+  ['Servidor', 'IBS', 'SRV-IBS-001'],
+  ['Laptop', 'VTA', 'LAP-VTA-001']
+];
+
+for (const [tipo, ubicacion, esperado] of ESPERADOS) {
+  const sugerido = await pedir('admin', `/equipos/siguiente-codigo?tipo=${encodeURIComponent(tipo)}&ubicacion=${ubicacion}`);
+  const codigo = sugerido.cuerpo.datos?.codigo;
+  marca('equipos', codigo === esperado, `${tipo.padEnd(10)} en ${ubicacion.padEnd(7)} -> ${codigo}`);
+}
+
+const antesDeLaCamara = await pedir('admin', '/equipos/siguiente-codigo?tipo=Camara&ubicacion=QA');
+const codigoCamara = antesDeLaCamara.cuerpo.datos.codigo;
+const numeroPrevio = Number(codigoCamara.split('-')[2]);
+
+const primero = await pedir('admin', '/equipos', {
+  metodo: 'POST',
+  cuerpo: { codigo: codigoCamara, nombre_equipo: 'QA-CAMARA-01', tipo: 'Camara', estado: 'Operativo', activo: true }
+});
+marca('equipos', primero.estado === 201, `se da de alta una camara con ${codigoCamara} (${primero.estado})`);
+
+const correlativo = await pedir('admin', '/equipos/siguiente-codigo?tipo=Camara&ubicacion=QA');
+const numeroNuevo = Number(correlativo.cuerpo.datos?.codigo.split('-')[2]);
+marca('equipos', numeroNuevo === numeroPrevio + 1,
+  `el correlativo avanza solo: ${codigoCamara} -> ${correlativo.cuerpo.datos?.codigo}`);
+
+const prefijoAjeno = await pedir('admin', '/equipos', {
+  metodo: 'POST',
+  cuerpo: { codigo: 'PC-QA-900', nombre_equipo: 'QA-SERVIDOR-MAL', tipo: 'Servidor', estado: 'Operativo', activo: true }
+});
+marca('equipos', prefijoAjeno.estado === 400,
+  `un servidor con prefijo de PC se rechaza (${prefijoAjeno.estado})`);
+
+const sinGuiones = await pedir('admin', '/equipos', {
+  metodo: 'POST',
+  cuerpo: { codigo: 'PCQA002', nombre_equipo: 'QA-SIN-FORMATO', tipo: 'PC', estado: 'Operativo', activo: true }
+});
+marca('equipos', sinGuiones.estado === 400, `un codigo sin el formato se rechaza (${sinGuiones.estado})`);
+
+const paraLaptop = await pedir('admin', '/equipos/siguiente-codigo?tipo=Laptop&ubicacion=QA');
+const codigoLaptop = paraLaptop.cuerpo.datos.codigo;
+const enMinusculas = await pedir('admin', '/equipos', {
+  metodo: 'POST',
+  cuerpo: {
+    codigo: codigoLaptop.toLowerCase(),
+    nombre_equipo: 'QA-LAPTOP-01', tipo: 'Laptop', estado: 'Operativo', activo: true
+  }
+});
+marca('equipos', enMinusculas.cuerpo.datos?.codigo === codigoLaptop,
+  `el codigo se normaliza a mayusculas: ${codigoLaptop.toLowerCase()} -> ${enMinusculas.cuerpo.datos?.codigo}`);
+
+const ubicaciones = await pedir('admin', '/equipos/ubicaciones');
+marca('equipos', (ubicaciones.cuerpo.datos ?? []).some((u) => u.codigo === 'QA'),
+  `las ubicaciones en uso quedan a la vista (${(ubicaciones.cuerpo.datos ?? []).map((u) => u.codigo).join(' ')})`);
 
 console.log('\n=== F. SOLICITUDES DE COMPRA ===');
 const compra = await pedir('qa.cliente3', '/compras', {

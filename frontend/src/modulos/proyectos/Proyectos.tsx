@@ -138,7 +138,7 @@ export const Proyectos = () => {
         icono={Lightbulb}
         abierto={modalNueva}
         alCerrar={() => setModalNueva(false)}
-        ancho="max-w-3xl"
+        ancho="max-w-6xl"
       >
         <FormularioPeticion
           nueva={proyectos.nueva}
