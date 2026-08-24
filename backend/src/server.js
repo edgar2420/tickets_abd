@@ -1,6 +1,6 @@
 import http from 'node:http';
 import { crearApp } from './app.js';
-import { env } from './config/env.js';
+import { env, direccionesLocales } from './config/env.js';
 import { pool } from './config/db.js';
 import { inicializarSockets } from './realtime/socket.js';
 
@@ -11,11 +11,19 @@ inicializarSockets(servidor);
 
 servidor.listen(env.port, () => {
   console.log('--------------------------------------------------------');
-  console.log(' Sistema de Gestion de Tickets TI - API v2.5.0');
+  console.log(' Sistema de Gestion de Tickets TI - API v2.6.0');
   console.log(' Autor: ' + env.autor + ' | ' + env.autorRol);
   console.log(' Entorno: ' + env.nodeEnv);
   console.log(' HTTP:    http://localhost:' + env.port + env.apiPrefix);
   console.log(' Sockets: ws://localhost:' + env.port + '/socket.io');
+
+  if (env.redLocal) {
+    const direcciones = direccionesLocales();
+    console.log('--------------------------------------------------------');
+    console.log(' Acceso desde la red local habilitado. Comparta:');
+    direcciones.forEach((direccion) => console.log('   http://' + direccion + ':5173'));
+    if (direcciones.length === 0) console.log('   Sin direcciones de red disponibles');
+  }
   console.log('--------------------------------------------------------');
 });
 

@@ -1,3 +1,4 @@
+import os from 'node:os';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -6,6 +7,16 @@ const required = (key, fallback) => {
   if (value === undefined) throw new Error(`Variable de entorno requerida no definida: ${key}`);
   return value;
 };
+
+const PUERTOS_DE_RED = [5173, 8080, 4000];
+
+export const direccionesLocales = () => Object.values(os.networkInterfaces())
+  .flat()
+  .filter((interfaz) => interfaz && interfaz.family === 'IPv4' && !interfaz.internal)
+  .map((interfaz) => interfaz.address);
+
+const origenesDeLaRed = () => direccionesLocales()
+  .flatMap((direccion) => PUERTOS_DE_RED.map((puerto) => `http://${direccion}:${puerto}`));
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
@@ -23,11 +34,15 @@ export const env = {
     secret: required('JWT_SECRET', 'cambiar-esta-clave-en-produccion'),
     expiresIn: process.env.JWT_EXPIRES_IN ?? '8h'
   },
+  redLocal: (process.env.RED_LOCAL ?? 'false') === 'true',
   cors: {
-    origins: (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:19006')
-      .split(',')
-      .map((o) => o.trim())
-      .filter(Boolean)
+    origins: [
+      ...(process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:19006')
+        .split(',')
+        .map((o) => o.trim())
+        .filter(Boolean),
+      ...((process.env.RED_LOCAL ?? 'false') === 'true' ? origenesDeLaRed() : [])
+    ]
   },
   httpsObligatorio: (process.env.FORZAR_HTTPS ?? 'false') === 'true',
   cookies: {
