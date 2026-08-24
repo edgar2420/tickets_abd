@@ -98,7 +98,7 @@ export const Ficha = ({ ficha, alCerrar }: { ficha: SolicitudProyecto; alCerrar:
 
         <div className="superficie space-y-3 p-4">
           <p className="text-xs font-bold uppercase tracking-wide text-institucional-700 dark:text-institucional-300">
-            Evaluacion de Tecnologias de la Informacion
+            Evaluacion de Sistemas
           </p>
           {ficha.evaluado_por_nombre ? (
             <>
