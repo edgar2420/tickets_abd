@@ -212,8 +212,18 @@ export const AdminUsuarios = () => {
         icono={Users}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
+        ancho="max-w-4xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-usuario" className="boton-primario" disabled={guardando}>
+              <CheckCircle2 className="h-4 w-4" />
+              Guardar
+            </button>
+          </>
+        }
       >
-        <form onSubmit={guardar} className="space-y-4">
+        <form id="form-usuario" onSubmit={guardar} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
               <label className="etiqueta">Nombre completo</label>
@@ -286,13 +296,6 @@ export const AdminUsuarios = () => {
             )}
           </div>
 
-          <div className="flex justify-end gap-2">
-            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-            <button type="submit" className="boton-primario" disabled={guardando}>
-              <CheckCircle2 className="h-4 w-4" />
-              Guardar
-            </button>
-          </div>
         </form>
       </Modal>
 

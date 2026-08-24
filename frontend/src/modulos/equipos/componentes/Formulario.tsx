@@ -31,15 +31,13 @@ const Seleccion = ({ etiqueta, valor, alCambiar, children }: {
   </div>
 );
 
-export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursales, guardando, alEnviar, alCancelar }: {
+export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursales, alEnviar }: {
   formulario: FormularioEquipo;
   setFormulario: Actualizar;
   usuarios: Usuario[];
   areas: Area[];
   sucursales: Sucursal[];
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => {
   const campo = (etiqueta: string, clave: keyof FormularioEquipo, extra: Record<string, unknown> = {}) => (
     <div>
@@ -54,7 +52,7 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
   );
 
   return (
-    <form onSubmit={alEnviar} className="space-y-5">
+    <form id="form-equipo" onSubmit={alEnviar} className="space-y-5">
       <Seccion titulo="Identificacion" icono={Monitor}>
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="sm:col-span-3">
@@ -195,10 +193,6 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
         </div>
       </Seccion>
 
-      <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-        <button type="button" className="boton-secundario" onClick={alCancelar}>Cancelar</button>
-        <button type="submit" className="boton-primario" disabled={guardando}>Guardar equipo</button>
-      </div>
     </form>
   );
 };

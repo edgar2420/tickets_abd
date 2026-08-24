@@ -139,13 +139,19 @@ export const Proyectos = () => {
         abierto={modalNueva}
         alCerrar={() => setModalNueva(false)}
         ancho="max-w-6xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalNueva(false)}>Cancelar</button>
+            <button type="submit" form="form-proyecto" className="boton-primario" disabled={proyectos.guardando}>
+              Enviar la peticion
+            </button>
+          </>
+        }
       >
         <FormularioPeticion
           nueva={proyectos.nueva}
           setNueva={proyectos.setNueva}
-          guardando={proyectos.guardando}
           alEnviar={enviarPeticion}
-          alCancelar={() => setModalNueva(false)}
         />
       </Modal>
 
@@ -155,8 +161,11 @@ export const Proyectos = () => {
         abierto={proyectos.ficha !== null}
         alCerrar={() => proyectos.setFicha(null)}
         ancho="max-w-6xl"
+        acciones={
+          <button type="button" className="boton-primario" onClick={() => proyectos.setFicha(null)}>Cerrar</button>
+        }
       >
-        {proyectos.ficha && <Ficha ficha={proyectos.ficha} alCerrar={() => proyectos.setFicha(null)} />}
+        {proyectos.ficha && <Ficha ficha={proyectos.ficha} />}
       </Modal>
 
       <Modal
@@ -165,6 +174,19 @@ export const Proyectos = () => {
         abierto={proyectos.accion !== null}
         alCerrar={() => proyectos.setAccion(null)}
         ancho={anchoAccion}
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => proyectos.setAccion(null)}>Cancelar</button>
+            <button
+              type="submit"
+              form="form-accion-proyecto"
+              className={proyectos.accion?.tipo === 'rechazar' ? 'boton-peligro' : 'boton-primario'}
+              disabled={proyectos.guardando}
+            >
+              Confirmar
+            </button>
+          </>
+        }
       >
         {proyectos.accion && (
           <FormularioAccion
@@ -172,9 +194,7 @@ export const Proyectos = () => {
             datos={proyectos.datosAccion}
             setDatos={proyectos.setDatosAccion}
             responsables={proyectos.responsables}
-            guardando={proyectos.guardando}
             alEnviar={enviarAccion}
-            alCancelar={() => proyectos.setAccion(null)}
           />
         )}
       </Modal>

@@ -179,9 +179,18 @@ export const AdminRoles = () => {
         icono={ShieldCheck}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
-        ancho="max-w-3xl"
+        ancho="max-w-4xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-rol" className="boton-primario" disabled={guardando}>
+              <CheckCircle2 className="h-4 w-4" />
+              Guardar
+            </button>
+          </>
+        }
       >
-        <form onSubmit={guardar} className="space-y-5">
+        <form id="form-rol" onSubmit={guardar} className="space-y-5">
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="etiqueta">Nombre del rol</label>
@@ -230,13 +239,6 @@ export const AdminRoles = () => {
             Rol activo
           </label>
 
-          <div className="flex justify-end gap-2">
-            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-            <button type="submit" className="boton-primario" disabled={guardando}>
-              <CheckCircle2 className="h-4 w-4" />
-              Guardar rol
-            </button>
-          </div>
         </form>
       </Modal>
 

@@ -45,7 +45,7 @@ export const Auditoria = () => {
   const [filtros, setFiltros] = useState({ entidad: '', desde: '', hasta: '' });
   const [error, setError] = useState<string | null>(null);
   const [pagina, setPagina] = useState(1);
-  const [limite, setLimite] = useState(25);
+  const [limite, setLimite] = useState(10);
   const [info, setInfo] = useState<InfoPaginacion | null>(null);
   const [consultado, setConsultado] = useState<Date | null>(null);
   const [consultando, setConsultando] = useState(false);
@@ -155,7 +155,6 @@ export const Auditoria = () => {
                   <th>Registro</th>
                   <th>Accion</th>
                   <th>Detalle</th>
-                  <th>Origen</th>
                 </tr>
               </thead>
               <tbody>
@@ -185,9 +184,6 @@ export const Auditoria = () => {
                       </td>
                       <td className="max-w-md truncate text-xs text-slate-500 dark:text-slate-400" title={detalle ?? ''}>
                         {detalle ?? '-'}
-                      </td>
-                      <td className="whitespace-nowrap font-mono text-xs text-slate-400 dark:text-slate-500">
-                        {registro.ip ?? '-'}
                       </td>
                     </tr>
                   );

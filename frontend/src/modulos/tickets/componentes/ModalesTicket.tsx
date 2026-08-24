@@ -26,7 +26,31 @@ export const ModalResolver = ({ abierto, alCerrar, procesando, ejecutar, ticketI
   const [observaciones, setObservaciones] = useState('');
 
   return (
-    <Modal titulo="Registrar solucion tecnica" icono={CheckCircle2} abierto={abierto} alCerrar={alCerrar} ancho="max-w-3xl">
+    <Modal
+      titulo="Registrar solucion tecnica"
+      icono={CheckCircle2}
+      abierto={abierto}
+      alCerrar={alCerrar}
+      ancho="max-w-4xl"
+      acciones={
+        <>
+          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
+          <button
+            type="button"
+            className="boton-primario"
+            disabled={procesando || solucion.trim().length < 10}
+            onClick={() => ejecutar(`/tickets/${ticketId}/resolver`, {
+              solucion_detalle: solucion.trim(),
+              minutos_empleados: minutos === '' ? null : Number(minutos),
+              observaciones: observaciones.trim() || null
+            })}
+          >
+            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            Guardar solucion
+          </button>
+        </>
+      }
+    >
       <div className="space-y-4">
         <div>
           <label className="etiqueta" htmlFor="solucion">Detalle de la solucion aplicada</label>
@@ -64,22 +88,6 @@ export const ModalResolver = ({ abierto, alCerrar, procesando, ejecutar, ticketI
             />
           </div>
         </div>
-        <div className="flex justify-end gap-2">
-          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
-          <button
-            type="button"
-            className="boton-primario"
-            disabled={procesando || solucion.trim().length < 10}
-            onClick={() => ejecutar(`/tickets/${ticketId}/resolver`, {
-              solucion_detalle: solucion.trim(),
-              minutos_empleados: minutos === '' ? null : Number(minutos),
-              observaciones: observaciones.trim() || null
-            })}
-          >
-            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-            Guardar solucion
-          </button>
-        </div>
       </div>
     </Modal>
   );
@@ -97,18 +105,14 @@ export const ModalAsignar = ({ abierto, alCerrar, procesando, ejecutar, ticketId
   }, [abierto, tecnicos.length]);
 
   return (
-    <Modal titulo="Asignar ticket a un tecnico" icono={Users} abierto={abierto} alCerrar={alCerrar} ancho="max-w-lg">
-      <div className="space-y-4">
-        <div>
-          <label className="etiqueta" htmlFor="tecnico">Tecnico responsable</label>
-          <select id="tecnico" className="campo" value={elegido} onChange={(e) => setElegido(e.target.value)}>
-            <option value="">Seleccione un tecnico</option>
-            {tecnicos.map((tecnico) => (
-              <option key={tecnico.id} value={tecnico.id}>{tecnico.nombre} ({tecnico.rol})</option>
-            ))}
-          </select>
-        </div>
-        <div className="flex justify-end gap-2">
+    <Modal
+      titulo="Asignar ticket a un tecnico"
+      icono={Users}
+      abierto={abierto}
+      alCerrar={alCerrar}
+      ancho="max-w-2xl"
+      acciones={
+        <>
           <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
           <button
             type="button"
@@ -119,6 +123,18 @@ export const ModalAsignar = ({ abierto, alCerrar, procesando, ejecutar, ticketId
             <Users className="h-4 w-4" />
             Asignar
           </button>
+        </>
+      }
+    >
+      <div className="space-y-4">
+        <div>
+          <label className="etiqueta" htmlFor="tecnico">Tecnico responsable</label>
+          <select id="tecnico" className="campo" value={elegido} onChange={(e) => setElegido(e.target.value)}>
+            <option value="">Seleccione un tecnico</option>
+            {tecnicos.map((tecnico) => (
+              <option key={tecnico.id} value={tecnico.id}>{tecnico.nombre} ({tecnico.rol})</option>
+            ))}
+          </select>
         </div>
       </div>
     </Modal>
@@ -131,7 +147,27 @@ export const ModalPrioridad = ({ abierto, alCerrar, procesando, ejecutar, ticket
   const [motivo, setMotivo] = useState('');
 
   return (
-    <Modal titulo="Definir la prioridad" icono={SignalHigh} abierto={abierto} alCerrar={alCerrar} ancho="max-w-2xl">
+    <Modal
+      titulo="Definir la prioridad"
+      icono={SignalHigh}
+      abierto={abierto}
+      alCerrar={alCerrar}
+      ancho="max-w-3xl"
+      acciones={
+        <>
+          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
+          <button
+            type="button"
+            className="boton-primario"
+            disabled={procesando}
+            onClick={() => ejecutar(`/tickets/${ticketId}/prioridad`, { prioridad, motivo: motivo.trim() || null })}
+          >
+            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <SignalHigh className="h-4 w-4" />}
+            Guardar prioridad
+          </button>
+        </>
+      }
+    >
       <div className="space-y-4">
         <p className="text-sm text-slate-600 dark:text-slate-200">
           La prioridad la determina Sistemas y fija el objetivo de atencion del ticket.
@@ -168,18 +204,6 @@ export const ModalPrioridad = ({ abierto, alCerrar, procesando, ejecutar, ticket
             placeholder="Por que se asigna esta prioridad (opcional)"
           />
         </div>
-        <div className="flex justify-end gap-2">
-          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
-          <button
-            type="button"
-            className="boton-primario"
-            disabled={procesando}
-            onClick={() => ejecutar(`/tickets/${ticketId}/prioridad`, { prioridad, motivo: motivo.trim() || null })}
-          >
-            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <SignalHigh className="h-4 w-4" />}
-            Guardar prioridad
-          </button>
-        </div>
       </div>
     </Modal>
   );
@@ -189,7 +213,27 @@ export const ModalEspera = ({ abierto, alCerrar, procesando, ejecutar, ticketId 
   const [motivo, setMotivo] = useState('');
 
   return (
-    <Modal titulo="Poner el ticket en espera" icono={PauseCircle} abierto={abierto} alCerrar={alCerrar} ancho="max-w-xl">
+    <Modal
+      titulo="Poner el ticket en espera"
+      icono={PauseCircle}
+      abierto={abierto}
+      alCerrar={alCerrar}
+      ancho="max-w-3xl"
+      acciones={
+        <>
+          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
+          <button
+            type="button"
+            className="boton-primario"
+            disabled={procesando || motivo.trim().length < 10}
+            onClick={() => ejecutar(`/tickets/${ticketId}/espera`, { motivo_espera: motivo.trim() })}
+          >
+            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <PauseCircle className="h-4 w-4" />}
+            Poner en espera
+          </button>
+        </>
+      }
+    >
       <div className="space-y-4">
         <div>
           <label className="etiqueta" htmlFor="motivo-espera">Motivo de la espera</label>
@@ -202,18 +246,6 @@ export const ModalEspera = ({ abierto, alCerrar, procesando, ejecutar, ticketId 
             placeholder="Se espera un repuesto, la respuesta del usuario o la intervencion de un tercero"
           />
           <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">Minimo 10 caracteres.</p>
-        </div>
-        <div className="flex justify-end gap-2">
-          <button type="button" className="boton-secundario" onClick={alCerrar}>Cancelar</button>
-          <button
-            type="button"
-            className="boton-primario"
-            disabled={procesando || motivo.trim().length < 10}
-            onClick={() => ejecutar(`/tickets/${ticketId}/espera`, { motivo_espera: motivo.trim() })}
-          >
-            {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <PauseCircle className="h-4 w-4" />}
-            Poner en espera
-          </button>
         </div>
       </div>
     </Modal>

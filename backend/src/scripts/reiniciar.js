@@ -20,8 +20,8 @@ const OPERATIVAS = [
   'inventario_articulos',
   'solicitudes_proyecto',
   'solicitudes_compra',
-  'equipos',
   'tickets',
+  'equipos',
   'auditoria'
 ];
 

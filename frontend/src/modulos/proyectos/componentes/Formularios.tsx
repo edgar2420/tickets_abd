@@ -10,28 +10,12 @@ import type { Frecuencia, PrioridadTicket, TipoProyecto, Usuario } from '../../.
 type Peticion = typeof PETICION_VACIA;
 type Datos = Record<string, string>;
 
-const Pie = ({ guardando, texto, alCancelar, peligro = false }: {
-  guardando: boolean;
-  texto: string;
-  alCancelar: () => void;
-  peligro?: boolean;
-}) => (
-  <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-    <button type="button" className="boton-secundario" onClick={alCancelar}>Cancelar</button>
-    <button type="submit" className={peligro ? 'boton-peligro' : 'boton-primario'} disabled={guardando}>
-      {texto}
-    </button>
-  </div>
-);
-
-export const FormularioPeticion = ({ nueva, setNueva, guardando, alEnviar, alCancelar }: {
+export const FormularioPeticion = ({ nueva, setNueva, alEnviar }: {
   nueva: Peticion;
   setNueva: (actualizar: (previa: Peticion) => Peticion) => void;
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => (
-  <form onSubmit={alEnviar} className="space-y-5">
+  <form id="form-proyecto" onSubmit={alEnviar} className="space-y-5">
     <p className="flex items-start gap-2 rounded-lg border border-institucional-200 bg-institucional-50 p-3 text-xs
                   text-institucional-900 dark:border-institucional-500/30 dark:bg-institucional-500/10 dark:text-institucional-200">
       <Lightbulb className="mt-0.5 h-4 w-4 shrink-0" />
@@ -136,23 +120,20 @@ export const FormularioPeticion = ({ nueva, setNueva, guardando, alEnviar, alCan
       </div>
     </div>
 
-    <Pie guardando={guardando} texto="Enviar la peticion" alCancelar={alCancelar} />
   </form>
 );
 
-export const FormularioAccion = ({ accion, datos, setDatos, responsables, guardando, alEnviar, alCancelar }: {
+export const FormularioAccion = ({ accion, datos, setDatos, responsables, alEnviar }: {
   accion: AccionProyecto;
   datos: Datos;
   setDatos: (actualizar: (previos: Datos) => Datos) => void;
   responsables: Usuario[];
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => {
   const cambiar = (clave: string, valor: string) => setDatos((previos) => ({ ...previos, [clave]: valor }));
 
   return (
-    <form onSubmit={alEnviar} className="space-y-4">
+    <form id="form-accion-proyecto" onSubmit={alEnviar} className="space-y-4">
       <div className="superficie p-4">
         <p className="font-semibold text-institucional-900 dark:text-slate-100">{accion.proyecto.titulo}</p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -297,12 +278,6 @@ export const FormularioAccion = ({ accion, datos, setDatos, responsables, guarda
         </div>
       )}
 
-      <Pie
-        guardando={guardando}
-        texto="Confirmar"
-        alCancelar={alCancelar}
-        peligro={accion.tipo === 'rechazar'}
-      />
     </form>
   );
 };

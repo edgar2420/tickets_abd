@@ -78,7 +78,28 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
   };
 
   return (
-    <Modal titulo="Cambiar mi contrasena" icono={KeyRound} abierto={abierto} alCerrar={cerrar} ancho="max-w-lg">
+    <Modal
+      titulo="Cambiar mi contrasena"
+      icono={KeyRound}
+      abierto={abierto}
+      alCerrar={cerrar}
+      ancho="max-w-2xl"
+      acciones={listo ? (
+        <button type="button" className="boton-primario" onClick={cerrar}>Entendido</button>
+      ) : (
+        <>
+          <button type="button" className="boton-secundario" onClick={cerrar}>Cancelar</button>
+          <button
+            type="submit"
+            form="form-password"
+            className="boton-primario"
+            disabled={guardando || !cumpleTodo || !coinciden || actual.length === 0}
+          >
+            Cambiar contrasena
+          </button>
+        </>
+      )}
+    >
       {listo ? (
         <div className="space-y-4">
           <p className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm
@@ -86,12 +107,9 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
             <Check className="mt-0.5 h-4 w-4 shrink-0" />
             Su contrasena fue cambiada. La proxima vez que inicie sesion use la nueva.
           </p>
-          <div className="flex justify-end">
-            <button type="button" className="boton-primario" onClick={cerrar}>Entendido</button>
-          </div>
         </div>
       ) : (
-        <form onSubmit={enviar} className="space-y-4">
+        <form id="form-password" onSubmit={enviar} className="space-y-4">
           {error && <Alerta mensaje={error} />}
 
           <CampoPassword
@@ -130,16 +148,6 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
             )}
           </div>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-            <button type="button" className="boton-secundario" onClick={cerrar}>Cancelar</button>
-            <button
-              type="submit"
-              className="boton-primario"
-              disabled={guardando || !cumpleTodo || !coinciden || actual.length === 0}
-            >
-              Cambiar contrasena
-            </button>
-          </div>
         </form>
       )}
     </Modal>

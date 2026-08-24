@@ -77,15 +77,21 @@ export const Compras = () => {
         icono={ShoppingCart}
         abierto={modalNueva}
         alCerrar={() => setModalNueva(false)}
-        ancho="max-w-3xl"
+        ancho="max-w-4xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalNueva(false)}>Cancelar</button>
+            <button type="submit" form="form-compra" className="boton-primario" disabled={compras.guardando}>
+              Enviar solicitud
+            </button>
+          </>
+        }
       >
         <FormularioSolicitud
           nueva={compras.nueva}
           setNueva={compras.setNueva}
           usuario={usuario}
-          guardando={compras.guardando}
           alEnviar={enviarSolicitud}
-          alCancelar={() => setModalNueva(false)}
         />
       </Modal>
 
@@ -95,8 +101,11 @@ export const Compras = () => {
         abierto={compras.ficha !== null}
         alCerrar={() => compras.setFicha(null)}
         ancho="max-w-6xl"
+        acciones={
+          <button type="button" className="boton-primario" onClick={() => compras.setFicha(null)}>Cerrar</button>
+        }
       >
-        {compras.ficha && <Ficha ficha={compras.ficha} alCerrar={() => compras.setFicha(null)} />}
+        {compras.ficha && <Ficha ficha={compras.ficha} />}
       </Modal>
 
       <Modal
@@ -105,6 +114,19 @@ export const Compras = () => {
         abierto={compras.accion !== null}
         alCerrar={() => compras.setAccion(null)}
         ancho={anchoAccion}
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => compras.setAccion(null)}>Cancelar</button>
+            <button
+              type="submit"
+              form="form-accion-compra"
+              className={compras.accion?.tipo === 'rechazar' ? 'boton-peligro' : 'boton-primario'}
+              disabled={compras.guardando}
+            >
+              Confirmar
+            </button>
+          </>
+        }
       >
         {compras.accion && (
           <FormularioAccion
@@ -112,9 +134,7 @@ export const Compras = () => {
             datos={compras.datosAccion}
             setDatos={compras.setDatosAccion}
             equipos={compras.equipos}
-            guardando={compras.guardando}
             alEnviar={enviarAccion}
-            alCancelar={() => compras.setAccion(null)}
           />
         )}
       </Modal>
