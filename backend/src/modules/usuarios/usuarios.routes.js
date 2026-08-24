@@ -11,7 +11,7 @@ import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { passwordSchema, revisarPassword, textoLimpio, usuarioSchema } from '../../utils/password.js';
 
 const crearUsuarioSchema = z.object({
-  nombre: textoLimpio(4, 150),
+  nombre: textoLimpio(4, 150, 'El nombre completo'),
   usuario: usuarioSchema,
   email: z.string().trim().email().max(150).optional().nullable().or(z.literal('')),
   password: passwordSchema,

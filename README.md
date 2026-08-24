@@ -100,6 +100,15 @@ Retira tickets, comentarios, adjuntos, notificaciones, inventario, equipos, comp
 de proyecto, la bitacora y todas las cuentas, y vuelve a crear la administradora. Conserva la
 configuracion: roles, permisos, areas, sucursales y categorias.
 
+## Mi perfil
+
+Cada persona tiene su propia pantalla en **/perfil**, a la que se llega pulsando su nombre en la
+cabecera. Muestra sus datos, el area y la sucursal a nombre de las cuales quedan sus registros,
+y el detalle de lo que puede hacer: los permisos agrupados por modulo, cada uno con su
+descripcion, no solo el nombre del rol.
+
+Desde ahi cambia su contrasena, y tambien desde el icono de llave de la cabecera.
+
 ## Contrasenas
 
 | Regla | Detalle |
@@ -624,4 +633,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.4.1
+Documento de referencia: Version 2.4.2

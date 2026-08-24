@@ -7,6 +7,7 @@ import {
 import { usarConfirmacion } from '../../components/Confirmacion';
 import { Paginacion } from '../../components/Paginacion';
 import { CampoPassword } from '../../components/CampoPassword';
+import { LARGO_MINIMO, Reglas } from '../../components/CambioPassword';
 import { fechaCorta } from '../../lib/formato';
 import type { Area, InfoPaginacion, RespuestaPaginada, Rol, Sucursal, Usuario } from '../../lib/tipos';
 
@@ -260,10 +261,17 @@ export const AdminUsuarios = () => {
                 valor={formulario.password}
                 alCambiar={(password) => setFormulario((f) => ({ ...f, password }))}
                 requerido={!formulario.id}
-                minimo={formulario.id ? undefined : 8}
+                minimo={formulario.id ? undefined : LARGO_MINIMO}
                 autoComplete="new-password"
-                marcador={formulario.id ? 'Dejar en blanco para conservar la actual' : 'Minimo 8 caracteres'}
+                marcador={formulario.id
+                  ? 'Dejar en blanco para conservar la actual'
+                  : `Minimo ${LARGO_MINIMO} caracteres`}
               />
+              {formulario.password && (
+                <div className="mt-2">
+                  <Reglas password={formulario.password} usuario={formulario.usuario} />
+                </div>
+              )}
             </div>
             {formulario.id && (
               <label className="flex items-center gap-2 text-sm text-slate-700 sm:col-span-2 dark:text-slate-200">

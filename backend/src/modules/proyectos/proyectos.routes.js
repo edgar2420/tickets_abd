@@ -21,12 +21,12 @@ export const ESTADOS = [
 ];
 
 const peticionSchema = z.object({
-  titulo: textoLimpio(10, 200),
+  titulo: textoLimpio(10, 200, 'El titulo'),
   tipo: z.enum(TIPOS),
-  problema: textoLimpio(30, 2000),
-  situacion_actual: textoLimpio(20, 2000),
-  propuesta: textoLimpio(30, 2000),
-  beneficio: textoLimpio(20, 2000),
+  problema: textoLimpio(30, 2000, 'La descripcion del problema'),
+  situacion_actual: textoLimpio(20, 2000, 'La situacion actual'),
+  propuesta: textoLimpio(30, 2000, 'La propuesta'),
+  beneficio: textoLimpio(20, 2000, 'El beneficio esperado'),
   personas_afectadas: z.number().int().min(1).max(9999),
   frecuencia: z.enum(FRECUENCIAS),
   urgencia: z.enum(URGENCIAS),
@@ -34,7 +34,7 @@ const peticionSchema = z.object({
 });
 
 const evaluacionSchema = z.object({
-  evaluacion_ti: textoLimpio(20, 1000),
+  evaluacion_ti: textoLimpio(20, 1000, 'La evaluacion tecnica'),
   esfuerzo_estimado: z.enum(ESCALAS),
   valor_estimado: z.enum(ESCALAS)
 });
@@ -51,7 +51,7 @@ const avanceSchema = z.object({
 });
 
 const rechazoSchema = z.object({
-  motivo_rechazo: textoLimpio(10, 500)
+  motivo_rechazo: textoLimpio(10, 500, 'El motivo')
 });
 
 const SELECT_PROYECTO = `
