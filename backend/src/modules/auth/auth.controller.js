@@ -7,15 +7,16 @@ import { HttpError, asyncHandler } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { abrirSesion, cerrarSesion } from '../../utils/sesion.js';
 import { verificarBloqueo, registrarFallo, limpiarIntentos } from '../../services/intentos.service.js';
+import { passwordSchema, revisarPassword, usuarioSchema } from '../../utils/password.js';
 
 export const loginSchema = z.object({
-  usuario: z.string().min(3, 'El usuario debe tener al menos 3 caracteres'),
-  password: z.string().min(6, 'La contrasena debe tener al menos 6 caracteres')
+  usuario: usuarioSchema,
+  password: z.string().min(1, 'Indique su contrasena').max(128)
 });
 
 export const cambioPasswordSchema = z.object({
-  passwordActual: z.string().min(6),
-  passwordNueva: z.string().min(8, 'La nueva contrasena debe tener al menos 8 caracteres')
+  passwordActual: z.string().min(1, 'Indique su contrasena actual').max(128),
+  passwordNueva: passwordSchema
 });
 
 export const login = asyncHandler(async (req, res) => {
@@ -79,6 +80,13 @@ export const cambiarPassword = asyncHandler(async (req, res) => {
   if (!(await bcrypt.compare(passwordActual, rows[0].password_hash))) {
     throw HttpError.badRequest('La contrasena actual no es correcta');
   }
+  if (passwordNueva === passwordActual) {
+    throw HttpError.badRequest('La contrasena nueva debe ser distinta de la actual');
+  }
+
+  const fallas = revisarPassword(passwordNueva, req.usuario.usuario);
+  if (fallas.length) throw HttpError.badRequest(fallas.join('. '));
+
   const hash = await bcrypt.hash(passwordNueva, 10);
   await query('UPDATE usuarios SET password_hash = $1 WHERE id = $2', [hash, req.usuario.id]);
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: req.usuario.id, accion: 'CAMBIO_PASSWORD', ip: req.ip });

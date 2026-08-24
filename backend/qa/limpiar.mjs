@@ -29,5 +29,27 @@ if (idsCompra.length) {
   await borrar('solicitudes de compra', 'DELETE FROM solicitudes_compra WHERE id = ANY($1)', [idsCompra]);
 }
 
+const { rows: proyectos } = await query('SELECT id FROM solicitudes_proyecto WHERE titulo LIKE $1', [PREFIJO]);
+const idsProyecto = proyectos.map((proyecto) => proyecto.id);
+if (idsProyecto.length) {
+  await borrar('auditoria de proyectos',
+    "DELETE FROM auditoria WHERE entidad = 'PROYECTO' AND entidad_id = ANY($1)", [idsProyecto]);
+  await borrar('peticiones de proyecto',
+    'DELETE FROM solicitudes_proyecto WHERE id = ANY($1)', [idsProyecto]);
+}
+
+await borrar('movimientos de los articulos de prueba',
+  "DELETE FROM inventario_movimientos WHERE articulo_id IN (SELECT id FROM inventario_articulos WHERE codigo LIKE 'QA-%')", []);
+await borrar('articulos de prueba',
+  "DELETE FROM inventario_articulos WHERE codigo LIKE 'QA-%'", []);
+await borrar('equipos de prueba',
+  "DELETE FROM equipos WHERE codigo LIKE 'QA-%'", []);
+await borrar('notificaciones de las cuentas de prueba',
+  "DELETE FROM notificaciones WHERE usuario_id IN (SELECT id FROM usuarios WHERE usuario LIKE 'qa.%')", []);
+await borrar('auditoria de las cuentas de prueba',
+  "DELETE FROM auditoria WHERE usuario_id IN (SELECT id FROM usuarios WHERE usuario LIKE 'qa.%')", []);
+await borrar('cuentas de prueba',
+  "DELETE FROM usuarios WHERE usuario LIKE 'qa.%'", []);
+
 console.log('\nBase de datos sin residuos de prueba.');
 await pool.end();

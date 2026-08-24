@@ -1,4 +1,7 @@
 import { inflateSync } from 'node:zlib';
+import { ADMIN, entrar, prepararEntorno } from './preparar.mjs';
+
+await prepararEntorno();
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000/api/v1';
 const ORIGEN = 'http://localhost:5173';
@@ -7,15 +10,6 @@ let fallos = 0;
 const marca = (ok, detalle) => {
   if (!ok) fallos += 1;
   console.log(`${ok ? 'OK  ' : 'FALLA'} ${detalle}`);
-};
-
-const entrar = async (usuario, password) => {
-  const respuesta = await fetch(`${BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usuario, password })
-  });
-  return respuesta.headers.getSetCookie().map((c) => c.split(';')[0]).join('; ');
 };
 
 const paginasDe = (buffer) => (buffer.toString('latin1').match(/\/Type \/Page[^s]/g) ?? []).length;
@@ -48,7 +42,7 @@ const paginasEnBlanco = (buffer) => {
 
 console.log('=== LOS DOCUMENTOS SALEN AL TAMANO DE LO QUE SE PIDE ===');
 
-const sesion = await entrar('admin', 'Admin123*');
+const sesion = (await entrar(ADMIN.usuario, ADMIN.password)).cookie;
 
 const DOCUMENTOS = [
   ['reporte mensual', '/tickets/mensual/pdf', 8],
@@ -56,6 +50,7 @@ const DOCUMENTOS = [
   ['reporte de inventario', '/inventario/reporte/pdf', 8],
   ['reporte de equipos', '/equipos/reporte/pdf', 8],
   ['reporte de compras', '/compras/reporte/pdf', 8],
+  ['reporte de proyectos', '/proyectos/reporte/pdf', 8],
   ['reporte de auditoria', '/auditoria/pdf', 40],
   ['matriz de permisos', '/auditoria/matriz-rbac/pdf', 12]
 ];

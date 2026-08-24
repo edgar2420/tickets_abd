@@ -1,4 +1,7 @@
 import http from 'node:http';
+import { prepararEntorno, ADMIN, CLAVE_QA } from './preparar.mjs';
+
+await prepararEntorno();
 
 const BASE = 'http://localhost:4000/api/v1';
 const ORIGEN = 'http://localhost:5173';
@@ -30,7 +33,7 @@ const leerCookies = (respuesta) => {
 console.log('=== 1. LA SESION VIAJA EN COOKIE httpOnly ===');
 const respuestaLogin = await fetch(BASE + '/auth/login', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ usuario: 'admin', password: 'Admin123*' })
+  body: JSON.stringify({ usuario: ADMIN.usuario, password: ADMIN.password })
 });
 const cookies = leerCookies(respuestaLogin);
 const sesion = await respuestaLogin.json();
@@ -131,14 +134,14 @@ let ultimo = 0;
 for (let i = 1; i <= 6; i += 1) {
   const r = await fetch(BASE + '/auth/login', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usuario: 'oruro', password: 'clave-incorrecta' })
+    body: JSON.stringify({ usuario: 'qa.bloqueo', password: 'clave-incorrecta' })
   });
   ultimo = r.status;
 }
 marca(ultimo === 403, `tras varios intentos fallidos la cuenta queda bloqueada (${ultimo})`);
 const bloqueada = await fetch(BASE + '/auth/login', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ usuario: 'oruro', password: 'Prueba123*' })
+  body: JSON.stringify({ usuario: 'qa.bloqueo', password: CLAVE_QA })
 });
 const mensajeBloqueo = (await bloqueada.json()).mensaje;
 marca(bloqueada.status === 403, `ni con la clave correcta entra mientras dura el bloqueo: ${mensajeBloqueo}`);
