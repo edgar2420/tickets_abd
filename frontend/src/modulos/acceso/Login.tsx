@@ -63,7 +63,7 @@ export const Login = () => {
 
               <h1 className="mt-6 text-4xl font-bold leading-tight tracking-tight text-white xl:text-5xl">
                 Mesa de Ayuda
-                <span className="block text-institucional-200">Tecnologias de la Informacion</span>
+                <span className="block text-institucional-200">Sistemas</span>
               </h1>
 
               <p className="mt-4 max-w-xl text-base leading-relaxed text-institucional-100">

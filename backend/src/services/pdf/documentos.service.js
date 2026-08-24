@@ -136,7 +136,7 @@ export const construirFichaProyecto = (proyecto) => {
     { etiqueta: 'Sistemas o herramientas actuales', valor: proyecto.sistemas_actuales || 'No indicados' }
   ], 2);
 
-  doc.titulo1('Evaluacion de Tecnologias de la Informacion', 'escudo');
+  doc.titulo1('Evaluacion de Sistemas', 'escudo');
   if (proyecto.evaluado_por_nombre) {
     doc.camposClaveValor([
       { etiqueta: 'Evaluada por', valor: proyecto.evaluado_por_nombre },
@@ -335,7 +335,7 @@ export const construirReporteMensual = (datos) => {
 export const construirReporteTickets = ({ filas, indicadores, filtros }) => {
   const doc = new DocumentoPDF({
     titulo: 'Reporte de Gestion de Tickets',
-    subtitulo: 'Mesa de ayuda - Tecnologias de la Informacion',
+    subtitulo: 'Mesa de ayuda - Sistemas',
     codigo: 'REP-TICKETS',
     icono: 'grafico',
     orientacion: 'landscape'
@@ -697,7 +697,7 @@ export const construirFichaCompra = ({ solicitud }) => {
     {
       instancia: 'Revision tecnica',
       responsable: solicitud.revisado_por_nombre ?? 'Pendiente',
-      cargo: solicitud.revisado_por_nombre ? 'Tecnologias de la Informacion' : '-',
+      cargo: solicitud.revisado_por_nombre ? 'Sistemas' : '-',
       fecha: fecha(solicitud.fecha_revision) ?? 'Pendiente',
       observacion: solicitud.observacion_ti ?? '-'
     },
@@ -711,14 +711,14 @@ export const construirFichaCompra = ({ solicitud }) => {
     {
       instancia: 'Compra ejecutada',
       responsable: solicitud.comprado_por_nombre ?? 'Pendiente',
-      cargo: solicitud.comprado_por_nombre ? 'Tecnologias de la Informacion' : '-',
+      cargo: solicitud.comprado_por_nombre ? 'Sistemas' : '-',
       fecha: fecha(solicitud.fecha_compra) ?? 'Pendiente',
       observacion: solicitud.numero_orden ? 'Orden ' + solicitud.numero_orden : '-'
     },
     {
       instancia: 'Entrega al solicitante',
       responsable: solicitud.entregado_por_nombre ?? 'Pendiente',
-      cargo: solicitud.entregado_por_nombre ? 'Tecnologias de la Informacion' : '-',
+      cargo: solicitud.entregado_por_nombre ? 'Sistemas' : '-',
       fecha: fecha(solicitud.fecha_entrega) ?? 'Pendiente',
       observacion: solicitud.equipo_codigo ? 'Equipo ' + solicitud.equipo_codigo : '-'
     }

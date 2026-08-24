@@ -68,7 +68,7 @@ export const prepararEntorno = async () => {
   const listaSucursales = sucursales.cuerpo.datos ?? [];
   const existentes = new Set((usuarios.cuerpo.datos ?? []).map((u) => u.usuario));
 
-  const areaTi = listaAreas.find((a) => a.nombre.includes('Tecnologias'))?.id ?? listaAreas[0]?.id;
+  const areaTi = listaAreas.find((a) => a.nombre.includes('Sistemas'))?.id ?? listaAreas[0]?.id;
 
   const sesiones = { admin };
 

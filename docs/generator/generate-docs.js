@@ -320,7 +320,7 @@ const construir = async () => {
   });
 
   doc.titulo1('1. Resumen del sistema', 'ticket');
-  doc.parrafo('Sistema centralizado de mesa de ayuda para el departamento de Tecnologias de la Informacion. '
+  doc.parrafo('Sistema centralizado de mesa de ayuda para el departamento de Sistemas. '
     + 'Gestiona el ciclo de vida completo de incidencias y requerimientos garantizando trazabilidad total sobre '
     + 'quien solicito, quien atendio y quien resolvio cada ticket, sobre una arquitectura de seguridad basada en '
     + 'control de acceso por roles con asignacion dinamica de permisos.');
@@ -712,7 +712,7 @@ const construir = async () => {
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Definida al instalar, minimo diez caracteres' },
-    { etiqueta: 'Area asignada', valor: 'Tecnologias de la Informacion' },
+    { etiqueta: 'Area asignada', valor: 'Sistemas' },
     { etiqueta: 'Rol asignado', valor: 'admin' }
   ], 2);
   doc.tabla([

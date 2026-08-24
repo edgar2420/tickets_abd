@@ -1,5 +1,5 @@
 INSERT INTO areas (nombre) VALUES
-    ('Tecnologias de la Informacion'),
+    ('Sistemas'),
     ('Recursos Humanos'),
     ('Contabilidad'),
     ('Operaciones'),
@@ -48,6 +48,6 @@ ON CONFLICT DO NOTHING;
 INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
 SELECT 'Ing. Edgar Rojas Apaza', 'admin', NULL,
        '$2a$10$lzSNZbBvBnK.uwTnvh6oo.5D41gjygykPH0WUPxXD2dT9Pw9ST5F6',
-       (SELECT id FROM areas WHERE nombre = 'Tecnologias de la Informacion'),
+       (SELECT id FROM areas WHERE nombre = 'Sistemas'),
        (SELECT id FROM roles WHERE nombre = 'admin')
 WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario = 'admin');
