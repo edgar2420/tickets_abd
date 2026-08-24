@@ -88,6 +88,142 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   return doc;
 };
 
+export const codigoProyecto = (id) => `PRY-${String(id).padStart(5, '0')}`;
+
+const colorEstadoProyecto = (estado) => {
+  if (estado === 'Implementada') return PALETA.ok;
+  if (estado === 'Rechazada') return PALETA.critico;
+  if (estado === 'En desarrollo' || estado === 'En pruebas') return PALETA.advertencia;
+  return PALETA.primario;
+};
+
+export const construirFichaProyecto = (proyecto) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Peticion de Proyecto de Software',
+    subtitulo: `${codigoProyecto(proyecto.id)} - ${proyecto.titulo}`,
+    codigo: 'PRY-FICHA',
+    icono: 'engranaje'
+  });
+
+  doc.titulo1('Identificacion de la peticion', 'documento');
+  doc.camposClaveValor([
+    { etiqueta: 'Codigo', valor: codigoProyecto(proyecto.id) },
+    { etiqueta: 'Estado', valor: proyecto.estado },
+    { etiqueta: 'Tipo', valor: proyecto.tipo },
+    { etiqueta: 'Urgencia', valor: proyecto.urgencia },
+    { etiqueta: 'Solicitante', valor: proyecto.solicitante_nombre },
+    { etiqueta: 'Area', valor: proyecto.area_nombre },
+    { etiqueta: 'Sucursal', valor: proyecto.sucursal_nombre },
+    { etiqueta: 'Registrada el', valor: fecha(proyecto.fecha_creacion) }
+  ], 2);
+
+  doc.titulo1('Que problema se quiere resolver', 'alerta');
+  doc.parrafo(proyecto.problema);
+
+  doc.titulo2('Como se resuelve hoy');
+  doc.parrafo(proyecto.situacion_actual);
+
+  doc.titulo1('Que se propone', 'engranaje');
+  doc.parrafo(proyecto.propuesta);
+
+  doc.titulo2('Que se gana con esto');
+  doc.parrafo(proyecto.beneficio);
+
+  doc.titulo1('Alcance declarado', 'grafico');
+  doc.camposClaveValor([
+    { etiqueta: 'Personas afectadas', valor: String(proyecto.personas_afectadas) },
+    { etiqueta: 'Frecuencia de uso', valor: proyecto.frecuencia },
+    { etiqueta: 'Sistemas o herramientas actuales', valor: proyecto.sistemas_actuales || 'No indicados' }
+  ], 2);
+
+  doc.titulo1('Evaluacion de Tecnologias de la Informacion', 'escudo');
+  if (proyecto.evaluado_por_nombre) {
+    doc.camposClaveValor([
+      { etiqueta: 'Evaluada por', valor: proyecto.evaluado_por_nombre },
+      { etiqueta: 'Fecha de evaluacion', valor: fecha(proyecto.fecha_evaluacion) },
+      { etiqueta: 'Esfuerzo estimado', valor: proyecto.esfuerzo_estimado ?? 'No indicado' },
+      { etiqueta: 'Valor para la empresa', valor: proyecto.valor_estimado ?? 'No indicado' }
+    ], 2);
+    doc.parrafo(proyecto.evaluacion_ti ?? 'Sin observaciones registradas.');
+  } else {
+    doc.nota('La peticion todavia no fue evaluada tecnicamente.', { icono: 'reloj' });
+  }
+
+  doc.titulo1('Seguimiento', 'flujo');
+  doc.tabla([
+    { titulo: 'Etapa', campo: 'etapa', ancho: 0.3 },
+    { titulo: 'Responsable', campo: 'quien', ancho: 0.34 },
+    { titulo: 'Momento', campo: 'cuando', ancho: 0.36 }
+  ], [
+    { etapa: 'Registro', quien: proyecto.solicitante_nombre, cuando: fecha(proyecto.fecha_creacion) },
+    {
+      etapa: 'Evaluacion tecnica',
+      quien: proyecto.evaluado_por_nombre ?? 'Pendiente',
+      cuando: proyecto.fecha_evaluacion ? fecha(proyecto.fecha_evaluacion) : 'Pendiente'
+    },
+    {
+      etapa: 'Aprobacion',
+      quien: proyecto.aprobado_por_nombre ?? 'Pendiente',
+      cuando: proyecto.fecha_aprobacion ? fecha(proyecto.fecha_aprobacion) : 'Pendiente'
+    },
+    {
+      etapa: 'Desarrollo',
+      quien: proyecto.responsable_nombre ?? 'Sin asignar',
+      cuando: proyecto.fecha_inicio ? fecha(proyecto.fecha_inicio) : 'Pendiente'
+    },
+    {
+      etapa: 'Entrega',
+      quien: proyecto.responsable_nombre ?? 'Sin asignar',
+      cuando: proyecto.fecha_entrega ? fecha(proyecto.fecha_entrega) : 'Pendiente'
+    }
+  ]);
+
+  if (proyecto.estado === 'Rechazada') {
+    doc.nota(`No aprobada por ${proyecto.rechazado_por_nombre ?? 'la organizacion'}: ${proyecto.motivo_rechazo}`,
+      { icono: 'alerta', color: PALETA.critico });
+  }
+
+  return doc;
+};
+
+export const construirReporteProyectos = ({ filas }) => {
+  const doc = new DocumentoPDF({
+    titulo: 'Cartera de Peticiones de Proyecto',
+    subtitulo: 'Mejoras e ideas de software propuestas por las areas',
+    codigo: 'REP-PROYECTOS',
+    icono: 'grafico',
+    orientacion: 'landscape'
+  });
+
+  const cuenta = (estado) => filas.filter((f) => f.estado === estado).length;
+
+  doc.titulo1('Situacion de la cartera', 'grafico');
+  doc.indicadores([
+    { etiqueta: 'Peticiones', valor: filas.length, icono: 'documento', color: PALETA.primario },
+    { etiqueta: 'En evaluacion', valor: cuenta('En evaluacion'), icono: 'reloj', color: PALETA.advertencia },
+    { etiqueta: 'Aprobadas', valor: cuenta('Aprobada'), icono: 'check', color: PALETA.acento },
+    { etiqueta: 'En curso', valor: cuenta('En desarrollo') + cuenta('En pruebas'), icono: 'engranaje', color: PALETA.advertencia },
+    { etiqueta: 'Implementadas', valor: cuenta('Implementada'), icono: 'check', color: PALETA.ok }
+  ]);
+
+  doc.titulo1('Detalle de las peticiones', 'documento');
+  doc.tabla([
+    { titulo: 'Codigo', ancho: 0.08, render: (f) => codigoProyecto(f.id) },
+    { titulo: 'Titulo', campo: 'titulo', ancho: 0.24, truncar: true },
+    { titulo: 'Tipo', campo: 'tipo', ancho: 0.12 },
+    { titulo: 'Solicitante', campo: 'solicitante_nombre', ancho: 0.16, truncar: true },
+    { titulo: 'Area', campo: 'area_nombre', ancho: 0.12, truncar: true },
+    { titulo: 'Urgencia', campo: 'urgencia', ancho: 0.08 },
+    { titulo: 'Estado', campo: 'estado', ancho: 0.12, color: (f) => colorEstadoProyecto(f.estado) },
+    { titulo: 'Registrada', ancho: 0.08, render: (f) => soloFecha(f.fecha_creacion) }
+  ], filas.length ? filas : [{
+    id: 0, titulo: 'Sin peticiones registradas', tipo: '-', solicitante_nombre: '-',
+    area_nombre: '-', urgencia: '-', estado: '-', fecha_creacion: null
+  }]);
+
+  return doc;
+};
+
 const variacionLegible = (valor) => {
   if (valor === null) return 'sin base de comparacion';
   if (valor > 0) return `+${valor}% respecto al mes anterior`;

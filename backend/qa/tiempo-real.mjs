@@ -1,4 +1,7 @@
 import { io } from 'socket.io-client';
+import { prepararEntorno } from './preparar.mjs';
+
+const { sesiones } = await prepararEntorno();
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000';
 const ORIGEN = 'http://localhost:5173';
@@ -24,8 +27,8 @@ const entrar = async (usuario, password) => {
 
 console.log('=== CANAL EN TIEMPO REAL ===');
 
-const tecnico = await entrar('tecnico', 'Prueba123*');
-const cliente = await entrar('sucre', 'Prueba123*');
+const tecnico = sesiones['qa.tecnico'];
+const cliente = sesiones['qa.cliente4'];
 
 const socket = io(BASE, { extraHeaders: { Cookie: tecnico.cookie }, transports: ['websocket', 'polling'] });
 

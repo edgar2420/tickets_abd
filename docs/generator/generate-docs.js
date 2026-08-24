@@ -711,7 +711,7 @@ const construir = async () => {
   doc.titulo1('17. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
-    { etiqueta: 'Contrasena inicial', valor: 'Admin123*' },
+    { etiqueta: 'Contrasena inicial', valor: 'Definida al instalar, minimo diez caracteres' },
     { etiqueta: 'Area asignada', valor: 'Tecnologias de la Informacion' },
     { etiqueta: 'Rol asignado', valor: 'admin' }
   ], 2);
@@ -768,9 +768,23 @@ const construir = async () => {
     },
     {
       version: '2.1.0',
-      fecha: new Date().toLocaleDateString('es-BO'),
+      fecha: '22/08/2026',
       descripcion: 'Reporte mensual de la mesa de ayuda en el tablero, Gerencia habilitada para registrar '
         + 'tickets y bitacora de auditoria con permiso propio',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.2.2',
+      fecha: '23/08/2026',
+      descripcion: 'Reporte mensual detallado con filtros, correccion del desborde de paginas en los PDF y '
+        + 'calendario para elegir el periodo',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.3.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Modulo de peticiones de proyecto, politica de contrasenas con cambio y restablecimiento, '
+        + 'base reiniciada a una sola cuenta administradora y baterias de prueba autosuficientes',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });

@@ -374,3 +374,60 @@ export interface ReporteMensual {
   porDia: { etiqueta: string; creados: number; resueltos: number }[];
   tickets: TicketDelPeriodo[];
 }
+
+export type TipoProyecto = 'Mejora' | 'Software nuevo' | 'Automatizacion' | 'Integracion' | 'Reporte';
+export type EstadoProyecto =
+  | 'Recibida' | 'En evaluacion' | 'Aprobada' | 'En desarrollo' | 'En pruebas' | 'Implementada' | 'Rechazada';
+export type Escala = 'Bajo' | 'Medio' | 'Alto';
+export type Frecuencia = 'Diaria' | 'Semanal' | 'Mensual' | 'Ocasional';
+
+export interface SolicitudProyecto {
+  id: number;
+  titulo: string;
+  tipo: TipoProyecto;
+  problema: string;
+  situacion_actual: string;
+  propuesta: string;
+  beneficio: string;
+  personas_afectadas: number;
+  frecuencia: Frecuencia;
+  urgencia: PrioridadTicket;
+  sistemas_actuales: string | null;
+  estado: EstadoProyecto;
+  fecha_creacion: string;
+  solicitante_id: number;
+  solicitante_nombre: string;
+  sucursal_id: number | null;
+  sucursal_nombre: string;
+  area_id: number | null;
+  area_nombre: string;
+  evaluado_por_id: number | null;
+  evaluado_por_nombre: string | null;
+  fecha_evaluacion: string | null;
+  evaluacion_ti: string | null;
+  esfuerzo_estimado: Escala | null;
+  valor_estimado: Escala | null;
+  aprobado_por_id: number | null;
+  aprobado_por_nombre: string | null;
+  fecha_aprobacion: string | null;
+  observacion_aprobacion: string | null;
+  responsable_id: number | null;
+  responsable_nombre: string | null;
+  fecha_inicio: string | null;
+  fecha_entrega: string | null;
+  avance: number;
+  rechazado_por_id: number | null;
+  rechazado_por_nombre: string | null;
+  fecha_rechazo: string | null;
+  motivo_rechazo: string | null;
+}
+
+export interface ResumenProyectos {
+  total: number;
+  recibidas: number;
+  en_evaluacion: number;
+  aprobadas: number;
+  en_curso: number;
+  implementadas: number;
+  rechazadas: number;
+}

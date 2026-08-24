@@ -25,6 +25,7 @@ import { notificacionesRouter } from './modules/notificaciones/notificaciones.ro
 import { inventarioRouter } from './modules/inventario/inventario.routes.js';
 import { equiposRouter } from './modules/equipos/equipos.routes.js';
 import { comprasRouter } from './modules/compras/compras.routes.js';
+import { proyectosRouter } from './modules/proyectos/proyectos.routes.js';
 
 const limitadorGeneral = rateLimit({
   windowMs: 60 * 1000,
@@ -70,7 +71,7 @@ export const crearApp = () => {
   app.get('/salud', (_req, res) => res.json({
     ok: true,
     servicio: 'API Sistema de Tickets TI',
-    version: '2.2.2',
+    version: '2.3.0',
     autor: env.autor,
     modulo: env.autorRol,
     fecha: new Date().toISOString()
@@ -96,6 +97,7 @@ export const crearApp = () => {
   api.use('/inventario', inventarioRouter);
   api.use('/equipos', equiposRouter);
   api.use('/compras', comprasRouter);
+  api.use('/proyectos', proyectosRouter);
 
   app.use(env.apiPrefix, api);
   app.use(notFoundHandler);

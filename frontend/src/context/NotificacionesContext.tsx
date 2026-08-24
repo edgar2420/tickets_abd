@@ -12,6 +12,7 @@ interface EstadoNotificaciones {
   recargar: () => Promise<void>;
   ultimoEventoTicket: number;
   ultimoEventoCompra: number;
+  ultimoEventoProyecto: number;
 }
 
 const Contexto = createContext<EstadoNotificaciones | null>(null);
@@ -21,6 +22,7 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
   const [notificaciones, setNotificaciones] = useState<Notificacion[]>([]);
   const [ultimoEventoTicket, setUltimoEventoTicket] = useState(0);
   const [ultimoEventoCompra, setUltimoEventoCompra] = useState(0);
+  const [ultimoEventoProyecto, setUltimoEventoProyecto] = useState(0);
 
   const recargar = useCallback(async () => {
     if (!usuario) return;
@@ -41,6 +43,7 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
     };
     const alCambiarTicket = (_ticket: Ticket) => setUltimoEventoTicket(Date.now());
     const alCambiarCompra = () => setUltimoEventoCompra(Date.now());
+    const alCambiarProyecto = () => setUltimoEventoProyecto(Date.now());
 
     socket.on('notificacion:nueva', alNotificar);
     socket.on('ticket:creado', alCambiarTicket);
@@ -48,6 +51,8 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
     socket.on('ticket:resuelto', alCambiarTicket);
     socket.on('compra:creada', alCambiarCompra);
     socket.on('compra:actualizada', alCambiarCompra);
+    socket.on('proyecto:creado', alCambiarProyecto);
+    socket.on('proyecto:actualizado', alCambiarProyecto);
 
     return () => {
       socket.off('notificacion:nueva', alNotificar);
@@ -56,6 +61,8 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
       socket.off('ticket:resuelto', alCambiarTicket);
       socket.off('compra:creada', alCambiarCompra);
       socket.off('compra:actualizada', alCambiarCompra);
+      socket.off('proyecto:creado', alCambiarProyecto);
+      socket.off('proyecto:actualizado', alCambiarProyecto);
     };
   }, [usuario]);
 
@@ -77,9 +84,10 @@ export const ProveedorNotificaciones = ({ children }: { children: ReactNode }) =
       marcarTodas,
       recargar,
       ultimoEventoTicket,
-      ultimoEventoCompra
+      ultimoEventoCompra,
+      ultimoEventoProyecto
     }),
-    [notificaciones, marcarLeida, marcarTodas, recargar, ultimoEventoTicket, ultimoEventoCompra]
+    [notificaciones, marcarLeida, marcarTodas, recargar, ultimoEventoTicket, ultimoEventoCompra, ultimoEventoProyecto]
   );
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;

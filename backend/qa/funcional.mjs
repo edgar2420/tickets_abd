@@ -1,5 +1,4 @@
-const BASE = 'http://localhost:4000/api/v1';
-const ORIGEN = 'http://localhost:5173';
+import { prepararEntorno, entrar, pedirCon, ADMIN, BASE, ORIGEN, PERFILES } from './preparar.mjs';
 
 const resultados = [];
 const marca = (modulo, ok, detalle) => {
@@ -7,54 +6,22 @@ const marca = (modulo, ok, detalle) => {
   console.log(`${ok ? 'OK   ' : 'FALLA'} [${modulo}] ${detalle}`);
 };
 
-const sesiones = new Map();
+const { sesiones } = await prepararEntorno();
 
-const entrar = async (usuario, password) => {
-  const respuesta = await fetch(`${BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ usuario, password })
-  });
-  if (respuesta.status !== 200) return null;
-  const cookies = respuesta.headers.getSetCookie();
-  const pares = cookies.map((c) => c.split(';')[0]);
-  const csrf = pares.find((p) => p.startsWith('tickets_csrf='))?.split('=')[1];
-  const sesion = { cookie: pares.join('; '), csrf, perfil: (await respuesta.json()).usuario };
-  sesiones.set(usuario, sesion);
-  return sesion;
-};
-
-const pedir = async (usuario, ruta, opciones = {}) => {
-  const sesion = sesiones.get(usuario);
-  const cabeceras = { Cookie: sesion.cookie, 'X-CSRF-Token': sesion.csrf, Origin: ORIGEN };
-  if (opciones.cuerpo) cabeceras['Content-Type'] = 'application/json';
-  const respuesta = await fetch(BASE + ruta, {
-    method: opciones.metodo ?? 'GET',
-    headers: cabeceras,
-    body: opciones.cuerpo ? JSON.stringify(opciones.cuerpo) : undefined
-  });
-  const cuerpo = await respuesta.json().catch(() => ({}));
-  return { estado: respuesta.status, cuerpo };
-};
+const pedir = (usuario, ruta, opciones = {}) => pedirCon(sesiones[usuario])(ruta, opciones);
 
 console.log('=== A. ACCESO DE TODAS LAS CUENTAS ===');
-const cuentas = [
-  ['admin', 'Admin123*', 'admin'],
-  ['gerente', 'Prueba123*', 'gerencia'],
-  ['tecnico', 'Prueba123*', 'tecnico_l1'],
-  ['tecnico2', 'Prueba123*', 'tecnico_l1'],
-  ['tecnico3', 'Prueba123*', 'tecnico_l2'],
-  ['solicitante', 'Prueba123*', 'cliente'],
-  ['lapaz', 'Prueba123*', 'cliente'],
-  ['cochabamba', 'Prueba123*', 'cliente'],
-  ['sucre', 'Prueba123*', 'cliente'],
-  ['silos', 'Prueba123*', 'cliente']
-];
-for (const [usuario, password, rolEsperado] of cuentas) {
-  const sesion = await entrar(usuario, password);
-  marca('acceso', Boolean(sesion) && sesion.perfil.rol === rolEsperado,
-    `${usuario} (${sesion?.perfil?.rol ?? 'sin acceso'} / ${sesion?.perfil?.sucursal ?? '-'})`);
+marca('acceso', sesiones.admin.perfil?.rol === 'admin',
+  `${ADMIN.usuario} (${sesiones.admin.perfil?.rol} / ${sesiones.admin.perfil?.sucursal})`);
+
+for (const perfil of PERFILES.filter((p) => p.usuario !== 'qa.bloqueo')) {
+  const sesion = sesiones[perfil.usuario];
+  marca('acceso', sesion?.perfil?.rol === perfil.rol,
+    `${perfil.usuario} (${sesion?.perfil?.rol ?? 'sin acceso'} / ${sesion?.perfil?.sucursal ?? '-'})`);
 }
+
+const claveMala = await entrar(ADMIN.usuario, 'clave-que-no-es-la-buena');
+marca('acceso', claveMala.estado === 401, `una clave incorrecta se rechaza (${claveMala.estado})`);
 
 console.log('\n=== B. CATALOGOS ===');
 for (const catalogo of ['areas', 'sucursales', 'categorias', 'roles', 'permisos']) {
@@ -64,7 +31,7 @@ for (const catalogo of ['areas', 'sucursales', 'categorias', 'roles', 'permisos'
 }
 
 console.log('\n=== C. CICLO DE VIDA DEL TICKET ===');
-const creado = await pedir('lapaz', '/tickets', {
+const creado = await pedir('qa.cliente2', '/tickets', {
   metodo: 'POST',
   cuerpo: {
     titulo: 'QA - impresora de la sucursal sin respuesta',
@@ -76,29 +43,29 @@ const creado = await pedir('lapaz', '/tickets', {
 marca('tickets', creado.estado === 201, `el cliente crea el ticket (${creado.estado})`);
 const ticket = creado.cuerpo.datos;
 
-const mio = await pedir('lapaz', '/tickets');
-marca('tickets', mio.cuerpo.datos?.every((t) => t.solicitante_id === sesiones.get('lapaz').perfil.id),
+const mio = await pedir('qa.cliente2', '/tickets');
+marca('tickets', mio.cuerpo.datos?.every((t) => t.solicitante_id === sesiones['qa.cliente2'].perfil.id),
   'el cliente solo ve sus propios tickets');
 
-const ajeno = await pedir('sucre', `/tickets/${ticket.id}`);
+const ajeno = await pedir('qa.cliente4', `/tickets/${ticket.id}`);
 marca('tickets', ajeno.estado === 403 || ajeno.estado === 404,
   `un cliente de otra sucursal no accede al ticket ajeno (${ajeno.estado})`);
 
-const todos = await pedir('tecnico', '/tickets');
+const todos = await pedir('qa.tecnico', '/tickets');
 marca('tickets', todos.estado === 200 && todos.cuerpo.datos.length >= 1,
   `el tecnico ve la bandeja completa (${todos.cuerpo.datos?.length} tickets)`);
 
 const asignado = await pedir('admin', `/tickets/${ticket.id}/asignar`, {
-  metodo: 'PUT', cuerpo: { asignado_id: sesiones.get('tecnico').perfil.id }
+  metodo: 'PUT', cuerpo: { asignado_id: sesiones['qa.tecnico'].perfil.id }
 });
 marca('tickets', asignado.estado === 200 && asignado.cuerpo.datos?.estado === 'En Proceso',
   `la asignacion deja el ticket En Proceso (${asignado.estado})`);
 
-const yaTomado = await pedir('tecnico2', `/tickets/${ticket.id}/tomar`, { metodo: 'PUT' });
+const yaTomado = await pedir('qa.tecnico2', `/tickets/${ticket.id}/tomar`, { metodo: 'PUT' });
 marca('tickets', yaTomado.estado === 409,
   `otro tecnico no puede tomar un ticket ya asignado (${yaTomado.estado})`);
 
-const libre = await pedir('silos', '/tickets', {
+const libre = await pedir('qa.cliente', '/tickets', {
   metodo: 'POST',
   cuerpo: {
     titulo: 'QA - equipo de deposito sin acceso a la red',
@@ -107,33 +74,55 @@ const libre = await pedir('silos', '/tickets', {
     prioridad: 'Media'
   }
 });
-const tomado = await pedir('tecnico3', `/tickets/${libre.cuerpo.datos.id}/tomar`, { metodo: 'PUT' });
+const tomado = await pedir('qa.tecnico3', `/tickets/${libre.cuerpo.datos.id}/tomar`, { metodo: 'PUT' });
 marca('tickets', tomado.estado === 200 && tomado.cuerpo.datos?.estado === 'En Proceso',
   `un tecnico toma un ticket abierto y pasa a En Proceso (${tomado.estado})`);
 
-const comentario = await pedir('tecnico', `/tickets/${ticket.id}/comentarios`, {
+const comentario = await pedir('qa.tecnico', `/tickets/${ticket.id}/comentarios`, {
   metodo: 'POST', cuerpo: { mensaje: 'Se revisa la cola de impresion en el equipo del usuario.' }
 });
 marca('tickets', comentario.estado === 201, `conversacion en el ticket (${comentario.estado})`);
 
-const resuelto = await pedir('tecnico2', `/tickets/${ticket.id}/resolver`, {
+const resuelto = await pedir('qa.tecnico2', `/tickets/${ticket.id}/resolver`, {
   metodo: 'PUT', cuerpo: { solucion_detalle: 'Se reinstalo el controlador de impresion y se purgo la cola.' }
 });
 marca('tickets', resuelto.estado === 200 && resuelto.cuerpo.datos?.estado === 'Resuelto',
   `resolucion con solucion documentada (${resuelto.estado})`);
 
-const cerrado = await pedir('lapaz', `/tickets/${ticket.id}/cerrar`, { metodo: 'PUT' });
+const cerrado = await pedir('qa.cliente2', `/tickets/${ticket.id}/cerrar`, { metodo: 'PUT' });
 marca('tickets', cerrado.estado === 200 && cerrado.cuerpo.datos?.estado === 'Cerrado',
   `el solicitante da conformidad y cierra (${cerrado.estado})`);
 
-const sinPermiso = await pedir('solicitante', `/tickets/${ticket.id}/asignar`, {
+const sinPermiso = await pedir('qa.cliente', `/tickets/${ticket.id}/asignar`, {
   metodo: 'PUT', cuerpo: { asignado_id: 1 }
 });
 marca('tickets', sinPermiso.estado === 403, `un cliente no puede asignar tickets (${sinPermiso.estado})`);
 
 console.log('\n=== D. INVENTARIO ===');
+const existentes = await pedir('admin', '/inventario/articulos');
+marca('inventario', existentes.estado === 200, `catalogo de articulos (${existentes.cuerpo.datos?.length ?? 0})`);
+
+if ((existentes.cuerpo.datos?.length ?? 0) === 0) {
+  const alta = await pedir('admin', '/inventario/articulos', {
+    metodo: 'POST',
+    cuerpo: {
+      codigo: 'QA-ART-01',
+      nombre: 'QA - articulo para la bateria de pruebas',
+      descripcion: 'Creado por la prueba automatizada para verificar entradas y salidas.',
+      tipo: 'Consumible',
+      unidad: 'Unidad',
+      stock_minimo: 2,
+      ubicacion: 'QA',
+      estado: 'Disponible'
+    }
+  });
+  marca('inventario', alta.estado === 201, `se da de alta un articulo de prueba (${alta.estado})`);
+  await pedir('admin', `/inventario/articulos/${alta.cuerpo.datos.id}/movimientos`, {
+    metodo: 'POST', cuerpo: { tipo: 'Entrada', cantidad: 20, motivo: 'QA - carga inicial de prueba' }
+  });
+}
+
 const articulos = await pedir('admin', '/inventario/articulos');
-marca('inventario', articulos.estado === 200, `catalogo de articulos (${articulos.cuerpo.datos?.length ?? 0})`);
 const articulo = articulos.cuerpo.datos?.[0];
 if (articulo) {
   const antes = Number(articulo.stock_actual);
@@ -152,12 +141,34 @@ if (articulo) {
   });
   marca('inventario', excesiva.estado >= 400, `se rechaza una salida sin existencias (${excesiva.estado})`);
 }
-const inventarioCliente = await pedir('lapaz', '/inventario/articulos');
+const inventarioCliente = await pedir('qa.cliente2', '/inventario/articulos');
 marca('inventario', inventarioCliente.estado === 403, `el cliente no accede al inventario (${inventarioCliente.estado})`);
 
 console.log('\n=== E. EQUIPOS ===');
+const equiposPrevios = await pedir('admin', '/equipos');
+marca('equipos', equiposPrevios.estado === 200, `listado de equipos (${equiposPrevios.cuerpo.datos?.length ?? 0})`);
+
+if ((equiposPrevios.cuerpo.datos?.length ?? 0) === 0) {
+  const alta = await pedir('admin', '/equipos', {
+    metodo: 'POST',
+    cuerpo: {
+      codigo: 'QA-PC-01',
+      nombre_equipo: 'QA-EQUIPO-01',
+      tipo: 'Escritorio',
+      marca: 'Generico',
+      sistema_operativo: 'Windows 11 Pro',
+      ram_gb: 16,
+      direccion_ip: '10.0.0.99',
+      anydesk_id: '111 222 333',
+      anydesk_password: 'ClaveRemota2026',
+      estado: 'Operativo',
+      activo: true
+    }
+  });
+  marca('equipos', alta.estado === 201, `se da de alta un equipo de prueba (${alta.estado})`);
+}
+
 const equipos = await pedir('admin', '/equipos');
-marca('equipos', equipos.estado === 200, `listado de equipos (${equipos.cuerpo.datos?.length ?? 0})`);
 const equipo = equipos.cuerpo.datos?.[0];
 if (equipo) {
   marca('equipos', !('anydesk_password' in equipo) && !('anydesk_password_cifrada' in equipo),
@@ -165,12 +176,12 @@ if (equipo) {
   const revelada = await pedir('admin', `/equipos/${equipo.id}/credenciales`);
   marca('equipos', revelada.estado === 200 && revelada.cuerpo.datos !== undefined,
     'un administrador puede revelar la credencial bajo demanda');
-  const negada = await pedir('lapaz', `/equipos/${equipo.id}/credenciales`);
+  const negada = await pedir('qa.cliente2', `/equipos/${equipo.id}/credenciales`);
   marca('equipos', negada.estado === 403, `el cliente no puede revelarla (${negada.estado})`);
 }
 
 console.log('\n=== F. SOLICITUDES DE COMPRA ===');
-const compra = await pedir('cochabamba', '/compras', {
+const compra = await pedir('qa.cliente3', '/compras', {
   metodo: 'POST',
   cuerpo: {
     titulo: 'QA - equipo de reposicion para el area comercial',
@@ -184,7 +195,7 @@ const compra = await pedir('cochabamba', '/compras', {
 marca('compras', compra.estado === 201, `el cliente registra la solicitud (${compra.estado})`);
 const solicitud = compra.cuerpo.datos;
 
-const gerenciaAntes = await pedir('gerente', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
+const gerenciaAntes = await pedir('qa.gerente', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
 marca('compras', gerenciaAntes.estado >= 400,
   `Gerencia no puede aprobar antes que TI (${gerenciaAntes.estado})`);
 
@@ -193,10 +204,10 @@ const ti = await pedir('admin', `/compras/${solicitud.id}/aprobar-ti`, {
 });
 marca('compras', ti.estado === 200, `TI aprueba en primera instancia (${ti.estado})`);
 
-const clienteAprueba = await pedir('cochabamba', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
+const clienteAprueba = await pedir('qa.cliente3', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
 marca('compras', clienteAprueba.estado === 403, `un cliente no puede aprobar (${clienteAprueba.estado})`);
 
-const gerencia = await pedir('gerente', `/compras/${solicitud.id}/aprobar-gerencia`, {
+const gerencia = await pedir('qa.gerente', `/compras/${solicitud.id}/aprobar-gerencia`, {
   metodo: 'PUT', cuerpo: { observacion_gerencia: 'QA - presupuesto autorizado.' }
 });
 marca('compras', gerencia.estado === 200, `Gerencia aprueba en segunda instancia (${gerencia.estado})`);
@@ -218,19 +229,19 @@ marca('tablero', tablero.estado === 200 && est?.total !== undefined,
 marca('tablero', !('horas_promedio_resolucion' in (est ?? {})), 'no se publica el tiempo promedio de resolucion');
 marca('tablero', Array.isArray(graficos?.porCategoria), `desglose por categoria (${graficos?.porCategoria?.length ?? 0})`);
 marca('tablero', Array.isArray(graficos?.porSolicitante), `desglose por solicitante (${graficos?.porSolicitante?.length ?? 0})`);
-const tableroCliente = await pedir('lapaz', '/tickets/tablero');
+const tableroCliente = await pedir('qa.cliente2', '/tickets/tablero');
 marca('tablero', tableroCliente.cuerpo.datos?.graficos === null,
   'el cliente recibe sus indicadores sin los graficos globales');
 
-const notificaciones = await pedir('tecnico', '/notificaciones');
+const notificaciones = await pedir('qa.tecnico', '/notificaciones');
 marca('notificaciones', notificaciones.estado === 200,
   `bandeja del tecnico (${notificaciones.cuerpo.datos?.length ?? 0} avisos)`);
 const pendiente = notificaciones.cuerpo.datos?.find((n) => !n.leida);
 if (pendiente) {
-  const leida = await pedir('tecnico', `/notificaciones/${pendiente.id}/leida`, { metodo: 'PUT' });
+  const leida = await pedir('qa.tecnico', `/notificaciones/${pendiente.id}/leida`, { metodo: 'PUT' });
   marca('notificaciones', leida.estado === 200, `un aviso se marca como leido (${leida.estado})`);
 }
-const todasLeidas = await pedir('tecnico', '/notificaciones/leidas', { metodo: 'PUT' });
+const todasLeidas = await pedir('qa.tecnico', '/notificaciones/leidas', { metodo: 'PUT' });
 marca('notificaciones', todasLeidas.estado === 200, `se marcan todas como leidas (${todasLeidas.estado})`);
 
 console.log('\n=== H. AUDITORIA ===');
@@ -240,21 +251,21 @@ marca('auditoria', auditoria.estado === 200, `consulta del registro (${registros
 for (const entidad of ['TICKET', 'COMPRA', 'INVENTARIO', 'SESION']) {
   marca('auditoria', registros.some((r) => r.entidad === entidad), `queda huella de ${entidad}`);
 }
-const auditoriaCliente = await pedir('lapaz', '/auditoria');
+const auditoriaCliente = await pedir('qa.cliente2', '/auditoria');
 marca('auditoria', auditoriaCliente.estado === 403, `el cliente no accede a la auditoria (${auditoriaCliente.estado})`);
 
 console.log('\n=== H2. ALCANCE DE GERENCIA Y REPORTE MENSUAL ===');
-const permisosGerente = sesiones.get('gerente').perfil.permisos;
+const permisosGerente = sesiones['qa.gerente'].perfil.permisos;
 marca('gerencia', !permisosGerente.includes('auditoria.ver'),
   'Gerencia no tiene el permiso de auditoria');
 marca('gerencia', permisosGerente.includes('tickets.crear'),
   'Gerencia puede registrar tickets');
 
-const auditoriaGerencia = await pedir('gerente', '/auditoria');
+const auditoriaGerencia = await pedir('qa.gerente', '/auditoria');
 marca('gerencia', auditoriaGerencia.estado === 403,
   `la bitacora le queda cerrada (${auditoriaGerencia.estado})`);
 
-const ticketGerencia = await pedir('gerente', '/tickets', {
+const ticketGerencia = await pedir('qa.gerente', '/tickets', {
   metodo: 'POST',
   cuerpo: {
     titulo: 'QA - Gerencia registra un requerimiento propio',
@@ -265,10 +276,10 @@ const ticketGerencia = await pedir('gerente', '/tickets', {
 });
 marca('gerencia', ticketGerencia.estado === 201, `Gerencia abre un ticket (${ticketGerencia.estado})`);
 
-const tableroGerencia = await pedir('gerente', '/tickets/tablero');
+const tableroGerencia = await pedir('qa.gerente', '/tickets/tablero');
 marca('gerencia', tableroGerencia.estado === 200, `Gerencia entra al tablero (${tableroGerencia.estado})`);
 
-const mensual = await pedir('gerente', '/tickets/mensual');
+const mensual = await pedir('qa.gerente', '/tickets/mensual');
 const reporte = mensual.cuerpo.datos;
 marca('reporte', mensual.estado === 200 && reporte?.nombre !== undefined,
   `reporte del periodo: ${reporte?.nombre}`);
@@ -285,11 +296,11 @@ marca('reporte', Array.isArray(reporte?.porDia) && reporte.porDia.length >= 28,
 marca('reporte', Array.isArray(reporte?.categorias) && Array.isArray(reporte?.tecnicos),
   'incluye desglose por categoria y por tecnico');
 
-const mesViejo = await pedir('gerente', '/tickets/mensual?mes=2026-01');
+const mesViejo = await pedir('qa.gerente', '/tickets/mensual?mes=2026-01');
 marca('reporte', mesViejo.estado === 200 && mesViejo.cuerpo.datos?.mes === '2026-01',
   `admite consultar un mes anterior (${mesViejo.cuerpo.datos?.nombre})`);
 
-const mesInvalido = await pedir('gerente', '/tickets/mensual?mes=no-es-un-mes');
+const mesInvalido = await pedir('qa.gerente', '/tickets/mensual?mes=no-es-un-mes');
 marca('reporte', mesInvalido.estado === 200 && /^\d{4}-\d{2}$/.test(mesInvalido.cuerpo.datos?.mes ?? ''),
   'un periodo mal escrito cae al mes vigente en lugar de fallar');
 
@@ -305,22 +316,22 @@ marca('reporte',
   ['creados', 'abiertos', 'en_proceso', 'resueltos', 'cerrados'].every((c) => columnasDesglose.includes(c)),
   `cada desglose abre por estado: ${columnasDesglose.join(', ')}`);
 
-const filtradoCategoria = await pedir('gerente', '/tickets/mensual?categoria=Hardware');
+const filtradoCategoria = await pedir('qa.gerente', '/tickets/mensual?categoria=Hardware');
 const soloHardware = (filtradoCategoria.cuerpo.datos?.tickets ?? []).every((t) => t.categoria === 'Hardware');
 marca('reporte', filtradoCategoria.estado === 200 && soloHardware,
   `filtra por categoria (${filtradoCategoria.cuerpo.datos?.tickets?.length} tickets, todos de Hardware)`);
 
-const filtradoPrioridad = await pedir('gerente', '/tickets/mensual?prioridad=Alta');
+const filtradoPrioridad = await pedir('qa.gerente', '/tickets/mensual?prioridad=Alta');
 const soloAlta = (filtradoPrioridad.cuerpo.datos?.tickets ?? []).every((t) => t.prioridad === 'Alta');
 marca('reporte', filtradoPrioridad.estado === 200 && soloAlta,
   `filtra por prioridad (${filtradoPrioridad.cuerpo.datos?.tickets?.length} tickets, todos de prioridad Alta)`);
 
 const sucursales = (await pedir('admin', '/sucursales')).cuerpo.datos ?? [];
-const filtradoSucursal = await pedir('gerente', `/tickets/mensual?sucursal_id=${sucursales[0]?.id}`);
+const filtradoSucursal = await pedir('qa.gerente', `/tickets/mensual?sucursal_id=${sucursales[0]?.id}`);
 marca('reporte', filtradoSucursal.estado === 200 && filtradoSucursal.cuerpo.datos?.filtroSucursal === sucursales[0]?.nombre,
   `filtra por sucursal (${filtradoSucursal.cuerpo.datos?.filtroSucursal})`);
 
-const mensualCliente = await pedir('lapaz', '/tickets/mensual');
+const mensualCliente = await pedir('qa.cliente2', '/tickets/mensual');
 marca('reporte', mensualCliente.estado === 403,
   `un cliente no accede al reporte mensual (${mensualCliente.estado})`);
 
@@ -333,7 +344,7 @@ marca('paginacion', excesivo.cuerpo.paginacion?.limite === 200,
   `un limite abusivo se acota a 200 (pedido 100000, aplicado ${excesivo.cuerpo.paginacion?.limite})`);
 
 console.log('\n=== J. DOCUMENTOS PDF ===');
-const sesionAdmin = sesiones.get('admin');
+const sesionAdmin = sesiones.admin;
 for (const [nombre, ruta] of [
   ['ficha del ticket', `/tickets/${ticket.id}/pdf`],
   ['reporte de tickets', '/tickets/reporte/pdf'],

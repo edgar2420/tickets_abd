@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  Bell, Boxes, Building, Building2, ClipboardList, Gauge, LayoutGrid, LogOut, Monitor, Moon,
+  Bell, Boxes, Building, Building2, ClipboardList, Gauge, KeyRound, LayoutGrid, Lightbulb, LogOut, Monitor, Moon,
   ShoppingCart,
   PanelLeftClose, PanelLeftOpen, ScrollText, ShieldCheck, Sun, Tags, Ticket,
   UserCog, Users, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
+import { CambioPassword } from './CambioPassword';
 import { usarNotificaciones } from '../context/NotificacionesContext';
 import { usarTema } from '../context/TemaContext';
 import { PiePagina } from './PiePagina';
@@ -27,6 +28,7 @@ const ENLACES: Enlace[] = [
   { ruta: '/inventario', texto: 'Inventario', icono: Boxes, permisos: ['inventario.ver'], grupo: 'Operacion' },
   { ruta: '/equipos', texto: 'Equipos', icono: Monitor, permisos: ['equipos.ver'], grupo: 'Operacion' },
   { ruta: '/compras', texto: 'Compras', icono: ShoppingCart, permisos: ['compras.solicitar', 'compras.ver_todas'], grupo: 'Operacion' },
+  { ruta: '/proyectos', texto: 'Proyectos', icono: Lightbulb, permisos: ['proyectos.solicitar', 'proyectos.ver_todas'], grupo: 'Operacion' },
   { ruta: '/admin/usuarios', texto: 'Usuarios', icono: Users, permisos: ['admin.usuarios'], grupo: 'Administracion' },
   { ruta: '/admin/roles', texto: 'Roles y permisos', icono: ShieldCheck, permisos: ['admin.roles'], grupo: 'Administracion' },
   { ruta: '/admin/sucursales', texto: 'Sucursales', icono: Building, permisos: ['admin.sucursales'], grupo: 'Administracion' },
@@ -120,6 +122,7 @@ const CLAVE_MENU = 'tickets_ti_menu_visible';
 
 export const Layout = () => {
   const { usuario, cerrarSesion, puede } = usarAuth();
+  const [modalPassword, setModalPassword] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(() => localStorage.getItem(CLAVE_MENU) !== 'oculto');
   const navegar = useNavigate();
 
@@ -165,6 +168,15 @@ export const Layout = () => {
                 {usuario?.sucursal ? ` - ${usuario.sucursal}` : ''}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setModalPassword(true)}
+              className="rounded-md p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+              aria-label="Cambiar mi contrasena"
+              title="Cambiar mi contrasena"
+            >
+              <KeyRound className="h-5 w-5" />
+            </button>
             <button
               type="button"
               onClick={salir}
@@ -230,6 +242,12 @@ export const Layout = () => {
       </div>
 
       <PiePagina />
+
+      <CambioPassword
+        abierto={modalPassword}
+        usuario={usuario?.usuario ?? ''}
+        alCerrar={() => setModalPassword(false)}
+      />
     </div>
   );
 };
