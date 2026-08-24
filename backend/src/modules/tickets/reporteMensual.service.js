@@ -48,7 +48,7 @@ const totales = async (mes, filtros) => {
        COUNT(*) FILTER (WHERE t.fecha_resolucion >= $1 AND t.fecha_resolucion < $2)::int AS resueltos,
        COUNT(*) FILTER (WHERE t.fecha_cierre >= $1 AND t.fecha_cierre < $2)::int         AS cerrados,
        COUNT(*) FILTER (WHERE t.fecha_creacion < $2
-                          AND t.estado IN ('Abierto', 'En Proceso'))::int                AS pendientes,
+                          AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera'))::int AS pendientes,
        COUNT(*) FILTER (WHERE t.fecha_creacion >= $1 AND t.fecha_creacion < $2
                           AND t.prioridad = 'Critica')::int                              AS criticos
       FROM tickets t
@@ -62,8 +62,8 @@ const desglose = async (mes, filtros, agrupacion, etiqueta, union = '') => {
   const { rows } = await query(
     `SELECT ${etiqueta} AS etiqueta,
             COUNT(*)::int                                                        AS creados,
-            COUNT(*) FILTER (WHERE t.estado = 'Abierto')::int                    AS abiertos,
-            COUNT(*) FILTER (WHERE t.estado = 'En Proceso')::int                  AS en_proceso,
+            COUNT(*) FILTER (WHERE t.estado IN ('Nuevo', 'Asignado'))::int       AS abiertos,
+            COUNT(*) FILTER (WHERE t.estado IN ('En Proceso', 'En Espera'))::int  AS en_proceso,
             COUNT(*) FILTER (WHERE t.estado = 'Resuelto')::int                    AS resueltos,
             COUNT(*) FILTER (WHERE t.estado = 'Cerrado')::int                     AS cerrados
        FROM tickets t

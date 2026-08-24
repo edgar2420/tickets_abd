@@ -121,7 +121,7 @@ comentariosRouter.post('/', recibirArchivos, asyncHandler(async (req, res) => {
   for (const destinatario of destinatarios) {
     await notificarUsuario({
       usuarioId: destinatario, ticketId, tipo: 'TICKET_COMENTARIO',
-      titulo: `Nuevo mensaje en ${codigoTicket(ticketId)}`,
+      titulo: `Nuevo mensaje en ${codigoTicket(ticket)}`,
       mensaje: `${req.usuario.nombre}: ${(mensaje || 'Adjunto un archivo').slice(0, 120)}`
     });
   }

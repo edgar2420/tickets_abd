@@ -1,22 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, CheckCircle2, ClipboardCheck, Clock, FileDown, History, Loader2,
-  PlayCircle, UserCheck, Users
+  AlertTriangle, ArrowLeft, CheckCircle2, ClipboardCheck, Clock, FileDown, History,
+  Monitor, PauseCircle, PlayCircle, SignalHigh, UserCheck, Users
 } from 'lucide-react';
 import { api, descargarPdf } from '../../lib/api';
 import { obtenerSocket } from '../../lib/socket';
 import { usarAuth } from '../../context/AuthContext';
-import { Alerta, Cargando, Etiqueta, Modal, Panel } from '../../components/Ui';
+import { Alerta, Cargando, Etiqueta, Panel } from '../../components/Ui';
 import { Conversacion } from '../../components/Conversacion';
-import { codigoTicket, duracionLegible, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
+import { codigoTicket, duracionEmpleada, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
 import type { Ticket } from '../../lib/tipos';
-
-interface Tecnico {
-  id: number;
-  nombre: string;
-  rol: string;
-}
+import { ESTILO_TIPO, OBJETIVOS } from './constantes';
+import { ModalAsignar, ModalEspera, ModalPrioridad, ModalResolver } from './componentes/ModalesTicket';
 
 const Dato = ({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) => (
   <div>
@@ -33,11 +29,7 @@ export const DetalleTicket = () => {
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [procesando, setProcesando] = useState(false);
-  const [modalResolver, setModalResolver] = useState(false);
-  const [modalAsignar, setModalAsignar] = useState(false);
-  const [solucion, setSolucion] = useState('');
-  const [tecnicos, setTecnicos] = useState<Tecnico[]>([]);
-  const [tecnicoElegido, setTecnicoElegido] = useState('');
+  const [modal, setModal] = useState<'' | 'resolver' | 'asignar' | 'prioridad' | 'espera'>('');
 
   const cargar = useCallback(async () => {
     try {
@@ -69,22 +61,13 @@ export const DetalleTicket = () => {
     };
   }, [id, cargar]);
 
-  useEffect(() => {
-    if (!modalAsignar || tecnicos.length > 0) return;
-    void api<{ datos: Tecnico[] }>('/usuarios/tecnicos')
-      .then(({ datos }) => setTecnicos(datos))
-      .catch(() => setTecnicos([]));
-  }, [modalAsignar, tecnicos.length]);
-
   const ejecutar = async (ruta: string, cuerpo?: unknown) => {
     setProcesando(true);
     setError(null);
     try {
       const { datos } = await api<{ datos: Ticket }>(ruta, { metodo: 'PUT', cuerpo });
       setTicket(datos);
-      setModalResolver(false);
-      setModalAsignar(false);
-      setSolucion('');
+      setModal('');
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'No fue posible completar la operacion');
     } finally {
@@ -96,10 +79,17 @@ export const DetalleTicket = () => {
   if (error && !ticket) return <Alerta mensaje={error} />;
   if (!ticket) return null;
 
+  const codigo = codigoTicket(ticket);
   const esSolicitante = ticket.solicitante_id === usuario?.id;
-  const puedeTomar = puede('tickets.responder') && ticket.estado === 'Abierto';
-  const puedeResolver = puede('tickets.resolver') && ['Abierto', 'En Proceso'].includes(ticket.estado);
-  const puedeAsignar = puede('tickets.responder') && !['Resuelto', 'Cerrado'].includes(ticket.estado);
+  const atiende = puede('tickets.responder');
+  const cerrado = ticket.estado === 'Cerrado';
+
+  const puedeTomar = atiende && ticket.estado === 'Nuevo';
+  const puedeIniciar = atiende && ['Asignado', 'En Espera', 'Resuelto'].includes(ticket.estado);
+  const puedeEsperar = atiende && ['Asignado', 'En Proceso'].includes(ticket.estado);
+  const puedeResolver = puede('tickets.resolver') && ticket.estado === 'En Proceso';
+  const puedeAsignar = atiende && !['Resuelto', 'Cerrado'].includes(ticket.estado);
+  const puedePrioridad = atiende && !cerrado;
   const puedeCerrar = ticket.estado === 'Resuelto' && (esSolicitante || puede('tickets.resolver'));
 
   return (
@@ -117,14 +107,19 @@ export const DetalleTicket = () => {
             Volver al listado
           </button>
           <h1 className="text-xl font-bold text-institucional-900 dark:text-slate-100">
-            <span className="font-mono text-base text-institucional-700 dark:text-institucional-300">{codigoTicket(ticket.id)}</span>
+            <span className="font-mono text-base text-institucional-700 dark:text-institucional-300">{codigo}</span>
             {'  '}
             {ticket.titulo}
           </h1>
           <div className="mt-2 flex flex-wrap gap-2">
             <Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} />
+            <Etiqueta texto={ticket.tipo} clase={ESTILO_TIPO[ticket.tipo]} />
             <Etiqueta texto={`Prioridad ${ticket.prioridad}`} clase={estiloPrioridad[ticket.prioridad]} />
+            <Etiqueta texto={ticket.servicio} clase="bg-slate-100 text-slate-700 border-slate-200 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
             <Etiqueta texto={ticket.categoria} clase="bg-slate-100 text-slate-700 border-slate-200 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
+            {ticket.vencido && (
+              <Etiqueta texto="Objetivo vencido" clase="bg-rose-100 text-rose-800 border-rose-300 dark:bg-rose-500/15 dark:text-rose-300 dark:border-rose-500/30" />
+            )}
           </div>
         </div>
 
@@ -132,25 +127,43 @@ export const DetalleTicket = () => {
           <button
             type="button"
             className="boton-secundario"
-            onClick={() => void descargarPdf(`/tickets/${ticket.id}/pdf`, {}, `acta-${codigoTicket(ticket.id)}.pdf`)}
+            onClick={() => void descargarPdf(`/tickets/${ticket.id}/pdf`, {}, `acta-${codigo}.pdf`)}
           >
             <FileDown className="h-4 w-4" />
             Acta PDF
           </button>
+          {puedePrioridad && (
+            <button type="button" className="boton-secundario" onClick={() => setModal('prioridad')}>
+              <SignalHigh className="h-4 w-4" />
+              Prioridad
+            </button>
+          )}
           {puedeAsignar && (
-            <button type="button" className="boton-secundario" onClick={() => setModalAsignar(true)}>
+            <button type="button" className="boton-secundario" onClick={() => setModal('asignar')}>
               <Users className="h-4 w-4" />
               Asignar
             </button>
           )}
+          {puedeEsperar && (
+            <button type="button" className="boton-secundario" onClick={() => setModal('espera')}>
+              <PauseCircle className="h-4 w-4" />
+              En espera
+            </button>
+          )}
           {puedeTomar && (
             <button type="button" className="boton-acento" disabled={procesando} onClick={() => void ejecutar(`/tickets/${ticket.id}/tomar`)}>
+              <UserCheck className="h-4 w-4" />
+              Tomar ticket
+            </button>
+          )}
+          {puedeIniciar && (
+            <button type="button" className="boton-acento" disabled={procesando} onClick={() => void ejecutar(`/tickets/${ticket.id}/iniciar`)}>
               <PlayCircle className="h-4 w-4" />
-              Atender ticket
+              {ticket.estado === 'En Espera' ? 'Reanudar' : 'Iniciar atencion'}
             </button>
           )}
           {puedeResolver && (
-            <button type="button" className="boton-primario" onClick={() => setModalResolver(true)}>
+            <button type="button" className="boton-primario" onClick={() => setModal('resolver')}>
               <CheckCircle2 className="h-4 w-4" />
               Registrar solucion
             </button>
@@ -166,10 +179,22 @@ export const DetalleTicket = () => {
 
       {error && <Alerta mensaje={error} />}
 
+      {ticket.estado === 'En Espera' && ticket.motivo_espera && (
+        <div className="flex items-start gap-2 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm text-orange-900 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <span>En espera desde {ticket.fecha_espera ? fechaHora(ticket.fecha_espera) : 'hace un momento'}: {ticket.motivo_espera}</span>
+        </div>
+      )}
+
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="space-y-5 lg:col-span-2">
           <Panel titulo="Descripcion reportada" icono={ClipboardCheck}>
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-200">{ticket.descripcion}</p>
+            {ticket.observaciones && (
+              <p className="mt-3 whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-600 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200">
+                {ticket.observaciones}
+              </p>
+            )}
           </Panel>
 
           <Panel titulo="Solucion tecnica" icono={CheckCircle2}>
@@ -207,8 +232,32 @@ export const DetalleTicket = () => {
               <Dato etiqueta="Solicitante" valor={ticket.solicitante_nombre} />
               <Dato etiqueta="Area solicitante" valor={ticket.solicitante_area} />
               <Dato etiqueta="Sucursal" valor={ticket.sucursal_nombre} />
+              <Dato etiqueta="Ubicacion" valor={ticket.ubicacion} />
               <Dato etiqueta="Atendido por" valor={ticket.asignado_nombre} />
               <Dato etiqueta="Resuelto por" valor={ticket.resuelto_por_nombre} />
+            </div>
+          </Panel>
+
+          <Panel titulo="Activo relacionado" icono={Monitor}>
+            {ticket.equipo_id ? (
+              <div className="space-y-3">
+                <Dato etiqueta="Codigo" valor={ticket.equipo_codigo} />
+                <Dato etiqueta="Equipo" valor={ticket.equipo_nombre} />
+              </div>
+            ) : (
+              <p className="text-sm text-slate-500 dark:text-slate-300">El ticket no esta ligado a un activo del parque.</p>
+            )}
+          </Panel>
+
+          <Panel titulo="Atencion" icono={Clock}>
+            <div className="space-y-3">
+              <Dato
+                etiqueta="Objetivo de atencion"
+                valor={`${OBJETIVOS[ticket.prioridad].texto} (${OBJETIVOS[ticket.prioridad].horas} h)`}
+              />
+              <Dato etiqueta="Vence" valor={ticket.fecha_objetivo ? fechaHora(ticket.fecha_objetivo) : null} />
+              <Dato etiqueta="Prioridad definida por" valor={ticket.prioridad_por_nombre} />
+              <Dato etiqueta="Tiempo empleado" valor={duracionEmpleada(ticket.minutos_empleados)} />
             </div>
           </Panel>
 
@@ -216,65 +265,30 @@ export const DetalleTicket = () => {
             <div className="space-y-3">
               <Dato etiqueta="Creacion" valor={fechaHora(ticket.fecha_creacion)} />
               <Dato etiqueta="Asignacion" valor={ticket.fecha_asignacion ? fechaHora(ticket.fecha_asignacion) : null} />
+              <Dato etiqueta="Inicio de atencion" valor={ticket.fecha_inicio ? fechaHora(ticket.fecha_inicio) : null} />
               <Dato etiqueta="Resolucion" valor={ticket.fecha_resolucion ? fechaHora(ticket.fecha_resolucion) : null} />
-              <Dato etiqueta="Tiempo transcurrido" valor={duracionLegible(ticket.horas_atencion)} />
+              <Dato etiqueta="Cierre" valor={ticket.fecha_cierre ? fechaHora(ticket.fecha_cierre) : null} />
             </div>
           </Panel>
         </div>
       </div>
 
-      <Modal titulo="Registrar solucion tecnica" icono={CheckCircle2} abierto={modalResolver} alCerrar={() => setModalResolver(false)}>
-        <div className="space-y-4">
-          <div>
-            <label className="etiqueta" htmlFor="solucion">Detalle de la solucion aplicada</label>
-            <textarea
-              id="solucion"
-              className="campo min-h-40"
-              value={solucion}
-              onChange={(e) => setSolucion(e.target.value)}
-              placeholder="Describa el diagnostico, las acciones ejecutadas y el resultado obtenido"
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" className="boton-secundario" onClick={() => setModalResolver(false)}>Cancelar</button>
-            <button
-              type="button"
-              className="boton-primario"
-              disabled={procesando || solucion.trim().length < 10}
-              onClick={() => void ejecutar(`/tickets/${ticket.id}/resolver`, { solucion_detalle: solucion.trim() })}
-            >
-              {procesando ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-              Guardar solucion
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      <Modal titulo="Asignar ticket a un tecnico" icono={Users} abierto={modalAsignar} alCerrar={() => setModalAsignar(false)} ancho="max-w-lg">
-        <div className="space-y-4">
-          <div>
-            <label className="etiqueta" htmlFor="tecnico">Tecnico responsable</label>
-            <select id="tecnico" className="campo" value={tecnicoElegido} onChange={(e) => setTecnicoElegido(e.target.value)}>
-              <option value="">Seleccione un tecnico</option>
-              {tecnicos.map((tecnico) => (
-                <option key={tecnico.id} value={tecnico.id}>{tecnico.nombre} ({tecnico.rol})</option>
-              ))}
-            </select>
-          </div>
-          <div className="flex justify-end gap-2">
-            <button type="button" className="boton-secundario" onClick={() => setModalAsignar(false)}>Cancelar</button>
-            <button
-              type="button"
-              className="boton-primario"
-              disabled={procesando || !tecnicoElegido}
-              onClick={() => void ejecutar(`/tickets/${ticket.id}/asignar`, { asignado_id: Number(tecnicoElegido) })}
-            >
-              <Users className="h-4 w-4" />
-              Asignar
-            </button>
-          </div>
-        </div>
-      </Modal>
+      <ModalResolver
+        abierto={modal === 'resolver'} alCerrar={() => setModal('')}
+        procesando={procesando} ejecutar={ejecutar} ticketId={ticket.id}
+      />
+      <ModalAsignar
+        abierto={modal === 'asignar'} alCerrar={() => setModal('')}
+        procesando={procesando} ejecutar={ejecutar} ticketId={ticket.id}
+      />
+      <ModalPrioridad
+        abierto={modal === 'prioridad'} alCerrar={() => setModal('')}
+        procesando={procesando} ejecutar={ejecutar} ticketId={ticket.id} actual={ticket.prioridad}
+      />
+      <ModalEspera
+        abierto={modal === 'espera'} alCerrar={() => setModal('')}
+        procesando={procesando} ejecutar={ejecutar} ticketId={ticket.id}
+      />
     </div>
   );
 };

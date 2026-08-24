@@ -1,6 +1,20 @@
 import type { EstadoTicket, PrioridadTicket } from './tipos';
 
-export const codigoTicket = (id: number) => `TI-${String(id).padStart(5, '0')}`;
+export const codigoTicket = (ticket: { anio?: number; numero?: number; id?: number }) => {
+  const anio = ticket.anio ?? new Date().getFullYear();
+  const numero = ticket.numero ?? ticket.id ?? 0;
+  return `SYS-${anio}-${String(numero).padStart(5, '0')}`;
+};
+
+export const duracionEmpleada = (minutos: number | null | undefined) => {
+  if (minutos === null || minutos === undefined) return 'No registrado';
+  const total = Math.max(0, Number(minutos));
+  const horas = Math.floor(total / 60);
+  const resto = total % 60;
+  if (horas === 0) return `${resto} min`;
+  if (resto === 0) return `${horas} h`;
+  return `${horas} h ${resto} min`;
+};
 
 export const montoBs = (valor: string | number | null | undefined) => {
   if (valor === null || valor === undefined || valor === '') return null;
@@ -42,8 +56,10 @@ export const tiempoRelativo = (valor: string) => {
 };
 
 export const estiloEstado: Record<EstadoTicket, string> = {
-  'Abierto': 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
+  'Nuevo': 'bg-sky-100 text-sky-800 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30',
+  'Asignado': 'bg-violet-100 text-violet-800 border-violet-200 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30',
   'En Proceso': 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30',
+  'En Espera': 'bg-orange-100 text-orange-800 border-orange-300 dark:bg-orange-500/15 dark:text-orange-300 dark:border-orange-500/30',
   'Resuelto': 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/30',
   'Cerrado': 'bg-slate-200 text-slate-700 border-slate-300 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600'
 };

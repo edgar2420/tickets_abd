@@ -36,7 +36,7 @@ const creado = await pedir('qa.cliente2', '/tickets', {
   cuerpo: {
     titulo: 'QA - impresora de la sucursal sin respuesta',
     descripcion: 'Prueba automatizada del ciclo completo de atencion.',
-    categoria: 'Hardware',
+    categoria: 'PC',
     prioridad: 'Alta'
   }
 });
@@ -58,8 +58,8 @@ marca('tickets', todos.estado === 200 && todos.cuerpo.datos.length >= 1,
 const asignado = await pedir('admin', `/tickets/${ticket.id}/asignar`, {
   metodo: 'PUT', cuerpo: { asignado_id: sesiones['qa.tecnico'].perfil.id }
 });
-marca('tickets', asignado.estado === 200 && asignado.cuerpo.datos?.estado === 'En Proceso',
-  `la asignacion deja el ticket En Proceso (${asignado.estado})`);
+marca('tickets', asignado.estado === 200 && asignado.cuerpo.datos?.estado === 'Asignado',
+  `la asignacion deja el ticket Asignado (${asignado.estado})`);
 
 const yaTomado = await pedir('qa.tecnico2', `/tickets/${ticket.id}/tomar`, { metodo: 'PUT' });
 marca('tickets', yaTomado.estado === 409,
@@ -70,18 +70,22 @@ const libre = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - equipo de deposito sin acceso a la red',
     descripcion: 'Prueba de la toma de atencion directa por un tecnico.',
-    categoria: 'Redes',
+    categoria: 'Red',
     prioridad: 'Media'
   }
 });
 const tomado = await pedir('qa.tecnico3', `/tickets/${libre.cuerpo.datos.id}/tomar`, { metodo: 'PUT' });
-marca('tickets', tomado.estado === 200 && tomado.cuerpo.datos?.estado === 'En Proceso',
-  `un tecnico toma un ticket abierto y pasa a En Proceso (${tomado.estado})`);
+marca('tickets', tomado.estado === 200 && tomado.cuerpo.datos?.estado === 'Asignado',
+  `un tecnico toma un ticket nuevo y queda Asignado (${tomado.estado})`);
 
 const comentario = await pedir('qa.tecnico', `/tickets/${ticket.id}/comentarios`, {
   metodo: 'POST', cuerpo: { mensaje: 'Se revisa la cola de impresion en el equipo del usuario.' }
 });
 marca('tickets', comentario.estado === 201, `conversacion en el ticket (${comentario.estado})`);
+
+const iniciado = await pedir('qa.tecnico', `/tickets/${ticket.id}/iniciar`, { metodo: 'PUT' });
+marca('tickets', iniciado.estado === 200 && iniciado.cuerpo.datos?.estado === 'En Proceso',
+  `al iniciar la atencion el ticket pasa a En Proceso (${iniciado.estado})`);
 
 const resuelto = await pedir('qa.tecnico2', `/tickets/${ticket.id}/resolver`, {
   metodo: 'PUT', cuerpo: { solucion_detalle: 'Se reinstalo el controlador de impresion y se purgo la cola.' }
@@ -436,7 +440,7 @@ const inyeccion = await pedir('admin', '/tickets?estado=' + encodeURIComponent("
 marca('validacion', inyeccion.estado < 500, `un filtro con inyeccion no rompe el servicio (${inyeccion.estado})`);
 const desbordado = await pedir('admin', '/tickets', {
   metodo: 'POST',
-  cuerpo: { titulo: 'x'.repeat(5000), descripcion: 'y'.repeat(50000), categoria: 'Redes' }
+  cuerpo: { titulo: 'x'.repeat(5000), descripcion: 'y'.repeat(50000), categoria: 'Red' }
 });
 marca('validacion', desbordado.estado === 400, `se rechaza un texto desmedido (${desbordado.estado})`);
 

@@ -10,6 +10,7 @@ ticketsRouter.use(autenticar);
 
 ticketsRouter.use('/:id/comentarios', comentariosRouter);
 
+ticketsRouter.get('/catalogo', ctrl.catalogo);
 ticketsRouter.get('/tablero', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.tablero);
 ticketsRouter.get('/reporte/pdf', requierePermiso('reportes.exportar', 'tickets.ver_todos'), ctrl.reportePdf);
 ticketsRouter.get('/mensual', requierePermiso('reportes.ver', 'tickets.ver_todos'), ctrl.mensual);
@@ -22,5 +23,8 @@ ticketsRouter.get('/:id/pdf', requierePermiso('tickets.ver_propios', 'tickets.ve
 ticketsRouter.post('/', requierePermiso('tickets.crear'), validate(ctrl.crearTicketSchema), ctrl.crear);
 ticketsRouter.put('/:id/tomar', requierePermiso('tickets.responder'), ctrl.tomar);
 ticketsRouter.put('/:id/asignar', requierePermiso('tickets.responder'), validate(ctrl.asignarSchema), ctrl.asignar);
+ticketsRouter.put('/:id/prioridad', requierePermiso('tickets.responder'), validate(ctrl.prioridadSchema), ctrl.definirPrioridad);
+ticketsRouter.put('/:id/iniciar', requierePermiso('tickets.responder'), ctrl.iniciar);
+ticketsRouter.put('/:id/espera', requierePermiso('tickets.responder'), validate(ctrl.esperaSchema), ctrl.poner_en_espera);
 ticketsRouter.put('/:id/resolver', requierePermiso('tickets.resolver'), validate(ctrl.resolverSchema), ctrl.resolver);
 ticketsRouter.put('/:id/cerrar', requierePermiso('tickets.ver_propios', 'tickets.ver_todos'), ctrl.cerrar);
