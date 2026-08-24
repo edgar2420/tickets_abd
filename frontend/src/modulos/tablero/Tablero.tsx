@@ -4,8 +4,6 @@ import { api } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { usarNotificaciones } from '../../context/NotificacionesContext';
 import { Alerta, Cargando, EncabezadoPagina, Indicador, Panel } from '../../components/Ui';
-import { usarReporteMensual } from './usarReporteMensual';
-import { ReporteMensual } from './componentes/ReporteMensual';
 import { IndicadoresSistemas } from './componentes/IndicadoresSistemas';
 import { BarraDistribucion, RankingSolicitantes, type Ranking } from './componentes/Distribuciones';
 import type { Distribucion, Indicadores } from '../../lib/tipos';
@@ -33,8 +31,6 @@ export const Tablero = () => {
   const [datos, setDatos] = useState<RespuestaTablero['datos'] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const verTodo = puede('tickets.ver_todos');
-  const verReporte = puede('reportes.ver', 'tickets.ver_todos');
-  const mensual = usarReporteMensual(verReporte);
 
   const cargar = useCallback(async () => {
     try {
@@ -73,22 +69,6 @@ export const Tablero = () => {
           <Indicador etiqueta="En proceso" valor={resumen.en_proceso} icono={Clock} tono="advertencia" />
           <Indicador etiqueta="Criticos activos" valor={resumen.criticos} icono={AlertTriangle} tono="critico" />
         </div>
-      )}
-
-      {verReporte && (
-        <ReporteMensual
-          reporte={mensual.reporte}
-          mes={mensual.mes}
-          setMes={mensual.setMes}
-          mesTope={mensual.mesVigente}
-          filtros={mensual.filtros}
-          setFiltros={mensual.setFiltros}
-          limpiar={mensual.limpiar}
-          hayFiltros={mensual.hayFiltros}
-          sucursales={mensual.sucursales}
-          categorias={mensual.categorias}
-          error={mensual.error}
-        />
       )}
 
       {graficos && (

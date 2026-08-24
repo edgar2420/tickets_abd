@@ -58,20 +58,18 @@ const PanelPedido = ({ accion }: { accion: AccionEnCurso }) => (
   </div>
 );
 
-export const FormularioAccion = ({ accion, datos, setDatos, equipos, guardando, alEnviar, alCancelar }: {
+export const FormularioAccion = ({ accion, datos, setDatos, equipos, alEnviar }: {
   accion: AccionEnCurso;
   datos: Datos;
   setDatos: Actualizar;
   equipos: Equipo[];
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => {
   const campo = { datos, setDatos };
   const esRevision = accion.tipo === 'revisar' || accion.tipo === 'aprobar-ti';
 
   return (
-    <form onSubmit={alEnviar} className="space-y-4">
+    <form id="form-accion-compra" onSubmit={alEnviar} className="space-y-4">
       <div className="superficie p-4">
         <p className="font-semibold text-institucional-900 dark:text-slate-100">{accion.solicitud.titulo}</p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -173,17 +171,6 @@ export const FormularioAccion = ({ accion, datos, setDatos, equipos, guardando, 
           </p>
         </div>
       )}
-
-      <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-        <button type="button" className="boton-secundario" onClick={alCancelar}>Cancelar</button>
-        <button
-          type="submit"
-          className={accion.tipo === 'rechazar' ? 'boton-peligro' : 'boton-primario'}
-          disabled={guardando}
-        >
-          Confirmar
-        </button>
-      </div>
     </form>
   );
 };

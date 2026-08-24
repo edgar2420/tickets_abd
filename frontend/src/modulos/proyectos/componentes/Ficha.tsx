@@ -65,7 +65,7 @@ const Bloque = ({ etiqueta, texto }: { etiqueta: string; texto: string }) => (
   </div>
 );
 
-export const Ficha = ({ ficha, alCerrar }: { ficha: SolicitudProyecto; alCerrar: () => void }) => (
+export const Ficha = ({ ficha }: { ficha: SolicitudProyecto }) => (
   <div className="space-y-5">
     <div className="superficie flex flex-wrap items-start justify-between gap-3 p-4">
       <div>
@@ -144,7 +144,6 @@ export const Ficha = ({ ficha, alCerrar }: { ficha: SolicitudProyecto; alCerrar:
         <FileDown className="h-4 w-4" />
         Descargar la peticion
       </button>
-      <button type="button" className="boton-primario" onClick={alCerrar}>Cerrar</button>
     </div>
   </div>
 );

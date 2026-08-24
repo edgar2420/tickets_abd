@@ -107,7 +107,15 @@ export const Equipos = () => {
         icono={Monitor}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
-        ancho="max-w-5xl"
+        ancho="max-w-6xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-equipo" className="boton-primario" disabled={equipos.guardando}>
+              Guardar equipo
+            </button>
+          </>
+        }
       >
         <Formulario
           formulario={equipos.formulario}
@@ -115,9 +123,7 @@ export const Equipos = () => {
           usuarios={equipos.usuarios}
           areas={equipos.areas}
           sucursales={equipos.sucursales}
-          guardando={equipos.guardando}
           alEnviar={guardar}
-          alCancelar={() => setModalAbierto(false)}
         />
       </Modal>
 
@@ -126,7 +132,10 @@ export const Equipos = () => {
         icono={Monitor}
         abierto={equipos.ficha !== null}
         alCerrar={() => equipos.setFicha(null)}
-        ancho="max-w-4xl"
+        ancho="max-w-5xl"
+        acciones={
+          <button type="button" className="boton-primario" onClick={() => equipos.setFicha(null)}>Cerrar</button>
+        }
       >
         {equipos.ficha && (
           <Ficha ficha={equipos.ficha} puede={puede} alRevelar={revelar} alEditar={editar} />
@@ -138,11 +147,12 @@ export const Equipos = () => {
         icono={KeyRound}
         abierto={equipos.credencial !== null}
         alCerrar={() => equipos.setCredencial(null)}
-        ancho="max-w-lg"
+        ancho="max-w-2xl"
+        acciones={
+          <button type="button" className="boton-secundario" onClick={() => equipos.setCredencial(null)}>Cerrar</button>
+        }
       >
-        {equipos.credencial && (
-          <Credencial credencial={equipos.credencial} alCerrar={() => equipos.setCredencial(null)} />
-        )}
+        {equipos.credencial && <Credencial credencial={equipos.credencial} />}
       </Modal>
 
       {dialogo}

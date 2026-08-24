@@ -143,9 +143,18 @@ export const AdminAreas = () => {
         icono={Building2}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
-        ancho="max-w-lg"
+        ancho="max-w-2xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-area" className="boton-primario" disabled={guardando}>
+              <CheckCircle2 className="h-4 w-4" />
+              Guardar
+            </button>
+          </>
+        }
       >
-        <form onSubmit={guardar} className="space-y-4">
+        <form id="form-area" onSubmit={guardar} className="space-y-4">
           <div>
             <label className="etiqueta">Nombre del area</label>
             <input className="campo" required minLength={3} value={formulario.nombre}
@@ -156,13 +165,6 @@ export const AdminAreas = () => {
               onChange={(e) => setFormulario((f) => ({ ...f, activo: e.target.checked }))} />
             Area activa
           </label>
-          <div className="flex justify-end gap-2">
-            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-            <button type="submit" className="boton-primario" disabled={guardando}>
-              <CheckCircle2 className="h-4 w-4" />
-              Guardar
-            </button>
-          </div>
         </form>
       </Modal>
 

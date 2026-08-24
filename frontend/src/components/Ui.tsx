@@ -122,27 +122,33 @@ export const Alerta = ({ mensaje }: { mensaje: string }) => (
   </div>
 );
 
-export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, ancho = 'max-w-2xl' }:
-  { titulo: string; icono?: LucideIcon; abierto: boolean; alCerrar: () => void; children: ReactNode; ancho?: string }) => {
+export const Modal = ({ titulo, icono: Icono, abierto, alCerrar, children, acciones, ancho = 'max-w-5xl' }:
+  {
+    titulo: string; icono?: LucideIcon; abierto: boolean; alCerrar: () => void;
+    children: ReactNode; acciones?: ReactNode; ancho?: string;
+  }) => {
   if (!abierto) return null;
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-900/60 p-4 backdrop-blur-sm sm:p-8">
-      <div className={`animar-entrada w-full ${ancho} overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-noche-850`}>
-        <header className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-4 dark:bg-noche-800 dark:border-noche-700">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/60 p-4 backdrop-blur-sm sm:p-8">
+      <div className={`animar-entrada flex max-h-full w-full ${ancho} flex-col overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-noche-850`}>
+        <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-slate-50 px-5 py-3.5 dark:bg-noche-800 dark:border-noche-700">
           <h3 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-institucional-900 dark:text-slate-100">
             {Icono && <Icono className="h-4 w-4 text-institucional-700 dark:text-institucional-300" />}
             {titulo}
           </h3>
-          <button
-            type="button"
-            onClick={alCerrar}
-            className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400"
-            aria-label="Cerrar"
-          >
-            <span className="text-lg leading-none">&times;</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            {acciones}
+            <button
+              type="button"
+              onClick={alCerrar}
+              className="rounded-md p-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:text-slate-400"
+              aria-label="Cerrar"
+            >
+              <span className="text-lg leading-none">&times;</span>
+            </button>
+          </div>
         </header>
-        <div className="p-5">{children}</div>
+        <div className="flex-1 overflow-y-auto p-5">{children}</div>
       </div>
     </div>
   );

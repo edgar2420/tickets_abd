@@ -1,7 +1,7 @@
 import { ShieldAlert } from 'lucide-react';
 import type { Credencial as DatosCredencial } from '../usarEquipos';
 
-export const Credencial = ({ credencial, alCerrar }: { credencial: DatosCredencial; alCerrar: () => void }) => (
+export const Credencial = ({ credencial }: { credencial: DatosCredencial }) => (
   <div className="space-y-4">
     <div className="superficie p-4">
       <p className="font-semibold text-institucional-900 dark:text-slate-100">
@@ -32,8 +32,5 @@ export const Credencial = ({ credencial, alCerrar }: { credencial: DatosCredenci
       Esta consulta quedo registrada en la bitacora de auditoria con su usuario y la fecha.
     </p>
 
-    <div className="flex justify-end">
-      <button type="button" className="boton-secundario" onClick={alCerrar}>Cerrar</button>
-    </div>
   </div>
 );

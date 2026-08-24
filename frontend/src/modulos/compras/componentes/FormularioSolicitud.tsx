@@ -4,15 +4,13 @@ import type { PrioridadTicket, Usuario } from '../../../lib/tipos';
 
 type Solicitud = typeof SOLICITUD_VACIA;
 
-export const FormularioSolicitud = ({ nueva, setNueva, usuario, guardando, alEnviar, alCancelar }: {
+export const FormularioSolicitud = ({ nueva, setNueva, usuario, alEnviar }: {
   nueva: Solicitud;
   setNueva: (actualizar: (previa: Solicitud) => Solicitud) => void;
   usuario: Usuario | null;
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => (
-  <form onSubmit={alEnviar} className="space-y-4">
+  <form id="form-compra" onSubmit={alEnviar} className="space-y-4">
     <div>
       <label className="etiqueta">Que necesita</label>
       <input
@@ -88,10 +86,5 @@ export const FormularioSolicitud = ({ nueva, setNueva, usuario, guardando, alEnv
       sucursal {usuario?.sucursal ?? 'sin asignar'}. Pasara primero por la revision tecnica de TI
       y luego por la aprobacion de Gerencia.
     </p>
-
-    <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-      <button type="button" className="boton-secundario" onClick={alCancelar}>Cancelar</button>
-      <button type="submit" className="boton-primario" disabled={guardando}>Enviar solicitud</button>
-    </div>
   </form>
 );
