@@ -80,54 +80,68 @@ npm start                  # Expo; configurar la IP de la API en app.json
 
 ## Acceso inicial
 
-La carga inicial crea unicamente la cuenta administradora:
+El sistema arranca con una sola cuenta. No se crean tecnicos, clientes ni datos de ejemplo:
 
-| Usuario | Contrasena | Rol | Area |
-|---|---|---|---|
-| `admin` | `Admin123*` | admin | Tecnologias de la Informacion, Fabrica Santa Cruz |
+| Usuario | Contrasena | Rol |
+|---|---|---|
+| `admin` | `24112001Edgar` | admin (Ing. Edgar Rojas Apaza) |
 
-Cambie esta contrasena en el primer ingreso, junto con `JWT_SECRET` y la clave de la base de
-datos, antes de publicar el sistema en produccion.
+Desde **Usuarios** se dan de alta las demas cuentas, y cada una elige sucursal y area al crearse.
 
-### Cuentas de demostracion
-
-Para recorrer el ciclo completo del ticket hace falta al menos un solicitante y un tecnico.
-Puede crearlos desde **Usuarios** en el panel, o generarlos con:
+### Dejar la base en cero
 
 ```bash
 cd backend
-npm run demo
+npm run reiniciar        # muestra que se va a borrar, sin tocar nada
+npm run reiniciar -- --si  # confirma y borra
 ```
 
-Todas comparten la contrasena `Prueba123*`:
+Retira tickets, comentarios, adjuntos, notificaciones, inventario, equipos, compras, peticiones
+de proyecto, la bitacora y todas las cuentas, y vuelve a crear la administradora. Conserva la
+configuracion: roles, permisos, areas, sucursales y categorias.
 
-**Equipo de Tecnologias de la Informacion**, en la fabrica. Reciben las solicitudes de compra y
-atienden los tickets de todas las sucursales:
+## Contrasenas
 
-| Usuario | Nombre | Rol | Alcance |
-|---|---|---|---|
-| `admin` | Ing. Edgar Rojas Apaza | admin | Sistema completo (contrasena `Admin123*`) |
-| `wabuawad` | Ing. William Abuawad | admin | Sistema completo |
-| `gerente` | Ing. Juan Pablo | gerencia | Aprobacion presupuestaria de las compras |
-| `tecnico` | Luis Mamani Colque | tecnico_l1 | Atender, resolver y cerrar tickets |
-| `tecnico2` | Jorge Choque Silva | tecnico_l1 | Asignacion entre tecnicos |
-| `tecnico3` | Patricia Nina Alvarez | tecnico_l2 | Escalamiento y gestion del parque |
+| Regla | Detalle |
+|---|---|
+| Largo | Al menos **10 caracteres** |
+| Espacios | No se admite ninguno, en ningun lugar de la clave |
+| Composicion | Al menos una letra y al menos un numero |
+| Reutilizacion | No puede ser igual al nombre de usuario ni a la clave actual |
+| Previsibles | Se rechaza una lista corta de claves obvias |
 
-**Un solicitante por cada sucursal**, para ver el corte por origen:
+La misma politica rige en los tres lugares donde se define una clave: el alta de un usuario, el
+cambio que hace cada persona desde el icono de llave de la cabecera, y el restablecimiento que
+puede hacer un administrador desde **Usuarios**.
 
-| Usuario | Nombre | Sucursal | Area |
-|---|---|---|---|
-| `solicitante` | Ana Quispe Torrez | Fabrica Santa Cruz | Contabilidad |
-| `silos` | Mario Cespedes Rivero | Silos Central de Insumos | Operaciones |
-| `lapaz` | Carlos Vargas Rojas | Sucursal La Paz | Recursos Humanos |
-| `cochabamba` | Maria Flores Colque | Sucursal Cochabamba | Comercial |
-| `sucre` | Elena Padilla Vaca | Sucursal Sucre | Comercial |
-| `oruro` | Hugo Mendoza Ticona | Sucursal Oruro | Operaciones |
+El nombre de usuario se recorta y se pasa a minusculas antes de guardarse, y solo admite letras,
+numeros, punto, guion y guion bajo: una comilla se rechaza antes de llegar a la consulta.
 
-Estas credenciales son conocidas y por eso **no** forman parte de la carga inicial: el script
-es de ejecucion manual y las cuentas deben desactivarse antes de publicar el sistema.
+## Peticiones de proyecto
 
-## Control de acceso (RBAC)
+Un apartado para que cualquier area proponga una mejora al sistema o una idea de software nueva.
+El formulario guia la explicacion en cuatro preguntas, cada una con su ayuda y su largo minimo:
+
+| Pregunta | Que se busca |
+|---|---|
+| Que problema quiere resolver | La dificultad concreta, no la solucion |
+| Como lo resuelven hoy | El procedimiento actual: planillas, correos, papel |
+| Como se lo imagina funcionando | Lo que le gustaria poder hacer, sin lenguaje tecnico |
+| Que se gana con esto | Tiempo ahorrado, errores evitados, informacion disponible antes |
+
+Se completa con el alcance declarado: a cuantas personas afecta, cada cuanto ocurre, que tan
+urgente es y que herramientas usan hoy.
+
+El circuito tiene cinco pasos, visibles en una barra de progreso:
+
+**Registro** que hace el area, **Evaluacion de TI** con esfuerzo y valor estimados, **Aprobacion**
+que incorpora la peticion a la cartera y designa responsable, **Desarrollo** con porcentaje de
+avance, y **Entrega**. En cualquier punto anterior al cierre puede no aprobarse, siempre con
+motivo escrito.
+
+Cada peticion se descarga como ficha en PDF y la cartera completa como reporte.
+
+## Control de acceso (RBAC)## Control de acceso (RBAC)
 
 Cada endpoint valida el token JWT y luego evalua el guard de permisos atomicos:
 
@@ -540,6 +554,7 @@ npm run qa:seguridad   # cookies, origen, cabeceras, bloqueo, cache y acceso cer
 npm run qa:funcional   # los once accesos y todos los modulos del sistema
 npm run qa:tiempo-real # canal de WebSockets y reparto por salas
 npm run qa:compras     # el circuito de compras avanzando en tiempo real
+npm run qa:proyectos   # peticiones de proyecto, contrasenas e inyeccion SQL
 npm run qa:documentos  # que los PDF salgan al tamano pedido, sin hojas en blanco
 npm run qa:navegador   # recorrido completo atravesando el servidor web
 npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
@@ -549,18 +564,21 @@ npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 |---|---|---|
 | Secretos | Configuracion fuera del control de versiones, historial completo del repositorio, credenciales incrustadas y claves de ejemplo | 7 de 7 |
 | Seguridad | Cookies de sesion, verificacion de origen, cabeceras, bloqueo por intentos, cache, acceso cerrado por omision y cierre de sesion | 34 de 34 |
-| Funcional | Acceso de las once cuentas, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, ocho documentos PDF y validacion de entrada, alcance de Gerencia y reporte mensual | 91 de 91 |
+| Funcional | Acceso de las cuentas del entorno, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, documentos PDF, validacion de entrada, alcance de Gerencia y reporte mensual | 93 de 93 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
 | Compras en tiempo real | Que Gerencia entre a la sala del circuito y vea cada cambio de estado sin recargar | 6 de 6 |
+| Proyectos y claves | Circuito de las peticiones, politica de contrasenas, restablecimiento por un administrador y cargas de inyeccion SQL sobre las busquedas | 44 de 44 |
 | Documentos | Que cada PDF salga al tamano de lo que se pide y sin hojas en blanco | 15 de 15 |
 | Navegador | Recorrido de punta a punta contra el servidor web: portada, acceso, las doce pantallas, ciclo del ticket, descarga de PDF y cierre de sesion | 28 de 28 |
 
-**185 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
+**237 comprobaciones**, todas en verde, con la API conectada por el rol de privilegios
 recortados. La bateria del navegador requiere el servidor web levantado (`npm run dev` en
 `frontend`); las otras cuatro solo necesitan la API.
 
-Todo lo que crean las pruebas lleva el prefijo `QA - ` en el titulo, de modo que
-`npm run qa:limpiar` lo identifica sin tocar la informacion real de la empresa.
+Las baterias son autosuficientes: crean sus propias cuentas (`qa.*`), su articulo de inventario
+y su equipo, y todo lo que registran lleva el prefijo `QA - `. `npm run qa:limpiar` retira las
+cuentas y los registros de prueba sin tocar la informacion real de la empresa, de modo que la
+suite se puede correr sobre una base recien reiniciada.
 
 ## Puntos pendientes conocidos
 
@@ -583,4 +601,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.2.2
+Documento de referencia: Version 2.3.0

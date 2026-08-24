@@ -46,8 +46,8 @@ WHERE r.nombre = 'cliente'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO usuarios (nombre, usuario, email, password_hash, area_id, rol_id)
-SELECT 'Ing. Edgar Rojas Apaza', 'admin', 'admin@empresa.local',
-       '$2a$10$7DtpEtEY/IhC4J0N2fXBMOtuWcci28SZ9orB8oRhZeNT9aHnuGx12',
+SELECT 'Ing. Edgar Rojas Apaza', 'admin', NULL,
+       '$2a$10$lzSNZbBvBnK.uwTnvh6oo.5D41gjygykPH0WUPxXD2dT9Pw9ST5F6',
        (SELECT id FROM areas WHERE nombre = 'Tecnologias de la Informacion'),
        (SELECT id FROM roles WHERE nombre = 'admin')
 WHERE NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario = 'admin');

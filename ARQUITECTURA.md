@@ -29,6 +29,7 @@ frontend/src/
     ├── inventario/
     ├── equipos/
     ├── compras/
+    ├── proyectos/
     ├── auditoria/
     └── administracion/
 ```
@@ -156,9 +157,16 @@ backend/qa/
 ├── funcional.mjs           Todos los modulos de extremo a extremo
 ├── tiempo-real.mjs         Canal de WebSockets
 ├── compras-tiempo-real.mjs Circuito de compras avanzando en vivo
+├── proyectos.mjs           Peticiones de proyecto, contrasenas e inyeccion SQL
+├── documentos.mjs          Tamano de los PDF y ausencia de hojas en blanco
 ├── navegador.mjs           Recorrido completo atravesando el servidor web
-└── limpiar.mjs             Retira los datos que dejan las pruebas
+├── preparar.mjs            Crea las cuentas de prueba que usan las demas baterias
+└── limpiar.mjs             Retira los datos y las cuentas que dejan las pruebas
 ```
+
+Las baterias no dependen de datos preexistentes: `preparar.mjs` da de alta las cuentas `qa.*`
+que necesitan y cada bateria crea los registros que va a usar. La suite corre igual sobre una
+base recien reiniciada.
 
 Todo lo que crean las pruebas lleva el prefijo `QA - ` en el titulo.
 

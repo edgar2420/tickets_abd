@@ -1,4 +1,7 @@
 import { io } from 'socket.io-client';
+import { prepararEntorno } from './preparar.mjs';
+
+const { sesiones } = await prepararEntorno();
 
 const BASE = process.env.QA_BASE ?? 'http://localhost:4000';
 const ORIGEN = 'http://localhost:5173';
@@ -32,9 +35,9 @@ const pedir = (sesion, ruta, metodo = 'GET', cuerpo) => fetch(BASE + '/api/v1' +
 
 console.log('=== EL CIRCUITO DE COMPRAS LLEGA EN TIEMPO REAL ===');
 
-const gerente = await entrar('gerente', 'Prueba123*');
-const ti = await entrar('admin', 'Admin123*');
-const cliente = await entrar('cochabamba', 'Prueba123*');
+const gerente = sesiones['qa.gerente'];
+const ti = sesiones.admin;
+const cliente = sesiones['qa.cliente3'];
 
 const socketGerente = io(BASE, { extraHeaders: { Cookie: gerente.cookie }, transports: ['websocket', 'polling'] });
 const socketTi = io(BASE, { extraHeaders: { Cookie: ti.cookie }, transports: ['websocket', 'polling'] });

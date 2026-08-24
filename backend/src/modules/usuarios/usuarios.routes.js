@@ -8,15 +8,20 @@ import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
+import { passwordSchema, revisarPassword, textoLimpio, usuarioSchema } from '../../utils/password.js';
 
 const crearUsuarioSchema = z.object({
-  nombre: z.string().min(4).max(150),
-  usuario: z.string().min(3).max(80).regex(/^[a-zA-Z0-9._-]+$/, 'Solo letras, numeros, punto, guion y guion bajo'),
-  email: z.string().email().max(150).optional().nullable(),
-  password: z.string().min(8, 'La contrasena debe tener al menos 8 caracteres'),
+  nombre: textoLimpio(4, 150),
+  usuario: usuarioSchema,
+  email: z.string().trim().email().max(150).optional().nullable().or(z.literal('')),
+  password: passwordSchema,
   area_id: z.number().int().positive(),
   sucursal_id: z.number().int().positive(),
   rol_id: z.number().int().positive()
+});
+
+const reinicioPasswordSchema = z.object({
+  password: passwordSchema
 });
 
 const editarUsuarioSchema = crearUsuarioSchema.partial({ password: true }).extend({
@@ -112,3 +117,22 @@ usuariosRouter.delete('/:id', requierePermiso('admin.usuarios'), asyncHandler(as
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: id, accion: 'DESACTIVAR', detalle: rows[0], ip: req.ip });
   res.json({ ok: true, mensaje: 'Usuario desactivado' });
 }));
+
+usuariosRouter.put('/:id/password', requierePermiso('admin.usuarios'),
+  validate(reinicioPasswordSchema), asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const { rows: destino } = await query('SELECT usuario, nombre FROM usuarios WHERE id = $1', [id]);
+    if (!destino[0]) throw HttpError.notFound('El usuario indicado no existe');
+
+    const fallas = revisarPassword(req.body.password, destino[0].usuario);
+    if (fallas.length) throw HttpError.badRequest(fallas.join('. '));
+
+    const hash = await bcrypt.hash(req.body.password, 10);
+    await query('UPDATE usuarios SET password_hash = $1 WHERE id = $2', [hash, id]);
+
+    await registrarAuditoria({
+      usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: id,
+      accion: 'REINICIAR_PASSWORD', detalle: { usuario: destino[0].usuario }, ip: req.ip
+    });
+    res.json({ ok: true, mensaje: `Contrasena restablecida para ${destino[0].nombre}` });
+  }));

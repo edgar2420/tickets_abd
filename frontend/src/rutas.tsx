@@ -5,6 +5,7 @@ import { DetalleTicket, NuevoTicket, Tickets } from './modulos/tickets';
 import { Inventario } from './modulos/inventario';
 import { Equipos } from './modulos/equipos';
 import { Compras } from './modulos/compras';
+import { Proyectos } from './modulos/proyectos';
 import { Auditoria } from './modulos/auditoria';
 import {
   AdminAreas, AdminCategorias, AdminRoles, AdminSucursales, AdminUsuarios
@@ -28,6 +29,7 @@ export const RUTAS: Ruta[] = [
   { path: '/inventario', elemento: <Inventario />, permisos: ['inventario.ver'] },
   { path: '/equipos', elemento: <Equipos />, permisos: ['equipos.ver'] },
   { path: '/compras', elemento: <Compras />, permisos: ['compras.solicitar', 'compras.ver_todas'] },
+  { path: '/proyectos', elemento: <Proyectos />, permisos: ['proyectos.solicitar', 'proyectos.ver_todas'] },
   { path: '/auditoria', elemento: <Auditoria />, permisos: ['auditoria.ver'] },
   { path: '/admin/usuarios', elemento: <AdminUsuarios />, permisos: ['admin.usuarios'] },
   { path: '/admin/roles', elemento: <AdminRoles />, permisos: ['admin.roles'] },

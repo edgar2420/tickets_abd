@@ -6,6 +6,7 @@ let io = null;
 
 export const SALA_TECNICOS = 'sala:tecnicos';
 export const SALA_COMPRAS = 'sala:compras';
+export const SALA_PROYECTOS = 'sala:proyectos';
 export const salaUsuario = (usuarioId) => `usuario:${usuarioId}`;
 export const salaTicket = (ticketId) => `ticket:${ticketId}`;
 
@@ -22,6 +23,7 @@ export const inicializarSockets = (httpServer) => {
     socket.join(salaUsuario(usuario.id));
     if (usuario.permisos.includes('tickets.ver_todos')) socket.join(SALA_TECNICOS);
     if (usuario.permisos.includes('compras.ver_todas')) socket.join(SALA_COMPRAS);
+    if (usuario.permisos.includes('proyectos.ver_todas')) socket.join(SALA_PROYECTOS);
 
     socket.emit('conexion:establecida', {
       usuario: usuario.usuario,

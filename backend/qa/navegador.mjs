@@ -1,4 +1,8 @@
+import { ADMIN, prepararEntorno } from './preparar.mjs';
+
 const WEB = process.env.QA_WEB ?? 'http://localhost:5173';
+
+await prepararEntorno();
 
 let fallos = 0;
 const marca = (ok, detalle) => {
@@ -50,12 +54,12 @@ marca(galletas.size === 0, 'el navegador no recibio ninguna cookie antes de iden
 
 console.log('\n=== 3. INICIO DE SESION ===');
 const malas = await navegar('/api/v1/auth/login', {
-  metodo: 'POST', cuerpo: { usuario: 'admin', password: 'clave-que-no-es' }
+  metodo: 'POST', cuerpo: { usuario: ADMIN.usuario, password: 'clave-que-no-es' }
 });
 marca(malas.estado === 401, `una clave incorrecta se rechaza (${malas.estado})`);
 
 const acceso = await navegar('/api/v1/auth/login', {
-  metodo: 'POST', cuerpo: { usuario: 'admin', password: 'Admin123*' }
+  metodo: 'POST', cuerpo: { usuario: ADMIN.usuario, password: ADMIN.password }
 });
 marca(acceso.estado === 200, `el administrador entra (${acceso.estado})`);
 marca(galletas.has('tickets_sesion'), 'el navegador guarda la cookie de sesion');
