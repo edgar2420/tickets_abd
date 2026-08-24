@@ -37,6 +37,45 @@ funciones con nombre propio hasta que se lea solo.
 | Cliente movil | React Native (Expo) | Atencion de tickets desde dispositivos moviles |
 | Despliegue | Docker Compose + Nginx | Publicacion en servidor y proxy de API y WebSockets |
 
+## Probar desde otra maquina de la red local
+
+Para que un companero pruebe el sistema desde su propia computadora, sin publicarlo a internet.
+
+**1. Habilite el acceso** en `backend/.env`:
+
+```
+RED_LOCAL=true
+```
+
+Con eso el servidor suma sus propias direcciones IPv4 a los origenes admitidos, de modo que
+sigue funcionando aunque la direccion cambie. Al arrancar muestra las direcciones a compartir.
+
+**2. Abra los puertos en el firewall**, en PowerShell **como administrador**:
+
+```
+powershell -ExecutionPolicy Bypass -File scripts/abrir-red-local.ps1
+```
+
+El script habilita los puertos 5173 y 4000, avisa si la red esta marcada como publica e imprime
+las direcciones listas para compartir. Al terminar la prueba, cierrelos con `-Cerrar`.
+
+**3. Levante los dos servicios** como siempre (`npm run dev` en backend y en frontend) y pase la
+direccion que aparece en el arranque, por ejemplo `http://192.168.0.37:5173`.
+
+**4. Compruebe que quedo accesible**:
+
+```bash
+cd backend
+npm run qa:red
+```
+
+Verifica que la portada responda, que el inicio de sesion atraviese el proxy, que una escritura
+supere la verificacion de origen, que un origen ajeno siga rechazado y que el canal de tiempo
+real funcione.
+
+La conexion viaja **sin cifrar**: sirve para una prueba interna, no para dejar el sistema
+publicado de forma permanente. Para eso corresponde el despliegue con certificado.
+
 ## Despliegue con Docker
 
 ```bash
@@ -646,4 +685,4 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 ---
 
 **Ing. Edgar Rojas Apaza** | Desarrollo de Modulo de Tickets
-Documento de referencia: Version 2.5.0
+Documento de referencia: Version 2.6.0
