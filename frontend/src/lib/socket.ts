@@ -1,6 +1,6 @@
 import { io, type Socket } from 'socket.io-client';
 
-const URL_SOCKET = import.meta.env.VITE_SOCKET_URL ?? window.location.origin;
+const URL_SOCKET = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 let socket: Socket | null = null;
 
