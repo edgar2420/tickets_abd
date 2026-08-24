@@ -96,7 +96,7 @@ const nuevo = await navegar('/api/v1/tickets', {
   cuerpo: {
     titulo: 'QA - prueba de recorrido completo desde el navegador',
     descripcion: 'Ticket creado por la prueba de extremo a extremo que atraviesa el servidor web.',
-    categoria: 'Hardware',
+    categoria: 'PC',
     prioridad: 'Alta'
   }
 });
@@ -112,8 +112,18 @@ const mensaje = await navegar(`/api/v1/tickets/${ticket.id}/comentarios`, {
 });
 marca(mensaje.estado === 201, `se escribe en la conversacion (${mensaje.estado})`);
 
+const tomar = await navegar(`/api/v1/tickets/${ticket.id}/tomar`, { metodo: 'PUT' });
+marca(tomar.cuerpo.datos?.estado === 'Asignado', `se toma el ticket (${tomar.estado})`);
+
+const iniciar = await navegar(`/api/v1/tickets/${ticket.id}/iniciar`, { metodo: 'PUT' });
+marca(iniciar.cuerpo.datos?.estado === 'En Proceso', `se inicia la atencion (${iniciar.estado})`);
+
 const resolver = await navegar(`/api/v1/tickets/${ticket.id}/resolver`, {
-  metodo: 'PUT', cuerpo: { solucion_detalle: 'Prueba de extremo a extremo concluida correctamente.' }
+  metodo: 'PUT',
+  cuerpo: {
+    solucion_detalle: 'Prueba de extremo a extremo concluida correctamente.',
+    minutos_empleados: 25
+  }
 });
 marca(resolver.estado === 200 && resolver.cuerpo.datos?.estado === 'Resuelto',
   `se resuelve con la solucion documentada (${resolver.estado})`);

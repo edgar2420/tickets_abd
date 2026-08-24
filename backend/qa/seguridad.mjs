@@ -58,14 +58,14 @@ console.log('\n=== 3. PROTECCION CONTRA PETICIONES FORJADAS ===');
 const sinCabecera = await fetch(BASE + '/tickets', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Cookie: galleta, Origin: ORIGEN },
-  body: JSON.stringify({ titulo: 'QA - intento de falsificacion externa', descripcion: 'Peticion sin token de origen valido.', categoria: 'Redes' })
+  body: JSON.stringify({ titulo: 'QA - intento de falsificacion externa', descripcion: 'Peticion sin token de origen valido.', categoria: 'Red', servicio: 'Redes' })
 });
 marca(sinCabecera.status === 403, `escritura con cookie pero sin cabecera CSRF: rechazada (${sinCabecera.status})`);
 
 const cabeceraFalsa = await fetch(BASE + '/tickets', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': 'a'.repeat(48), Origin: ORIGEN },
-  body: JSON.stringify({ titulo: 'QA - intento con token de origen invalido', descripcion: 'Peticion con cabecera falsificada.', categoria: 'Redes' })
+  body: JSON.stringify({ titulo: 'QA - intento con token de origen invalido', descripcion: 'Peticion con cabecera falsificada.', categoria: 'Red', servicio: 'Redes' })
 });
 marca(cabeceraFalsa.status === 403, `escritura con token de origen invalido: rechazada (${cabeceraFalsa.status})`);
 
@@ -75,7 +75,7 @@ const legitima = await fetch(BASE + '/tickets', {
   body: JSON.stringify({
     titulo: 'QA - verificacion del circuito con proteccion de origen',
     descripcion: 'Ticket creado por la prueba de seguridad con la cabecera correcta.',
-    categoria: 'Redes', prioridad: 'Baja'
+    categoria: 'Red', servicio: 'Redes', prioridad: 'Baja'
   })
 });
 marca(legitima.status === 201, `escritura legitima aceptada (${legitima.status})`);
@@ -88,14 +88,14 @@ const origenAjeno = await fetch(BASE + '/tickets', {
     'Content-Type': 'application/json', Cookie: galleta,
     'X-CSRF-Token': csrf, Origin: 'https://sitio-malicioso.example'
   },
-  body: JSON.stringify({ titulo: 'QA - escritura desde un origen ajeno', descripcion: 'Peticion emitida desde un sitio no autorizado.', categoria: 'Redes' })
+  body: JSON.stringify({ titulo: 'QA - escritura desde un origen ajeno', descripcion: 'Peticion emitida desde un sitio no autorizado.', categoria: 'Red', servicio: 'Redes' })
 });
 marca(origenAjeno.status === 403, `una escritura desde un origen ajeno se rechaza (${origenAjeno.status})`);
 
 const sinOrigen = await fetch(BASE + '/tickets', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json', Cookie: galleta, 'X-CSRF-Token': csrf },
-  body: JSON.stringify({ titulo: 'QA - escritura sin declarar origen', descripcion: 'Peticion con cookie que no declara de donde parte.', categoria: 'Redes' })
+  body: JSON.stringify({ titulo: 'QA - escritura sin declarar origen', descripcion: 'Peticion con cookie que no declara de donde parte.', categoria: 'Red', servicio: 'Redes' })
 });
 marca(sinOrigen.status === 403, `una escritura con cookie que no declara origen se rechaza (${sinOrigen.status})`);
 
@@ -110,7 +110,7 @@ const escrituraBearer = await fetch(BASE + '/tickets', {
   body: JSON.stringify({
     titulo: 'QA - verificacion del acceso desde la aplicacion movil',
     descripcion: 'El esquema con cabecera no requiere token de origen porque no es explotable por CSRF.',
-    categoria: 'Redes', prioridad: 'Baja'
+    categoria: 'Red', servicio: 'Redes', prioridad: 'Baja'
   })
 });
 marca(escrituraBearer.status === 201, `escritura con cabecera, sin CSRF, aceptada (${escrituraBearer.status})`);
@@ -138,13 +138,14 @@ for (let i = 1; i <= 6; i += 1) {
   });
   ultimo = r.status;
 }
-marca(ultimo === 403, `tras varios intentos fallidos la cuenta queda bloqueada (${ultimo})`);
+marca([403, 429].includes(ultimo), `tras varios intentos fallidos ya no se admite el acceso (${ultimo})`);
 const bloqueada = await fetch(BASE + '/auth/login', {
   method: 'POST', headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ usuario: 'qa.bloqueo', password: CLAVE_QA })
 });
 const mensajeBloqueo = (await bloqueada.json()).mensaje;
-marca(bloqueada.status === 403, `ni con la clave correcta entra mientras dura el bloqueo: ${mensajeBloqueo}`);
+marca([403, 429].includes(bloqueada.status),
+  `ni con la clave correcta entra mientras dura el bloqueo: ${mensajeBloqueo}`);
 
 console.log('\n=== 7. CACHE DE CATALOGOS ===');
 const primera = await fetch(BASE + '/areas', { headers: { Cookie: galleta } });

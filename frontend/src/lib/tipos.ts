@@ -174,7 +174,12 @@ export interface ResumenEquipos {
   con_acceso_remoto: number;
 }
 
-export type EstadoTicket = 'Abierto' | 'En Proceso' | 'Resuelto' | 'Cerrado';
+export type EstadoTicket =
+  | 'Nuevo' | 'Asignado' | 'En Proceso' | 'En Espera' | 'Resuelto' | 'Cerrado';
+export type TipoTicket = 'Incidente' | 'Requerimiento' | 'Mantenimiento' | 'Desarrollo';
+export type ServicioTicket =
+  | 'Soporte informatico' | 'Redes' | 'Telefonia' | 'CCTV' | 'Servidores'
+  | 'IBS' | 'Desarrollo' | 'Mantenimiento' | 'Proyectos' | 'Gestion tecnologica';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
 export type CategoriaTicket = string;
 
@@ -232,15 +237,29 @@ export interface Rol {
 
 export interface Ticket {
   id: number;
+  anio: number;
+  numero: number;
   titulo: string;
   descripcion: string;
+  tipo: TipoTicket;
+  servicio: ServicioTicket;
   categoria: CategoriaTicket;
   prioridad: PrioridadTicket;
   estado: EstadoTicket;
+  ubicacion: string | null;
+  observaciones: string | null;
+  minutos_empleados: number | null;
   solucion_detalle: string | null;
+  motivo_espera: string | null;
   fecha_creacion: string;
   fecha_asignacion: string | null;
+  fecha_inicio: string | null;
+  fecha_espera: string | null;
   fecha_resolucion: string | null;
+  fecha_cierre: string | null;
+  fecha_objetivo: string | null;
+  fecha_prioridad: string | null;
+  vencido: boolean;
   solicitante_id: number;
   solicitante_nombre: string;
   solicitante_area: string;
@@ -251,8 +270,26 @@ export interface Ticket {
   asignado_nombre: string | null;
   resuelto_por_id: number | null;
   resuelto_por_nombre: string | null;
-  horas_atencion: number | null;
+  prioridad_por_id: number | null;
+  prioridad_por_nombre: string | null;
+  equipo_id: number | null;
+  equipo_codigo: string | null;
+  equipo_nombre: string | null;
   bitacora?: RegistroBitacora[];
+}
+
+export interface ObjetivoAtencion {
+  horas: number;
+  texto: string;
+  criterio: string;
+}
+
+export interface CatalogoTicket {
+  tipos: TipoTicket[];
+  servicios: ServicioTicket[];
+  estados: EstadoTicket[];
+  prioridades: PrioridadTicket[];
+  objetivos: Record<PrioridadTicket, ObjetivoAtencion>;
 }
 
 export interface RegistroBitacora {
@@ -292,11 +329,18 @@ export interface Notificacion {
 
 export interface Indicadores {
   total: number;
-  abiertos: number;
+  nuevos: number;
+  asignados: number;
   en_proceso: number;
+  en_espera: number;
   resueltos: number;
   cerrados: number;
+  abiertos: number;
   criticos: number;
+  altos: number;
+  vencidos: number;
+  mantenimientos: number;
+  pendientes_ibs: number;
 }
 
 export interface Distribucion {

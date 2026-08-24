@@ -425,42 +425,85 @@ const construir = async () => {
   ].join('\n'));
 
   doc.saltoPagina();
-  doc.titulo1('6. Ciclo de vida del ticket', 'flujo');
+  doc.titulo1('6. Modelo del ticket', 'ticket');
+  doc.parrafo('Cada ticket se identifica con un correlativo por gestion en el formato SYS-AAAA-NNNNN. '
+    + 'El numero se asigna en la misma sentencia de insercion, de modo que dos altas simultaneas no pueden '
+    + 'obtener el mismo correlativo.');
+  doc.tabla([
+    { titulo: 'Campo', campo: 'campo', ancho: 0.24 },
+    { titulo: 'Contenido', campo: 'contenido', ancho: 0.76 }
+  ], [
+    { campo: 'Numero', contenido: 'SYS-AAAA-NNNNN, correlativo unico dentro de cada gestion' },
+    { campo: 'Tipo', contenido: 'Incidente, Requerimiento, Mantenimiento o Desarrollo' },
+    { campo: 'Servicio', contenido: 'Soporte informatico, Redes, Telefonia, CCTV, Servidores, IBS, Desarrollo, '
+      + 'Mantenimiento, Proyectos o Gestion tecnologica' },
+    { campo: 'Categoria', contenido: 'Catalogo administrable: PC, Red, Camara, Telefonia, IBS, Servidores y otros' },
+    { campo: 'Ubicacion', contenido: 'Piso, oficina o area donde ocurre el hecho' },
+    { campo: 'Activo relacionado', contenido: 'Equipo del parque sobre el que se trabaja, validado contra inventario' },
+    { campo: 'Prioridad', contenido: 'La determina Sistemas, no el solicitante; queda registrado quien la fijo' },
+    { campo: 'Tiempo empleado', contenido: 'Minutos efectivamente dedicados, se registran al resolver' },
+    { campo: 'Observaciones', contenido: 'Recomendacion o pendiente que deja el tecnico' }
+  ], { alturaFila: 26 });
+
+  doc.titulo2('Objetivo de atencion por prioridad');
+  doc.tabla([
+    { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.16 },
+    { titulo: 'Objetivo', campo: 'objetivo', ancho: 0.26 },
+    { titulo: 'Criterio', campo: 'criterio', ancho: 0.58 }
+  ], [
+    { prioridad: 'Critica', objetivo: 'Inmediata (2 h)',
+      criterio: 'Operacion detenida, IBS caido, red general caida o problema critico de produccion' },
+    { prioridad: 'Alta', objetivo: 'Prioritaria (8 h)',
+      criterio: 'Afecta significativamente a un area, a un usuario critico o a un servicio importante' },
+    { prioridad: 'Media', objetivo: 'Dentro de la jornada (24 h)', criterio: 'Problema operativo normal' },
+    { prioridad: 'Baja', objetivo: 'Programada (72 h)', criterio: 'Mejora o requerimiento no urgente' }
+  ], { alturaFila: 24 });
+  doc.nota('El sistema calcula la fecha objetivo al fijarse la prioridad y marca como vencido todo ticket abierto '
+    + 'que la supere. El tablero de Sistemas expone ese conteo como indicador propio.', { icono: 'alerta' });
+
+  doc.titulo1('7. Ciclo de vida del ticket', 'flujo');
   doc.tabla([
     { titulo: 'Estado', campo: 'estado', ancho: 0.16 },
     { titulo: 'Disparador', campo: 'disparador', ancho: 0.26 },
     { titulo: 'Efectos registrados', campo: 'efectos', ancho: 0.58 }
   ], [
     {
-      estado: 'Abierto',
+      estado: 'Nuevo',
       disparador: 'POST /tickets',
-      efectos: 'solicitante_id = JWT.user_id; asignado_id y resuelto_por_id en NULL; fecha_creacion = NOW()'
+      efectos: 'anio y numero correlativos; solicitante_id = sesion; prioridad Media hasta que Sistemas la defina'
+    },
+    {
+      estado: 'Asignado',
+      disparador: 'PUT /tickets/:id/tomar o /asignar',
+      efectos: 'asignado_id fijado; fecha_asignacion = NOW(); notificacion al solicitante y al tecnico'
     },
     {
       estado: 'En Proceso',
-      disparador: 'PUT /tickets/:id/tomar',
-      efectos: 'asignado_id = JWT.user_id; fecha_asignacion = NOW(); notificacion al solicitante'
+      disparador: 'PUT /tickets/:id/iniciar',
+      efectos: 'fecha_inicio = NOW(); al reanudar desde espera se limpia el motivo registrado'
     },
     {
-      estado: 'En Proceso',
-      disparador: 'PUT /tickets/:id/asignar',
-      efectos: 'asignado_id = tecnico elegido; notificacion al tecnico asignado'
+      estado: 'En Espera',
+      disparador: 'PUT /tickets/:id/espera',
+      efectos: 'motivo_espera obligatorio; fecha_espera = NOW(); solo se sale reanudando la atencion'
     },
     {
       estado: 'Resuelto',
       disparador: 'PUT /tickets/:id/resolver',
-      efectos: 'solucion_detalle registrada; resuelto_por_id = JWT.user_id; fecha_resolucion = NOW()'
+      efectos: 'solucion_detalle, minutos_empleados y observaciones; resuelto_por_id = sesion; fecha_resolucion'
     },
     {
       estado: 'Cerrado',
       disparador: 'PUT /tickets/:id/cerrar',
-      efectos: 'Cierre conforme por el solicitante o la mesa de ayuda'
+      efectos: 'Cierre conforme por el solicitante o la mesa de ayuda; fecha_cierre = NOW()'
     }
   ], { alturaFila: 30 });
+  doc.parrafo('Las transiciones estan restringidas: de Asignado no se puede saltar a Cerrado, de Cerrado no se '
+    + 'sale, y todo intento fuera de la secuencia se rechaza con codigo 409.');
   doc.nota('Cada transicion registra su accion en la bitacora de auditoria, emite el evento correspondiente por '
     + 'WebSockets y archiva automaticamente un acta PDF del ticket en el repositorio documental.', { icono: 'documento' });
 
-  doc.titulo1('7. Endpoints expuestos', 'red');
+  doc.titulo1('8. Endpoints expuestos', 'red');
   doc.parrafo('Prefijo base de la API: /api/v1');
   doc.tabla([
     { titulo: 'Metodo', campo: 'metodo', ancho: 0.1 },
@@ -470,7 +513,7 @@ const construir = async () => {
   ], ENDPOINTS, { alturaFila: 15 });
 
   doc.saltoPagina();
-  doc.titulo1('8. Canal de tiempo real', 'red');
+  doc.titulo1('9. Canal de tiempo real', 'red');
   doc.parrafo('El socket se autentica con el mismo token JWT en el handshake. Cada usuario se une a una sala personal '
     + 'y los perfiles con permiso tickets.ver_todos se incorporan ademas a la sala del equipo tecnico.');
   doc.tabla([
@@ -479,7 +522,7 @@ const construir = async () => {
     { titulo: 'Descripcion', campo: 'descripcion', ancho: 0.48 }
   ], EVENTOS);
 
-  doc.titulo1('9. Modulo de documentacion en PDF', 'documento');
+  doc.titulo1('10. Modulo de documentacion en PDF', 'documento');
   doc.parrafo('Todas las salidas documentales del sistema se generan con un unico motor que garantiza identidad '
     + 'visual uniforme: encabezado institucional, iconografia vectorial, tablas con encabezado repetido y pie de '
     + 'pagina con la autoria del modulo en cada hoja. No se emplean emojis en ningun documento.');
@@ -501,7 +544,7 @@ const construir = async () => {
     'documento, grafico, baseDatos, flujo y red para reportes y arquitectura.'
   ], 'check');
 
-  doc.titulo1('10. Modulo de inventario de sistemas', 'baseDatos');
+  doc.titulo1('11. Modulo de inventario de sistemas', 'baseDatos');
   doc.parrafo('El inventario mantiene el catalogo de articulos y el kardex de movimientos. El saldo de '
     + 'un articulo nunca se edita de forma directa: resulta exclusivamente de las entradas, salidas y '
     + 'ajustes registrados, cada uno con su saldo anterior y resultante.');
@@ -522,7 +565,7 @@ const construir = async () => {
     + 'la tabla completa y saturar la memoria del navegador ni la del servidor.');
 
   doc.saltoPagina();
-  doc.titulo1('11. Modulo de equipos de la empresa', 'engranaje');
+  doc.titulo1('12. Modulo de equipos de la empresa', 'engranaje');
   doc.parrafo('Registra el parque informatico con su asignacion por usuario y area, las caracteristicas '
     + 'tecnicas de cada maquina y los datos de acceso remoto empleados por la mesa de ayuda.');
   doc.tabla([
@@ -551,7 +594,7 @@ const construir = async () => {
   { icono: 'alerta', color: PALETA.critico });
 
   doc.saltoPagina();
-  doc.titulo1('12. Sucursales y circuito de compras', 'red');
+  doc.titulo1('13. Sucursales y circuito de compras', 'red');
   doc.parrafo('El usuario pertenece a una sucursal y a un area, ambas independientes: las mismas areas '
     + 'funcionales existen en varias sucursales, de modo que separarlas evita duplicar el catalogo y '
     + 'permite cortar los indicadores por cualquiera de las dos dimensiones. El ticket, el equipo y la '
@@ -587,7 +630,7 @@ const construir = async () => {
 
   doc.saltoPagina();
   doc.saltoPagina();
-  doc.titulo1('13. Seguridad de la plataforma', 'escudo');
+  doc.titulo1('14. Seguridad de la plataforma', 'escudo');
   doc.parrafo('La credencial de sesion no se guarda en el almacenamiento del navegador. Al iniciar sesion el '
     + 'servidor deja dos cookies complementarias: una de sesion marcada httpOnly, que ningun script de la pagina '
     + 'puede leer, y una segunda de verificacion de origen que la aplicacion si lee y reenvia por cabecera en cada '
@@ -648,7 +691,7 @@ const construir = async () => {
     + 'administrativo se ve de inmediato y no queda a la espera de que venza un plazo.');
 
   doc.saltoPagina();
-  doc.titulo1('14. Verificacion y resultado de las pruebas', 'escudo');
+  doc.titulo1('15. Verificacion y resultado de las pruebas', 'escudo');
   doc.parrafo('El repositorio incorpora una bateria de pruebas automatizadas que recorre el sistema de extremo a '
     + 'extremo contra la API en ejecucion. Se invocan con "npm run qa" desde la carpeta backend y dejan la base sin '
     + 'residuos mediante "npm run qa:limpiar".');
@@ -668,7 +711,7 @@ const construir = async () => {
     { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.28 }
   ], PENDIENTES);
 
-  doc.titulo1('15. Despliegue en servidor', 'engranaje');
+  doc.titulo1('16. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -701,14 +744,14 @@ const construir = async () => {
     'cd ../mobile && npm install && npm start'
   ].join('\n'));
 
-  doc.titulo1('16. Inventario de componentes', 'baseDatos');
+  doc.titulo1('17. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
     { titulo: 'Contenido', campo: 'descripcion', ancho: 0.44 }
   ], ARCHIVOS);
 
-  doc.titulo1('17. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('18. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contrasena inicial', valor: 'Definida al instalar, minimo diez caracteres' },
@@ -785,6 +828,14 @@ const construir = async () => {
       fecha: new Date().toLocaleDateString('es-BO'),
       descripcion: 'Modulo de peticiones de proyecto, politica de contrasenas con cambio y restablecimiento, '
         + 'base reiniciada a una sola cuenta administradora y baterias de prueba autosuficientes',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.7.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Modelo completo del ticket: numeracion SYS-AAAA-NNNNN, tipo y servicio, ubicacion, activo '
+        + 'relacionado, seis estados con En Espera, tiempo empleado, prioridad determinada por Sistemas con '
+        + 'objetivo de atencion y tablero del Jefe de Sistemas',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
