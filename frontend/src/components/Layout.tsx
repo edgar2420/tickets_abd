@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
-  Bell, Boxes, Building, Building2, ClipboardList, Gauge, KeyRound, LayoutGrid, Lightbulb, LogOut, Monitor, Moon,
+  Bell, Boxes, Building, Building2, ClipboardList, Eraser, FileBarChart, Gauge, KeyRound, LayoutGrid, Lightbulb, LogOut, Monitor, Moon,
   ShoppingCart,
   PanelLeftClose, PanelLeftOpen, ScrollText, ShieldCheck, Sun, Tags, Ticket,
   UserCog, Users, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { CambioPassword } from './CambioPassword';
+import { limpiarCacheYCookies } from '../lib/limpieza';
 import { usarNotificaciones } from '../context/NotificacionesContext';
 import { usarTema } from '../context/TemaContext';
 import { PiePagina } from './PiePagina';
@@ -23,6 +24,7 @@ interface Enlace {
 
 const ENLACES: Enlace[] = [
   { ruta: '/tablero', texto: 'Tablero', icono: Gauge, permisos: ['tickets.ver_propios', 'tickets.ver_todos'], grupo: 'Operacion' },
+  { ruta: '/reportes', texto: 'Reporte mensual', icono: FileBarChart, permisos: ['reportes.ver', 'tickets.ver_todos'], grupo: 'Operacion' },
   { ruta: '/tickets', texto: 'Tickets', icono: Ticket, permisos: ['tickets.ver_propios', 'tickets.ver_todos'], grupo: 'Operacion' },
   { ruta: '/tickets/nuevo', texto: 'Nuevo ticket', icono: ClipboardList, permisos: ['tickets.crear'], grupo: 'Operacion' },
   { ruta: '/inventario', texto: 'Inventario', icono: Boxes, permisos: ['inventario.ver'], grupo: 'Operacion' },
@@ -137,6 +139,13 @@ export const Layout = () => {
     navegar('/login', { replace: true });
   };
 
+  const limpiar = async () => {
+    if (!window.confirm('Se borraran la cache, las cookies y los datos guardados en este navegador, y se cerrara la sesion. Continuar?')) return;
+    cerrarSesion();
+    await limpiarCacheYCookies();
+    window.location.replace('/login');
+  };
+
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="z-30 shrink-0 bg-institucional-900 text-white shadow dark:bg-noche-850 dark:border-b dark:border-noche-700">
@@ -181,6 +190,15 @@ export const Layout = () => {
               title="Cambiar mi contrasena"
             >
               <KeyRound className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => void limpiar()}
+              className="rounded-md p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
+              aria-label="Limpiar cache y cookies"
+              title="Limpiar cache y cookies de este navegador"
+            >
+              <Eraser className="h-5 w-5" />
             </button>
             <button
               type="button"

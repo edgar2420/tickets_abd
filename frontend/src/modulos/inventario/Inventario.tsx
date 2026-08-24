@@ -143,14 +143,20 @@ export const Inventario = () => {
         icono={Package}
         abierto={modalArticulo}
         alCerrar={() => setModalArticulo(false)}
-        ancho="max-w-3xl"
+        ancho="max-w-4xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalArticulo(false)}>Cancelar</button>
+            <button type="submit" form="form-articulo" className="boton-primario" disabled={inventario.guardando}>
+              Guardar articulo
+            </button>
+          </>
+        }
       >
         <FormularioArticulo
           formulario={inventario.formulario}
           setFormulario={inventario.setFormulario}
-          guardando={inventario.guardando}
           alEnviar={guardar}
-          alCancelar={() => setModalArticulo(false)}
         />
       </Modal>
 
@@ -159,16 +165,22 @@ export const Inventario = () => {
         icono={inventario.movimiento?.tipo === 'Salida' ? PackageMinus : PackagePlus}
         abierto={inventario.movimiento !== null}
         alCerrar={() => inventario.setMovimiento(null)}
-        ancho="max-w-xl"
+        ancho="max-w-3xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => inventario.setMovimiento(null)}>Cancelar</button>
+            <button type="submit" form="form-movimiento" className="boton-primario" disabled={inventario.guardando}>
+              Registrar {inventario.movimiento?.tipo === 'Salida' ? 'salida' : 'entrada'}
+            </button>
+          </>
+        }
       >
         {inventario.movimiento && (
           <FormularioMovimiento
             movimiento={inventario.movimiento}
             datos={inventario.datosMovimiento}
             setDatos={inventario.setDatosMovimiento}
-            guardando={inventario.guardando}
             alEnviar={(evento) => { evento.preventDefault(); void inventario.registrarMovimiento(); }}
-            alCancelar={() => inventario.setMovimiento(null)}
           />
         )}
       </Modal>
@@ -178,16 +190,22 @@ export const Inventario = () => {
         icono={Wrench}
         abierto={inventario.cambioEstado !== null}
         alCerrar={() => inventario.setCambioEstado(null)}
-        ancho="max-w-xl"
+        ancho="max-w-3xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => inventario.setCambioEstado(null)}>Cancelar</button>
+            <button type="submit" form="form-situacion" className="boton-primario" disabled={inventario.guardando}>
+              Guardar situacion
+            </button>
+          </>
+        }
       >
         {inventario.cambioEstado && (
           <FormularioSituacion
             articulo={inventario.cambioEstado}
             datos={inventario.datosEstado}
             setDatos={inventario.setDatosEstado}
-            guardando={inventario.guardando}
             alEnviar={(evento) => { evento.preventDefault(); void inventario.guardarEstado(); }}
-            alCancelar={() => inventario.setCambioEstado(null)}
           />
         )}
       </Modal>

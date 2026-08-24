@@ -52,7 +52,7 @@ const Bloque = ({ etiqueta, texto }: { etiqueta: string; texto: string }) => (
   </div>
 );
 
-export const Ficha = ({ ficha, alCerrar }: { ficha: SolicitudCompra; alCerrar: () => void }) => (
+export const Ficha = ({ ficha }: { ficha: SolicitudCompra }) => (
   <div className="space-y-5">
     <div className="superficie flex flex-wrap items-start justify-between gap-3 p-4">
       <div>
@@ -125,7 +125,6 @@ export const Ficha = ({ ficha, alCerrar }: { ficha: SolicitudCompra; alCerrar: (
         <FileDown className="h-4 w-4" />
         Ficha en PDF
       </button>
-      <button type="button" className="boton-primario" onClick={alCerrar}>Cerrar</button>
     </div>
   </div>
 );

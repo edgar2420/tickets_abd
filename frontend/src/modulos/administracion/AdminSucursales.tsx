@@ -200,9 +200,18 @@ export const AdminSucursales = () => {
         icono={Building}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
-        ancho="max-w-xl"
+        ancho="max-w-3xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-sucursal" className="boton-primario" disabled={guardando}>
+              <CheckCircle2 className="h-4 w-4" />
+              Guardar
+            </button>
+          </>
+        }
       >
-        <form onSubmit={guardar} className="space-y-4">
+        <form id="form-sucursal" onSubmit={guardar} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="etiqueta">Codigo</label>
@@ -245,13 +254,6 @@ export const AdminSucursales = () => {
             Sucursal activa
           </label>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-            <button type="submit" className="boton-primario" disabled={guardando}>
-              <CheckCircle2 className="h-4 w-4" />
-              Guardar
-            </button>
-          </div>
         </form>
       </Modal>
 

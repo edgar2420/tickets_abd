@@ -837,6 +837,14 @@ const construir = async () => {
         + 'relacionado, seis estados con En Espera, tiempo empleado, prioridad determinada por Sistemas con '
         + 'objetivo de atencion y tablero del Jefe de Sistemas',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.8.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Reporte mensual en pantalla propia sin duplicar indicadores, modales mas anchos con las '
+        + 'acciones fijas en el encabezado, auditoria de diez registros sin la columna de origen y limpieza '
+        + 'de cache y cookies desde la barra superior',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 

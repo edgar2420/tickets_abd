@@ -5,21 +5,12 @@ import { ESTILO_ESTADO } from '../constantes';
 import type { MovimientoEnCurso } from '../usarInventario';
 import type { EstadoArticulo, TipoArticulo } from '../../../lib/tipos';
 
-const Pie = ({ guardando, texto, alCancelar }: { guardando: boolean; texto: string; alCancelar: () => void }) => (
-  <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-    <button type="button" className="boton-secundario" onClick={alCancelar}>Cancelar</button>
-    <button type="submit" className="boton-primario" disabled={guardando}>{texto}</button>
-  </div>
-);
-
-export const FormularioArticulo = ({ formulario, setFormulario, guardando, alEnviar, alCancelar }: {
+export const FormularioArticulo = ({ formulario, setFormulario, alEnviar }: {
   formulario: Articulo;
   setFormulario: (actualizar: (previo: Articulo) => Articulo) => void;
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => (
-  <form onSubmit={alEnviar} className="space-y-4">
+  <form id="form-articulo" onSubmit={alEnviar} className="space-y-4">
     <div className="grid gap-4 sm:grid-cols-2">
       <div>
         <label className="etiqueta">Codigo</label>
@@ -111,24 +102,21 @@ export const FormularioArticulo = ({ formulario, setFormulario, guardando, alEnv
       </p>
     )}
 
-    <Pie guardando={guardando} texto="Guardar articulo" alCancelar={alCancelar} />
   </form>
 );
 
-export const FormularioMovimiento = ({ movimiento, datos, setDatos, guardando, alEnviar, alCancelar }: {
+export const FormularioMovimiento = ({ movimiento, datos, setDatos, alEnviar }: {
   movimiento: MovimientoEnCurso;
   datos: { cantidad: string; motivo: string };
   setDatos: (actualizar: (previos: { cantidad: string; motivo: string }) => { cantidad: string; motivo: string }) => void;
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => {
   const { articulo, tipo } = movimiento;
   const cantidad = Number(datos.cantidad) || 0;
   const resultante = tipo === 'Salida' ? articulo.stock_actual - cantidad : articulo.stock_actual + cantidad;
 
   return (
-    <form onSubmit={alEnviar} className="space-y-4">
+    <form id="form-movimiento" onSubmit={alEnviar} className="space-y-4">
       <div className="superficie p-4">
         <p className="font-semibold text-institucional-900 dark:text-slate-100">{articulo.nombre}</p>
         <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">
@@ -171,20 +159,17 @@ export const FormularioMovimiento = ({ movimiento, datos, setDatos, guardando, a
         <strong className="text-institucional-900 dark:text-slate-100">{resultante} {articulo.unidad}</strong>
       </div>
 
-      <Pie guardando={guardando} texto={`Registrar ${tipo.toLowerCase()}`} alCancelar={alCancelar} />
     </form>
   );
 };
 
-export const FormularioSituacion = ({ articulo, datos, setDatos, guardando, alEnviar, alCancelar }: {
+export const FormularioSituacion = ({ articulo, datos, setDatos, alEnviar }: {
   articulo: { codigo: string; nombre: string; estado: EstadoArticulo };
   datos: { estado: EstadoArticulo; motivo: string };
   setDatos: (actualizar: (previos: { estado: EstadoArticulo; motivo: string }) => { estado: EstadoArticulo; motivo: string }) => void;
-  guardando: boolean;
   alEnviar: (evento: FormEvent) => void;
-  alCancelar: () => void;
 }) => (
-  <form onSubmit={alEnviar} className="space-y-4">
+  <form id="form-situacion" onSubmit={alEnviar} className="space-y-4">
     <div className="superficie p-4">
       <p className="font-semibold text-institucional-900 dark:text-slate-100">{articulo.nombre}</p>
       <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -228,6 +213,5 @@ export const FormularioSituacion = ({ articulo, datos, setDatos, guardando, alEn
       </p>
     )}
 
-    <Pie guardando={guardando} texto="Guardar situacion" alCancelar={alCancelar} />
   </form>
 );

@@ -1,8 +1,12 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { createRequire } from 'node:module';
+
+const { version } = createRequire(import.meta.url)('./package.json');
 
 export default defineConfig({
   plugins: [react()],
+  define: { __VERSION__: JSON.stringify(version) },
   server: {
     host: true,
     port: 5173,

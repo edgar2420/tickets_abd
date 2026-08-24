@@ -176,9 +176,18 @@ export const AdminCategorias = () => {
         icono={Tags}
         abierto={modalAbierto}
         alCerrar={() => setModalAbierto(false)}
-        ancho="max-w-xl"
+        ancho="max-w-3xl"
+        acciones={
+          <>
+            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
+            <button type="submit" form="form-categoria" className="boton-primario" disabled={guardando}>
+              <CheckCircle2 className="h-4 w-4" />
+              Guardar
+            </button>
+          </>
+        }
       >
-        <form onSubmit={guardar} className="space-y-5">
+        <form id="form-categoria" onSubmit={guardar} className="space-y-5">
           <div>
             <label className="etiqueta" htmlFor="nombre-categoria">Nombre</label>
             <input
@@ -267,13 +276,6 @@ export const AdminCategorias = () => {
             Categoria disponible al registrar tickets
           </label>
 
-          <div className="flex justify-end gap-2 border-t border-slate-200 pt-4 dark:border-noche-700">
-            <button type="button" className="boton-secundario" onClick={() => setModalAbierto(false)}>Cancelar</button>
-            <button type="submit" className="boton-primario" disabled={guardando}>
-              <CheckCircle2 className="h-4 w-4" />
-              Guardar categoria
-            </button>
-          </div>
         </form>
       </Modal>
 
