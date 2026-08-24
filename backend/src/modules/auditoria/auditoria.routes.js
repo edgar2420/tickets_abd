@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { query } from '../../config/db.js';
 import { autenticar } from '../../middleware/auth.js';
+import { sinCache } from '../../middleware/cache.js';
 import { requierePermiso } from '../../middleware/rbac.js';
 import { asyncHandler } from '../../utils/httpError.js';
 import { listarAuditoria, contarAuditoria, registrarAuditoria } from '../../services/auditoria.service.js';
@@ -9,6 +10,7 @@ import { construirReporteAuditoria, construirMatrizRoles } from '../../services/
 
 export const auditoriaRouter = Router();
 auditoriaRouter.use(autenticar);
+auditoriaRouter.use(sinCache);
 
 auditoriaRouter.get('/', requierePermiso('auditoria.ver'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);
