@@ -1,9 +1,13 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 export const BASE = process.env.QA_BASE ?? 'http://localhost:4000/api/v1';
 export const ORIGEN = process.env.QA_ORIGEN ?? 'http://localhost:5173';
 
 export const ADMIN = {
-  usuario: process.env.QA_ADMIN_USUARIO ?? 'admin',
-  password: process.env.QA_ADMIN_PASSWORD ?? '24112001Edgar'
+  usuario: process.env.QA_ADMIN_USUARIO ?? process.env.ADMIN_USUARIO ?? 'admin',
+  password: process.env.QA_ADMIN_PASSWORD ?? process.env.ADMIN_PASSWORD ?? '24112001Edgar'
 };
 
 export const CLAVE_QA = 'QaPrueba2026x';
@@ -52,7 +56,10 @@ export const pedirCon = (sesion) => async (ruta, opciones = {}) => {
 export const prepararEntorno = async () => {
   const admin = await entrar(ADMIN.usuario, ADMIN.password);
   if (!admin.cookie) {
-    throw new Error(`No fue posible entrar como ${ADMIN.usuario}. Revise la clave administradora.`);
+    throw new Error(
+      `No fue posible entrar como "${ADMIN.usuario}". Si renombro la cuenta administradora, `
+      + 'indique la actual con QA_ADMIN_USUARIO y QA_ADMIN_PASSWORD en backend/.env'
+    );
   }
   const pedir = pedirCon(admin);
 
