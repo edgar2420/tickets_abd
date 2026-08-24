@@ -43,9 +43,13 @@ export const passwordSchema = z.string()
   .refine((valor) => /\d/.test(valor), 'La contrasena debe incluir al menos un numero')
   .refine((valor) => !OBVIAS.includes(valor.toLowerCase()), 'La contrasena es demasiado previsible');
 
-export const textoLimpio = (largoMinimo, largoMaximo) => z.string()
+export const textoLimpio = (largoMinimo, largoMaximo, campo = 'El texto') => z.string()
   .transform((valor) => valor.trim())
-  .pipe(z.string().min(largoMinimo).max(largoMaximo));
+  .pipe(
+    z.string()
+      .min(largoMinimo, `${campo} debe tener al menos ${largoMinimo} caracteres`)
+      .max(largoMaximo, `${campo} no puede superar los ${largoMaximo} caracteres`)
+  );
 
 export const usuarioSchema = z.string()
   .transform((valor) => valor.trim().toLowerCase())

@@ -12,14 +12,29 @@ const leerCookie = (nombre: string): string | null => {
 
 export const haySesion = () => leerCookie(COOKIE_CSRF) !== null;
 
+interface FallaDeCampo {
+  campo: string;
+  mensaje: string;
+}
+
+const esListaDeFallas = (detalle: unknown): detalle is FallaDeCampo[] =>
+  Array.isArray(detalle) && detalle.every((f) => typeof f?.mensaje === 'string');
+
+const componerMensaje = (mensaje: string, detalle: unknown) => {
+  if (!esListaDeFallas(detalle) || detalle.length === 0) return mensaje;
+  return detalle.map((falla) => falla.mensaje).join('. ');
+};
+
 export class ErrorApi extends Error {
   estado: number;
   detalle: unknown;
+  campos: FallaDeCampo[];
 
   constructor(estado: number, mensaje: string, detalle: unknown = null) {
-    super(mensaje);
+    super(componerMensaje(mensaje, detalle));
     this.estado = estado;
     this.detalle = detalle;
+    this.campos = esListaDeFallas(detalle) ? detalle : [];
   }
 }
 

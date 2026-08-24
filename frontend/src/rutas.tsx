@@ -1,6 +1,7 @@
 import type { JSX } from 'react';
 import { Login } from './modulos/acceso';
 import { Tablero } from './modulos/tablero';
+import { Perfil } from './modulos/perfil';
 import { DetalleTicket, NuevoTicket, Tickets } from './modulos/tickets';
 import { Inventario } from './modulos/inventario';
 import { Equipos } from './modulos/equipos';
@@ -22,6 +23,7 @@ export const RUTA_PUBLICA = { path: '/login', elemento: <Login /> };
 export const RUTA_INICIAL = '/tablero';
 
 export const RUTAS: Ruta[] = [
+  { path: '/perfil', elemento: <Perfil /> },
   { path: '/tablero', elemento: <Tablero />, permisos: ['tickets.ver_propios', 'tickets.ver_todos'] },
   { path: '/tickets', elemento: <Tickets />, permisos: ['tickets.ver_propios', 'tickets.ver_todos'] },
   { path: '/tickets/nuevo', elemento: <NuevoTicket />, permisos: ['tickets.crear'] },
