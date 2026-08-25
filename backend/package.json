@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-backend",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "description": "API REST + WebSockets del Sistema de Gestion de Tickets TI (STD-2026-TI)",
   "author": "Ing. Edgar Rojas Apaza",
   "license": "UNLICENSED",
@@ -25,7 +25,8 @@
     "qa:seguridad": "node qa/seguridad.mjs",
     "qa:funcional": "node qa/funcional.mjs",
     "qa:tiempo-real": "node qa/tiempo-real.mjs",
-    "qa:limpiar": "node qa/limpiar.mjs"
+    "qa:limpiar": "node qa/limpiar.mjs",
+    "clave": "node src/scripts/clave.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
