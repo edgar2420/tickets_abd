@@ -876,6 +876,13 @@ const construir = async () => {
         + 'reservada al personal de Sistemas y el activo relacionado se limita a los equipos asignados a la '
         + 'cuenta que registra el ticket',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.12.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Pantallas propias para lo que no existe: una direccion desconocida y un registro inexistente '
+        + 'dejan de redirigir en silencio y explican que ocurrio',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
