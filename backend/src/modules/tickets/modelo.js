@@ -1,7 +1,11 @@
 export const SERVICIOS = [
   'Soporte informatico', 'Redes', 'Telefonia', 'CCTV', 'Servidores',
-  'IBS', 'Desarrollo', 'Mantenimiento', 'Proyectos', 'Gestion tecnologica'
+  'IBS', 'Desarrollo'
 ];
+
+export const SERVICIO_MANTENIMIENTO = 'Mantenimiento';
+
+export const SERVICIOS_VALIDOS = [...SERVICIOS, SERVICIO_MANTENIMIENTO];
 
 export const ESTADOS = ['Nuevo', 'Asignado', 'En Proceso', 'En Espera', 'Resuelto', 'Cerrado'];
 

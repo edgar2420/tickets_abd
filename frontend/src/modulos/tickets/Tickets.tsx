@@ -8,7 +8,7 @@ import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAcciona
 import { Paginacion } from '../../components/Paginacion';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
 import type { Categoria, InfoPaginacion, RespuestaPaginada, Sucursal, Ticket } from '../../lib/tipos';
-import { ESTADOS, PRIORIDADES, SERVICIOS } from './constantes';
+import { ESTADOS, PRIORIDADES, SERVICIOS_CON_FILTRO } from './constantes';
 
 const FILTROS_VACIOS = {
   estado: '', categoria: '', prioridad: '', sucursal_id: '',
@@ -111,7 +111,7 @@ export const Tickets = () => {
             <label className="etiqueta">Servicio</label>
             <select className="campo" value={filtros.servicio} onChange={(e) => cambiar('servicio', e.target.value)}>
               <option value="">Todos</option>
-              {SERVICIOS.map((servicio) => <option key={servicio} value={servicio}>{servicio}</option>)}
+              {SERVICIOS_CON_FILTRO.map((servicio) => <option key={servicio} value={servicio}>{servicio}</option>)}
             </select>
           </div>
           <div>

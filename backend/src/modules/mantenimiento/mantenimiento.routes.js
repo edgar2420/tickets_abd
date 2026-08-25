@@ -8,7 +8,9 @@ import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { notificarEquipoTecnico } from '../../services/notificaciones.service.js';
 import { emitir, SALA_TECNICOS } from '../../realtime/socket.js';
-import { codigoTicket, fechaObjetivo, PRIORIDAD_INICIAL } from '../tickets/modelo.js';
+import {
+  codigoTicket, fechaObjetivo, PRIORIDAD_INICIAL, SERVICIO_MANTENIMIENTO
+} from '../tickets/modelo.js';
 import { obtenerTicket } from '../tickets/tickets.service.js';
 import { FRECUENCIAS } from './modelo.js';
 import * as servicio from './mantenimiento.service.js';
@@ -111,7 +113,7 @@ mantenimientoRouter.post('/:id/ticket', requierePermiso('mantenimiento.gestionar
       `INSERT INTO tickets
          (anio, numero, titulo, descripcion, servicio, categoria, ubicacion, equipo_id,
           prioridad, estado, solicitante_id, sucursal_id, fecha_objetivo)
-       SELECT $1, COALESCE(MAX(numero), 0) + 1, $2, $3, 'Mantenimiento', $4, $5, $6,
+       SELECT $1, COALESCE(MAX(numero), 0) + 1, $2, $3, $11, $4, $5, $6,
               $7, 'Nuevo', $8, $9, $10
          FROM tickets WHERE anio = $1
        RETURNING id`,
@@ -121,7 +123,7 @@ mantenimientoRouter.post('/:id/ticket', requierePermiso('mantenimiento.gestionar
         `Mantenimiento preventivo programado para ${equipo.nombre_equipo} (${equipo.codigo}).`,
         'PC', equipo.ubicacion ?? null, id,
         PRIORIDAD_INICIAL, req.usuario.id, equipo.sucursal_id ?? null,
-        fechaObjetivo(PRIORIDAD_INICIAL)
+        fechaObjetivo(PRIORIDAD_INICIAL), SERVICIO_MANTENIMIENTO
       ]
     );
 

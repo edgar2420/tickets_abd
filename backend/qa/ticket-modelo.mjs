@@ -11,7 +11,7 @@ const pedir = (usuario, ruta, opciones = {}) => pedirCon(sesiones[usuario])(ruta
 
 console.log('=== 1. CATALOGO DEL TICKET ===');
 const catalogo = (await pedir('admin', '/tickets/catalogo')).cuerpo.datos;
-marca(catalogo?.servicios?.length === 10, `servicios: ${catalogo?.servicios?.length} definidos`);
+marca(catalogo?.servicios?.length === 7, `servicios: ${catalogo?.servicios?.length} elegibles`);
 marca(catalogo?.estados?.join(' > ') === 'Nuevo > Asignado > En Proceso > En Espera > Resuelto > Cerrado',
   `estados: ${catalogo?.estados?.join(' > ')}`);
 for (const [prioridad, objetivo] of Object.entries(catalogo?.objetivos ?? {})) {
@@ -137,7 +137,7 @@ const conActivo = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - ticket vinculado a un activo del parque',
     descripcion: 'Se verifica que el ticket pueda apuntar al equipo sobre el que se trabaja.',
-    servicio: 'Mantenimiento', categoria: 'PC',
+    servicio: 'Soporte informatico', categoria: 'PC',
     equipo_id: equipoId
   }
 });
@@ -171,6 +171,23 @@ const cerrado = await pedir('qa.cliente', `/tickets/${ticket.id}/cerrar`, { meto
 marca(cerrado.cuerpo.datos?.estado === 'Cerrado', `Resuelto -> ${cerrado.cuerpo.datos?.estado}`);
 
 console.log('\n=== 6. FILTROS NUEVOS ===');
+const catalogoServicios = (await pedir('admin', '/tickets/catalogo')).cuerpo.datos?.servicios ?? [];
+marca(catalogoServicios.length === 7, `el catalogo ofrece ${catalogoServicios.length} servicios elegibles`);
+marca(!catalogoServicios.includes('Proyectos') && !catalogoServicios.includes('Gestion tecnologica'),
+  'ya no se ofrecen Proyectos ni Gestion tecnologica');
+marca(!catalogoServicios.includes('Mantenimiento'),
+  'Mantenimiento no se elige a mano: lo genera el plan preventivo');
+
+const servicioRetirado = await pedir('qa.cliente', '/tickets', {
+  metodo: 'POST',
+  cuerpo: {
+    titulo: 'QA - intento con un servicio retirado',
+    descripcion: 'Se verifica que ya no se acepte un servicio que salio del catalogo.',
+    servicio: 'Proyectos', categoria: 'PC'
+  }
+});
+marca(servicioRetirado.estado === 400, `un servicio retirado se rechaza (${servicioRetirado.estado})`);
+
 const porServicio = await pedir('admin', '/tickets?servicio=CCTV');
 marca((porServicio.cuerpo.datos ?? []).every((t) => t.servicio === 'CCTV'),
   `filtra por servicio (${porServicio.cuerpo.datos?.length} de CCTV)`);
@@ -178,7 +195,25 @@ marca((porServicio.cuerpo.datos ?? []).every((t) => t.servicio === 'CCTV'),
 const vencidos = await pedir('admin', '/tickets?vencidos=true');
 marca(vencidos.estado === 200, `filtra los vencidos (${vencidos.cuerpo.datos?.length})`);
 
-console.log('\n=== 7. INDICADORES DEL JEFE DE SISTEMAS ===');
+console.log('\n=== 7. LO QUE NO VE EL SOLICITANTE ===');
+const fichaCliente = await pedir('qa.cliente', `/tickets/${ticket.id}`);
+marca(fichaCliente.estado === 200, `el solicitante abre su propio ticket (${fichaCliente.estado})`);
+marca(fichaCliente.cuerpo.datos?.bitacora === undefined,
+  'al solicitante no se le entrega la bitacora');
+
+const fichaTecnico = await pedir('qa.tecnico', `/tickets/${ticket.id}`);
+marca(Array.isArray(fichaTecnico.cuerpo.datos?.bitacora),
+  `al personal de sistemas si: ${fichaTecnico.cuerpo.datos?.bitacora?.length} movimiento(s)`);
+
+const misEquipos = await pedir('qa.cliente', '/equipos/mios');
+marca(misEquipos.estado === 200, `el solicitante consulta sus propios activos (${misEquipos.estado})`);
+marca(Array.isArray(misEquipos.cuerpo.datos), 'la respuesta es la lista de sus equipos');
+
+const todosLosEquipos = await pedir('qa.cliente', '/equipos');
+marca(todosLosEquipos.estado === 403,
+  `el solicitante sigue sin poder listar el parque completo (${todosLosEquipos.estado})`);
+
+console.log('\n=== 8. INDICADORES DEL JEFE DE SISTEMAS ===');
 const tablero = (await pedir('admin', '/tickets/tablero')).cuerpo.datos;
 const ESPERADOS = [
   'nuevos', 'asignados', 'en_proceso', 'en_espera', 'resueltos', 'cerrados',

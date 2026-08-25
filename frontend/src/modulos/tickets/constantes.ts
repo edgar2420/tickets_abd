@@ -2,8 +2,10 @@ import type { EstadoTicket, PrioridadTicket, ServicioTicket } from '../../lib/ti
 
 export const SERVICIOS: ServicioTicket[] = [
   'Soporte informatico', 'Redes', 'Telefonia', 'CCTV', 'Servidores',
-  'IBS', 'Desarrollo', 'Mantenimiento', 'Proyectos', 'Gestion tecnologica'
+  'IBS', 'Desarrollo'
 ];
+
+export const SERVICIOS_CON_FILTRO: ServicioTicket[] = [...SERVICIOS, 'Mantenimiento'];
 
 export const ESTADOS: EstadoTicket[] = [
   'Nuevo', 'Asignado', 'En Proceso', 'En Espera', 'Resuelto', 'Cerrado'
@@ -19,9 +21,7 @@ export const AYUDA_SERVICIO: Record<ServicioTicket, string> = {
   Servidores: 'IBS, Oracle, Windows Server, hardware y respaldos',
   IBS: 'Incidentes, consultas, reportes y modulos del sistema',
   Desarrollo: 'Sistemas, automatizaciones, reportes e integraciones',
-  Mantenimiento: 'Preventivo y correctivo',
-  Proyectos: 'Implementaciones tecnologicas e infraestructura',
-  'Gestion tecnologica': 'Inventario, seguridad, proveedores e indicadores'
+  Mantenimiento: 'Preventivo, generado desde el plan de mantenimiento'
 };
 
 export const OBJETIVOS: Record<PrioridadTicket, { horas: number; texto: string; criterio: string }> = {
