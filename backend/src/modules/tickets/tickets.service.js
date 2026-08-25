@@ -4,7 +4,7 @@ import { construirActaTicket, rutaDocumento, codigoTicket } from '../../services
 
 export const SELECT_TICKET = `
   SELECT t.id, t.anio, t.numero, t.titulo, t.descripcion,
-         t.tipo, t.servicio, t.categoria, t.prioridad, t.estado,
+         t.servicio, t.categoria, t.prioridad, t.estado,
          t.ubicacion, t.observaciones, t.minutos_empleados,
          t.solucion_detalle, t.motivo_espera,
          t.fecha_creacion, t.fecha_asignacion, t.fecha_inicio, t.fecha_espera,
@@ -47,9 +47,8 @@ export const listarTickets = async (filtros, usuario) => {
         AND ($8::timestamp IS NULL OR t.fecha_creacion >= $8)
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
         AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
-        AND ($14::varchar  IS NULL OR t.tipo = $14)
-        AND ($15::varchar  IS NULL OR t.servicio = $15)
-        AND ($16::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
+        AND ($14::varchar  IS NULL OR t.servicio = $14)
+        AND ($15::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
              AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera')))
       ORDER BY
         CASE t.prioridad WHEN 'Critica' THEN 1 WHEN 'Alta' THEN 2 WHEN 'Media' THEN 3 ELSE 4 END,
@@ -63,7 +62,6 @@ export const listarTickets = async (filtros, usuario) => {
       filtros.limite ?? 25,
       filtros.sucursal_id ?? null,
       filtros.desplazamiento ?? 0,
-      filtros.tipo ?? null,
       filtros.servicio ?? null,
       filtros.vencidos === 'true' || filtros.vencidos === true
     ]
@@ -87,9 +85,8 @@ export const contarTickets = async (filtros, usuario) => {
         AND ($9::timestamp IS NULL OR t.fecha_creacion <= $9)
         AND ($10::text     IS NULL OR t.titulo ILIKE '%' || $10 || '%' OR t.descripcion ILIKE '%' || $10 || '%')
         AND ($11::int      IS NULL OR t.sucursal_id = $11)
-        AND ($12::varchar  IS NULL OR t.tipo = $12)
-        AND ($13::varchar  IS NULL OR t.servicio = $13)
-        AND ($14::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
+        AND ($12::varchar  IS NULL OR t.servicio = $12)
+        AND ($13::bool IS NOT TRUE OR (t.fecha_objetivo < CURRENT_TIMESTAMP
              AND t.estado IN ('Nuevo', 'Asignado', 'En Proceso', 'En Espera')))`,
     [
       verTodos, usuario.id,
@@ -97,7 +94,6 @@ export const contarTickets = async (filtros, usuario) => {
       filtros.asignado_id ?? null, filtros.area_id ?? null,
       filtros.desde ?? null, filtros.hasta ?? null, filtros.busqueda ?? null,
       filtros.sucursal_id ?? null,
-      filtros.tipo ?? null,
       filtros.servicio ?? null,
       filtros.vencidos === 'true' || filtros.vencidos === true
     ]
@@ -123,7 +119,7 @@ export const indicadores = async (filtros = {}, usuario = null) => {
                            AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS altos,
         COUNT(*) FILTER (WHERE fecha_objetivo < CURRENT_TIMESTAMP
                            AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS vencidos,
-        COUNT(*) FILTER (WHERE tipo = 'Mantenimiento'
+        COUNT(*) FILTER (WHERE servicio = 'Mantenimiento'
                            AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS mantenimientos,
         COUNT(*) FILTER (WHERE servicio = 'IBS'
                            AND estado IN ('Nuevo','Asignado','En Proceso','En Espera'))::int AS pendientes_ibs
@@ -173,11 +169,6 @@ export const distribuciones = async () => {
       GROUP BY 1 ORDER BY total DESC LIMIT 10`
   );
 
-  const porTipo = await query(
-    `SELECT tipo AS etiqueta, COUNT(*)::int AS total
-       FROM tickets GROUP BY tipo ORDER BY total DESC`
-  );
-
   const porServicio = await query(
     `SELECT servicio AS etiqueta, COUNT(*)::int AS total
        FROM tickets GROUP BY servicio ORDER BY total DESC LIMIT 12`
@@ -191,7 +182,6 @@ export const distribuciones = async () => {
     porSolicitante: porSolicitante.rows,
     porResponsable: porResponsable.rows,
     porUbicacion: porUbicacion.rows,
-    porTipo: porTipo.rows,
     porServicio: porServicio.rows
   };
 };

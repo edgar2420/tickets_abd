@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AlertTriangle, Building, Clock, Gauge, Layers, MapPin, Ticket, Users, Wrench } from 'lucide-react';
+import { AlertTriangle, Building, Clock, Gauge, Layers, MapPin, Ticket, Users } from 'lucide-react';
 import { api } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { usarNotificaciones } from '../../context/NotificacionesContext';
@@ -16,7 +16,6 @@ interface RespuestaTablero {
       porCategoria: Distribucion[];
       porEstado: Distribucion[];
       porArea: Distribucion[];
-      porTipo: Distribucion[];
       porServicio: Distribucion[];
       porUbicacion: Distribucion[];
       porResponsable: Distribucion[];
@@ -86,9 +85,6 @@ export const Tablero = () => {
           </div>
 
           <div className="space-y-4">
-            <Panel titulo="Tickets por tipo" icono={Wrench}>
-              <BarraDistribucion filas={graficos.porTipo ?? []} />
-            </Panel>
             <Panel titulo="Tickets por servicio" icono={Layers}>
               <BarraDistribucion filas={graficos.porServicio ?? []} />
             </Panel>

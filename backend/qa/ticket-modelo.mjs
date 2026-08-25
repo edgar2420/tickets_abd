@@ -11,7 +11,6 @@ const pedir = (usuario, ruta, opciones = {}) => pedirCon(sesiones[usuario])(ruta
 
 console.log('=== 1. CATALOGO DEL TICKET ===');
 const catalogo = (await pedir('admin', '/tickets/catalogo')).cuerpo.datos;
-marca(catalogo?.tipos?.length === 4, `tipos: ${catalogo?.tipos?.join(', ')}`);
 marca(catalogo?.servicios?.length === 10, `servicios: ${catalogo?.servicios?.length} definidos`);
 marca(catalogo?.estados?.join(' > ') === 'Nuevo > Asignado > En Proceso > En Espera > Resuelto > Cerrado',
   `estados: ${catalogo?.estados?.join(' > ')}`);
@@ -27,7 +26,6 @@ const primero = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - la impresora de Contabilidad no responde',
     descripcion: 'La impresora no toma los trabajos enviados desde ninguna maquina del area.',
-    tipo: 'Incidente',
     servicio: 'Soporte informatico',
     categoria: 'PC',
     ubicacion: 'Planta baja - Contabilidad',
@@ -45,7 +43,7 @@ const segundo = await pedir('qa.cliente2', '/tickets', {
   cuerpo: {
     titulo: 'QA - camara del almacen sin grabacion',
     descripcion: 'La camara del porton no esta grabando desde el fin de semana.',
-    tipo: 'Incidente', servicio: 'CCTV', categoria: 'Camara', ubicacion: 'Almacen'
+    servicio: 'CCTV', categoria: 'Camara', ubicacion: 'Almacen'
   }
 });
 marca(segundo.cuerpo.datos?.numero === ticket.numero + 1,
@@ -57,7 +55,7 @@ const intento = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - el solicitante intenta marcarlo como critico',
     descripcion: 'Se verifica que la prioridad enviada por un solicitante no se tome en cuenta.',
-    tipo: 'Requerimiento', servicio: 'Soporte informatico', categoria: 'PC',
+    servicio: 'Soporte informatico', categoria: 'PC',
     prioridad: 'Critica'
   }
 });
@@ -78,7 +76,7 @@ const altaTecnico = await pedir('qa.tecnico', '/tickets', {
   cuerpo: {
     titulo: 'QA - un tecnico tampoco fija la prioridad al registrar',
     descripcion: 'Se verifica que ni el personal tecnico pueda nacer un ticket con prioridad propia.',
-    tipo: 'Incidente', servicio: 'Soporte informatico', categoria: 'PC', prioridad: 'Critica'
+    servicio: 'Soporte informatico', categoria: 'PC', prioridad: 'Critica'
   }
 });
 marca(altaTecnico.cuerpo.datos?.prioridad === 'Media',
@@ -139,7 +137,7 @@ const conActivo = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - ticket vinculado a un activo del parque',
     descripcion: 'Se verifica que el ticket pueda apuntar al equipo sobre el que se trabaja.',
-    tipo: 'Mantenimiento', servicio: 'Soporte informatico', categoria: 'PC',
+    servicio: 'Mantenimiento', categoria: 'PC',
     equipo_id: equipoId
   }
 });
@@ -151,7 +149,7 @@ const activoInexistente = await pedir('qa.cliente', '/tickets', {
   cuerpo: {
     titulo: 'QA - ticket con un activo que no existe',
     descripcion: 'Se verifica que no se pueda apuntar a un activo inexistente.',
-    tipo: 'Incidente', servicio: 'Soporte informatico', categoria: 'PC', equipo_id: 999999
+    servicio: 'Soporte informatico', categoria: 'PC', equipo_id: 999999
   }
 });
 marca(activoInexistente.estado === 400, `un activo inexistente se rechaza (${activoInexistente.estado})`);
@@ -173,10 +171,6 @@ const cerrado = await pedir('qa.cliente', `/tickets/${ticket.id}/cerrar`, { meto
 marca(cerrado.cuerpo.datos?.estado === 'Cerrado', `Resuelto -> ${cerrado.cuerpo.datos?.estado}`);
 
 console.log('\n=== 6. FILTROS NUEVOS ===');
-const porTipo = await pedir('admin', '/tickets?tipo=Mantenimiento');
-marca((porTipo.cuerpo.datos ?? []).every((t) => t.tipo === 'Mantenimiento'),
-  `filtra por tipo (${porTipo.cuerpo.datos?.length} de mantenimiento)`);
-
 const porServicio = await pedir('admin', '/tickets?servicio=CCTV');
 marca((porServicio.cuerpo.datos ?? []).every((t) => t.servicio === 'CCTV'),
   `filtra por servicio (${porServicio.cuerpo.datos?.length} de CCTV)`);
@@ -196,7 +190,6 @@ for (const clave of ESPERADOS) {
 }
 marca(Array.isArray(tablero?.graficos?.porResponsable), 'desglose por responsable');
 marca(Array.isArray(tablero?.graficos?.porUbicacion), 'desglose por ubicacion');
-marca(Array.isArray(tablero?.graficos?.porTipo), 'desglose por tipo');
 marca(Array.isArray(tablero?.graficos?.porServicio), 'desglose por servicio');
 
 console.log('\n========================================');

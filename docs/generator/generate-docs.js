@@ -434,7 +434,6 @@ const construir = async () => {
     { titulo: 'Contenido', campo: 'contenido', ancho: 0.76 }
   ], [
     { campo: 'Numero', contenido: 'SYS-AAAA-NNNNN, correlativo unico dentro de cada gestion' },
-    { campo: 'Tipo', contenido: 'Incidente, Requerimiento, Mantenimiento o Desarrollo' },
     { campo: 'Servicio', contenido: 'Soporte informatico, Redes, Telefonia, CCTV, Servidores, IBS, Desarrollo, '
       + 'Mantenimiento, Proyectos o Gestion tecnologica' },
     { campo: 'Categoria', contenido: 'Catalogo administrable: PC, Red, Camara, Telefonia, IBS, Servidores y otros' },
@@ -860,6 +859,14 @@ const construir = async () => {
       descripcion: 'La prioridad de tickets y de solicitudes de compra queda reservada a la administracion '
         + 'mediante los permisos tickets.priorizar y compras.priorizar; se retira el selector de prioridad de '
         + 'los formularios del solicitante y de la aplicacion movil',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.10.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Modulo de mantenimiento preventivo con plan por activo, aviso de vencidos y por vencer, '
+        + 'generacion del ticket y registro de lo realizado; se retira el campo tipo del ticket, que queda '
+        + 'clasificado por servicio y categoria',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
