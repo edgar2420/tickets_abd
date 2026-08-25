@@ -14,14 +14,13 @@ import {
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { reporteMensual, mesValido, mesVigente } from './reporteMensual.service.js';
 import {
-  TIPOS, SERVICIOS, PRIORIDADES, ESTADOS, OBJETIVOS, PRIORIDAD_INICIAL,
+  SERVICIOS, PRIORIDADES, ESTADOS, OBJETIVOS, PRIORIDAD_INICIAL,
   puedePasar, fechaObjetivo, codigoTicket as codigo
 } from './modelo.js';
 
 export const crearTicketSchema = z.object({
   titulo: z.string().trim().min(6).max(200),
   descripcion: z.string().trim().min(10).max(4000),
-  tipo: z.enum(TIPOS).default('Incidente'),
   servicio: z.enum(SERVICIOS).default('Soporte informatico'),
   categoria: z.string().trim().min(2).max(50),
   ubicacion: z.string().trim().max(120).optional().nullable().or(z.literal('')),
@@ -106,16 +105,16 @@ export const crear = asyncHandler(async (req, res) => {
 
   const { rows } = await query(
     `INSERT INTO tickets
-       (anio, numero, titulo, descripcion, tipo, servicio, categoria, ubicacion, equipo_id,
+       (anio, numero, titulo, descripcion, servicio, categoria, ubicacion, equipo_id,
         observaciones, prioridad, estado, solicitante_id, sucursal_id,
         fecha_objetivo, prioridad_por_id, fecha_prioridad)
      SELECT $1,
             COALESCE(MAX(numero), 0) + 1,
-            $2, $3, $4, $5, $6, $7, $8, $9, $10, 'Nuevo', $11, $12, $13, $14, CURRENT_TIMESTAMP
+            $2, $3, $4, $5, $6, $7, $8, $9, 'Nuevo', $10, $11, $12, $13, CURRENT_TIMESTAMP
        FROM tickets WHERE anio = $1
      RETURNING id`,
     [
-      anio, c.titulo, c.descripcion, c.tipo, c.servicio, categoria,
+      anio, c.titulo, c.descripcion, c.servicio, categoria,
       vacioANulo(c.ubicacion), equipoId, vacioANulo(c.observaciones), prioridad,
       req.usuario.id, req.usuario.sucursal_id ?? null,
       fechaObjetivo(prioridad), defineLaPrioridad ? req.usuario.id : null
@@ -126,7 +125,7 @@ export const crear = asyncHandler(async (req, res) => {
 
   await registrarAuditoria({
     usuarioId: req.usuario.id, entidad: 'TICKET', entidadId: ticket.id, accion: 'CREAR',
-    detalle: { numero: codigo(ticket), tipo: ticket.tipo, servicio: ticket.servicio, categoria, prioridad },
+    detalle: { numero: codigo(ticket), servicio: ticket.servicio, categoria, prioridad },
     ip: req.ip
   });
   await notificarEquipoTecnico({
@@ -366,7 +365,6 @@ export const catalogo = asyncHandler(async (_req, res) => {
   res.json({
     ok: true,
     datos: {
-      tipos: TIPOS,
       servicios: SERVICIOS,
       estados: ESTADOS,
       prioridades: PRIORIDADES,

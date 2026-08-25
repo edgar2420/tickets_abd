@@ -11,7 +11,7 @@ import { Alerta, Cargando, Etiqueta, Panel } from '../../components/Ui';
 import { Conversacion } from '../../components/Conversacion';
 import { codigoTicket, duracionEmpleada, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
 import type { Ticket } from '../../lib/tipos';
-import { ESTILO_TIPO, OBJETIVOS } from './constantes';
+import { OBJETIVOS } from './constantes';
 import { ModalAsignar, ModalEspera, ModalPrioridad, ModalResolver } from './componentes/ModalesTicket';
 
 const Dato = ({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) => (
@@ -113,7 +113,6 @@ export const DetalleTicket = () => {
           </h1>
           <div className="mt-2 flex flex-wrap gap-2">
             <Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} />
-            <Etiqueta texto={ticket.tipo} clase={ESTILO_TIPO[ticket.tipo]} />
             <Etiqueta texto={`Prioridad ${ticket.prioridad}`} clase={estiloPrioridad[ticket.prioridad]} />
             <Etiqueta texto={ticket.servicio} clase="bg-slate-100 text-slate-700 border-slate-200 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />
             <Etiqueta texto={ticket.categoria} clase="bg-slate-100 text-slate-700 border-slate-200 dark:bg-noche-700 dark:text-slate-200 dark:border-noche-600" />

@@ -26,6 +26,7 @@ import { inventarioRouter } from './modules/inventario/inventario.routes.js';
 import { equiposRouter } from './modules/equipos/equipos.routes.js';
 import { comprasRouter } from './modules/compras/compras.routes.js';
 import { proyectosRouter } from './modules/proyectos/proyectos.routes.js';
+import { mantenimientoRouter } from './modules/mantenimiento/mantenimiento.routes.js';
 
 const limitadorGeneral = rateLimit({
   windowMs: 60 * 1000,
@@ -98,6 +99,7 @@ export const crearApp = () => {
   api.use('/equipos', equiposRouter);
   api.use('/compras', comprasRouter);
   api.use('/proyectos', proyectosRouter);
+  api.use('/mantenimiento', mantenimientoRouter);
 
   app.use(env.apiPrefix, api);
   app.use(notFoundHandler);

@@ -1,5 +1,3 @@
-export const TIPOS = ['Incidente', 'Requerimiento', 'Mantenimiento', 'Desarrollo'];
-
 export const SERVICIOS = [
   'Soporte informatico', 'Redes', 'Telefonia', 'CCTV', 'Servidores',
   'IBS', 'Desarrollo', 'Mantenimiento', 'Proyectos', 'Gestion tecnologica'

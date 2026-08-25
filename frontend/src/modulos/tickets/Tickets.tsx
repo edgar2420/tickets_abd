@@ -8,11 +8,11 @@ import { Alerta, Cargando, EncabezadoPagina, Etiqueta, Panel, Vacio, filaAcciona
 import { Paginacion } from '../../components/Paginacion';
 import { codigoTicket, estiloEstado, estiloPrioridad, fechaHora } from '../../lib/formato';
 import type { Categoria, InfoPaginacion, RespuestaPaginada, Sucursal, Ticket } from '../../lib/tipos';
-import { ESTADOS, ESTILO_TIPO, PRIORIDADES, SERVICIOS, TIPOS } from './constantes';
+import { ESTADOS, PRIORIDADES, SERVICIOS } from './constantes';
 
 const FILTROS_VACIOS = {
   estado: '', categoria: '', prioridad: '', sucursal_id: '',
-  tipo: '', servicio: '', vencidos: '', busqueda: ''
+  servicio: '', vencidos: '', busqueda: ''
 };
 
 export const Tickets = () => {
@@ -108,13 +108,6 @@ export const Tickets = () => {
             </select>
           </div>
           <div>
-            <label className="etiqueta">Tipo</label>
-            <select className="campo" value={filtros.tipo} onChange={(e) => cambiar('tipo', e.target.value)}>
-              <option value="">Todos</option>
-              {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
-            </select>
-          </div>
-          <div>
             <label className="etiqueta">Servicio</label>
             <select className="campo" value={filtros.servicio} onChange={(e) => cambiar('servicio', e.target.value)}>
               <option value="">Todos</option>
@@ -180,7 +173,6 @@ export const Tickets = () => {
                 <tr>
                   <th>Ticket</th>
                   <th>Titulo</th>
-                  <th>Tipo</th>
                   <th>Servicio</th>
                   <th>Prioridad</th>
                   <th>Estado</th>
@@ -211,7 +203,6 @@ export const Tickets = () => {
                         </span>
                       )}
                     </td>
-                    <td><Etiqueta texto={ticket.tipo} clase={ESTILO_TIPO[ticket.tipo]} /></td>
                     <td className="whitespace-nowrap text-slate-600 dark:text-slate-200">{ticket.servicio}</td>
                     <td><Etiqueta texto={ticket.prioridad} clase={estiloPrioridad[ticket.prioridad]} /></td>
                     <td><Etiqueta texto={ticket.estado} clase={estiloEstado[ticket.estado]} /></td>
