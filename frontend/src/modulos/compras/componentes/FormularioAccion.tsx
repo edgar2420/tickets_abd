@@ -1,7 +1,8 @@
 import type { FormEvent } from 'react';
 import { Dato } from '../../../components/Ui';
+import { usarAuth } from '../../../context/AuthContext';
 import { montoBs } from '../../../lib/formato';
-import { codigoCompra } from '../constantes';
+import { codigoCompra, PRIORIDADES } from '../constantes';
 import type { AccionEnCurso } from '../usarCompras';
 import type { Equipo } from '../../../lib/tipos';
 
@@ -65,8 +66,10 @@ export const FormularioAccion = ({ accion, datos, setDatos, equipos, alEnviar }:
   equipos: Equipo[];
   alEnviar: (evento: FormEvent) => void;
 }) => {
+  const { puede } = usarAuth();
   const campo = { datos, setDatos };
   const esRevision = accion.tipo === 'revisar' || accion.tipo === 'aprobar-ti';
+  const defineLaPrioridad = esRevision && puede('compras.priorizar');
 
   return (
     <form id="form-accion-compra" onSubmit={alEnviar} className="space-y-4">
@@ -107,6 +110,24 @@ export const FormularioAccion = ({ accion, datos, setDatos, equipos, alEnviar }:
               placeholder="Viabilidad tecnica, alternativas evaluadas o condiciones"
               {...campo}
             />
+            {defineLaPrioridad && (
+              <div>
+                <label className="etiqueta" htmlFor="prioridad-compra">Prioridad</label>
+                <select
+                  id="prioridad-compra"
+                  className="campo"
+                  value={datos.prioridad ?? accion.solicitud.prioridad}
+                  onChange={(e) => setDatos((previos) => ({ ...previos, prioridad: e.target.value }))}
+                >
+                  {PRIORIDADES.map((prioridad) => (
+                    <option key={prioridad} value={prioridad}>{prioridad}</option>
+                  ))}
+                </select>
+                <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">
+                  La define la administracion de Sistemas, no quien pide el equipo.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

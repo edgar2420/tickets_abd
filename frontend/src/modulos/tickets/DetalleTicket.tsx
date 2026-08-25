@@ -89,7 +89,7 @@ export const DetalleTicket = () => {
   const puedeEsperar = atiende && ['Asignado', 'En Proceso'].includes(ticket.estado);
   const puedeResolver = puede('tickets.resolver') && ticket.estado === 'En Proceso';
   const puedeAsignar = atiende && !['Resuelto', 'Cerrado'].includes(ticket.estado);
-  const puedePrioridad = atiende && !cerrado;
+  const puedePrioridad = puede('tickets.priorizar') && !cerrado;
   const puedeCerrar = ticket.estado === 'Resuelto' && (esSolicitante || puede('tickets.resolver'));
 
   return (

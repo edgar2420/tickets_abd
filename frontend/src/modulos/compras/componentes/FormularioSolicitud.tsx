@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react';
-import { PRIORIDADES, SOLICITUD_VACIA, TIPOS_EQUIPO } from '../constantes';
-import type { PrioridadTicket, Usuario } from '../../../lib/tipos';
+import { SOLICITUD_VACIA, TIPOS_EQUIPO } from '../constantes';
+import type { Usuario } from '../../../lib/tipos';
 
 type Solicitud = typeof SOLICITUD_VACIA;
 
@@ -57,16 +57,6 @@ export const FormularioSolicitud = ({ nueva, setNueva, usuario, alEnviar }: {
           value={nueva.cantidad}
           onChange={(e) => setNueva((previa) => ({ ...previa, cantidad: e.target.value }))}
         />
-      </div>
-      <div>
-        <label className="etiqueta">Prioridad</label>
-        <select
-          className="campo"
-          value={nueva.prioridad}
-          onChange={(e) => setNueva((previa) => ({ ...previa, prioridad: e.target.value as PrioridadTicket }))}
-        >
-          {PRIORIDADES.map((prioridad) => <option key={prioridad} value={prioridad}>{prioridad}</option>)}
-        </select>
       </div>
     </div>
 

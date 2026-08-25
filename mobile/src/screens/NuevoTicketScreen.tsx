@@ -4,12 +4,11 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { api } from '../lib/api';
 import { Boton, Panel, PiePagina, estilos } from '../components/Comunes';
 import { tema } from '../lib/tema';
-import type { PrioridadTicket, Ticket } from '../lib/tipos';
+import type { Ticket } from '../lib/tipos';
 import type { ParametrosNavegacion } from '../navegacion';
 
 type Propiedades = NativeStackScreenProps<ParametrosNavegacion, 'NuevoTicket'>;
 
-const PRIORIDADES: PrioridadTicket[] = ['Baja', 'Media', 'Alta', 'Critica'];
 
 interface Categoria {
   id: number;
@@ -51,7 +50,6 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
   const [descripcion, setDescripcion] = useState('');
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [categoria, setCategoria] = useState('');
-  const [prioridad, setPrioridad] = useState<PrioridadTicket>('Media');
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -70,7 +68,7 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
     try {
       const { datos } = await api<{ datos: Ticket }>('/tickets', {
         metodo: 'POST',
-        cuerpo: { titulo, descripcion, categoria, prioridad }
+        cuerpo: { titulo, descripcion, categoria }
       });
       navigation.replace('DetalleTicket', { id: datos.id });
     } catch (fallo) {
@@ -101,7 +99,6 @@ export const NuevoTicketScreen = ({ navigation }: Propiedades) => {
             valor={categoria}
             alCambiar={setCategoria}
           />
-          <Selector etiqueta="Prioridad" opciones={PRIORIDADES} valor={prioridad} alCambiar={setPrioridad} />
 
           <View>
             <Text style={estilos.etiqueta}>Descripcion detallada</Text>

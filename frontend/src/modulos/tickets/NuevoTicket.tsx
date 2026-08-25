@@ -14,7 +14,7 @@ import {
 export const NuevoTicket = () => {
   const navegar = useNavigate();
   const { puede } = usarAuth();
-  const defineLaPrioridad = puede('tickets.responder');
+  const defineLaPrioridad = puede('tickets.priorizar');
 
   const [categorias, setCategorias] = useState<Categoria[] | null>(null);
   const [equipos, setEquipos] = useState<Equipo[]>([]);
@@ -284,7 +284,7 @@ export const NuevoTicket = () => {
               </div>
             ) : (
               <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs leading-relaxed text-slate-600 dark:bg-noche-800 dark:border-noche-700 dark:text-slate-200">
-                La prioridad y el objetivo de atencion los determina el area de Sistemas al revisar el ticket.
+                La prioridad y el objetivo de atencion los determina la administracion de Sistemas al revisar el ticket.
               </div>
             )}
 

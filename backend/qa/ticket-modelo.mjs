@@ -51,7 +51,7 @@ const segundo = await pedir('qa.cliente2', '/tickets', {
 marca(segundo.cuerpo.datos?.numero === ticket.numero + 1,
   `el correlativo avanza dentro del ano: ${ticket.numero} -> ${segundo.cuerpo.datos?.numero}`);
 
-console.log('\n=== 3. LA PRIORIDAD LA DEFINE SISTEMAS ===');
+console.log('\n=== 3. LA PRIORIDAD LA DEFINE LA ADMINISTRACION ===');
 const intento = await pedir('qa.cliente', '/tickets', {
   metodo: 'POST',
   cuerpo: {
@@ -64,18 +64,31 @@ const intento = await pedir('qa.cliente', '/tickets', {
 marca(intento.cuerpo.datos?.prioridad === 'Media',
   `la prioridad que manda el solicitante se ignora: quedo en ${intento.cuerpo.datos?.prioridad}`);
 marca(intento.cuerpo.datos?.prioridad_por_nombre === null,
-  'no consta que nadie de Sistemas la haya definido todavia');
+  'no consta que nadie la haya definido todavia');
 
-const sinPermiso = await pedir('qa.cliente', `/tickets/${ticket.id}/prioridad`, {
-  metodo: 'PUT', cuerpo: { prioridad: 'Critica' }
+for (const cuenta of ['qa.cliente', 'qa.gerente', 'qa.tecnico', 'qa.tecnico3']) {
+  const negado = await pedir(cuenta, `/tickets/${ticket.id}/prioridad`, {
+    metodo: 'PUT', cuerpo: { prioridad: 'Critica' }
+  });
+  marca(negado.estado === 403, `${cuenta.padEnd(12)} no puede cambiar la prioridad (${negado.estado})`);
+}
+
+const altaTecnico = await pedir('qa.tecnico', '/tickets', {
+  metodo: 'POST',
+  cuerpo: {
+    titulo: 'QA - un tecnico tampoco fija la prioridad al registrar',
+    descripcion: 'Se verifica que ni el personal tecnico pueda nacer un ticket con prioridad propia.',
+    tipo: 'Incidente', servicio: 'Soporte informatico', categoria: 'PC', prioridad: 'Critica'
+  }
 });
-marca(sinPermiso.estado === 403, `un solicitante no puede cambiar la prioridad (${sinPermiso.estado})`);
+marca(altaTecnico.cuerpo.datos?.prioridad === 'Media',
+  `al tecnico tambien se le ignora la prioridad enviada: quedo en ${altaTecnico.cuerpo.datos?.prioridad}`);
 
-const definida = await pedir('qa.tecnico', `/tickets/${ticket.id}/prioridad`, {
+const definida = await pedir('admin', `/tickets/${ticket.id}/prioridad`, {
   metodo: 'PUT', cuerpo: { prioridad: 'Critica', motivo: 'Contabilidad no puede emitir comprobantes.' }
 });
 marca(definida.cuerpo.datos?.prioridad === 'Critica',
-  `Sistemas la fija en ${definida.cuerpo.datos?.prioridad}`);
+  `la administracion la fija en ${definida.cuerpo.datos?.prioridad}`);
 marca(Boolean(definida.cuerpo.datos?.prioridad_por_nombre),
   `consta quien la definio: ${definida.cuerpo.datos?.prioridad_por_nombre}`);
 marca(Boolean(definida.cuerpo.datos?.fecha_objetivo), 'queda fijado el objetivo de atencion');
