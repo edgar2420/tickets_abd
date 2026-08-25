@@ -845,6 +845,13 @@ const construir = async () => {
         + 'acciones fijas en el encabezado, auditoria de diez registros sin la columna de origen y limpieza '
         + 'de cache y cookies desde la barra superior',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.8.3',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Restablecimiento de contrasena desde la consola del servidor para la cuenta que quede sin '
+        + 'acceso, e indicadores del tablero con los rotulos completos',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
