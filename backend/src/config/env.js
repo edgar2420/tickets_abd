@@ -18,6 +18,22 @@ export const direccionesLocales = () => Object.values(os.networkInterfaces())
 const origenesDeLaRed = () => direccionesLocales()
   .flatMap((direccion) => PUERTOS_DE_RED.map((puerto) => `http://${direccion}:${puerto}`));
 
+const origenesFijos = () => (process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:19006')
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean);
+
+const VIGENCIA_ORIGENES = 30_000;
+let cacheOrigenes = { hasta: 0, lista: [] };
+
+export const origenesPermitidos = () => {
+  if ((process.env.RED_LOCAL ?? 'false') !== 'true') return origenesFijos();
+  const ahora = Date.now();
+  if (ahora < cacheOrigenes.hasta) return cacheOrigenes.lista;
+  cacheOrigenes = { hasta: ahora + VIGENCIA_ORIGENES, lista: [...origenesFijos(), ...origenesDeLaRed()] };
+  return cacheOrigenes.lista;
+};
+
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? 'development',
   port: Number(process.env.PORT ?? 4000),
@@ -36,13 +52,9 @@ export const env = {
   },
   redLocal: (process.env.RED_LOCAL ?? 'false') === 'true',
   cors: {
-    origins: [
-      ...(process.env.CORS_ORIGINS ?? 'http://localhost:5173,http://localhost:19006')
-        .split(',')
-        .map((o) => o.trim())
-        .filter(Boolean),
-      ...((process.env.RED_LOCAL ?? 'false') === 'true' ? origenesDeLaRed() : [])
-    ]
+    get origins() {
+      return origenesPermitidos();
+    }
   },
   httpsObligatorio: (process.env.FORZAR_HTTPS ?? 'false') === 'true',
   cookies: {
