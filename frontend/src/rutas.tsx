@@ -6,6 +6,7 @@ import { Perfil } from './modulos/perfil';
 import { DetalleTicket, NuevoTicket, Tickets } from './modulos/tickets';
 import { Inventario } from './modulos/inventario';
 import { Equipos } from './modulos/equipos';
+import { Mantenimiento } from './modulos/mantenimiento';
 import { Compras } from './modulos/compras';
 import { Proyectos } from './modulos/proyectos';
 import { Auditoria } from './modulos/auditoria';
@@ -32,6 +33,7 @@ export const RUTAS: Ruta[] = [
   { path: '/tickets/:id', elemento: <DetalleTicket />, permisos: ['tickets.ver_propios', 'tickets.ver_todos'] },
   { path: '/inventario', elemento: <Inventario />, permisos: ['inventario.ver'] },
   { path: '/equipos', elemento: <Equipos />, permisos: ['equipos.ver'] },
+  { path: '/mantenimiento', elemento: <Mantenimiento />, permisos: ['mantenimiento.ver'] },
   { path: '/compras', elemento: <Compras />, permisos: ['compras.solicitar', 'compras.ver_todas'] },
   { path: '/proyectos', elemento: <Proyectos />, permisos: ['proyectos.solicitar', 'proyectos.ver_todas'] },
   { path: '/auditoria', elemento: <Auditoria />, permisos: ['auditoria.ver'] },

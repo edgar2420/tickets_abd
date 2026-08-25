@@ -5,11 +5,8 @@ import { api } from '../../lib/api';
 import { usarAuth } from '../../context/AuthContext';
 import { Alerta, Cargando, EncabezadoPagina, IconoCategoria } from '../../components/Ui';
 import { estiloPrioridad } from '../../lib/formato';
-import type { Categoria, Equipo, PrioridadTicket, ServicioTicket, Ticket, TipoTicket } from '../../lib/tipos';
-import {
-  AYUDA_SERVICIO, AYUDA_TIPO, ESTILO_TIPO, OBJETIVOS,
-  PRIORIDADES, SERVICIOS, TIPOS
-} from './constantes';
+import type { Categoria, Equipo, PrioridadTicket, ServicioTicket, Ticket } from '../../lib/tipos';
+import { AYUDA_SERVICIO, OBJETIVOS, PRIORIDADES, SERVICIOS } from './constantes';
 
 export const NuevoTicket = () => {
   const navegar = useNavigate();
@@ -21,7 +18,6 @@ export const NuevoTicket = () => {
   const [formulario, setFormulario] = useState({
     titulo: '',
     descripcion: '',
-    tipo: 'Incidente' as TipoTicket,
     servicio: 'Soporte informatico' as ServicioTicket,
     categoria: '',
     ubicacion: '',
@@ -58,7 +54,6 @@ export const NuevoTicket = () => {
       const cuerpo: Record<string, unknown> = {
         titulo: formulario.titulo,
         descripcion: formulario.descripcion,
-        tipo: formulario.tipo,
         servicio: formulario.servicio,
         categoria: formulario.categoria,
         ubicacion: formulario.ubicacion.trim() || null,
@@ -81,7 +76,6 @@ export const NuevoTicket = () => {
     && formulario.categoria.length > 0;
 
   const resumen: [string, string][] = [
-    ['Tipo', formulario.tipo],
     ['Servicio', formulario.servicio],
     ['Categoria', formulario.categoria || 'Sin elegir'],
     ['Activo', equipo ? equipo.codigo : 'Ninguno'],
@@ -100,30 +94,6 @@ export const NuevoTicket = () => {
         <div className="grid gap-6 p-5 lg:grid-cols-5">
 
           <div className="space-y-4 lg:col-span-3">
-            <div>
-              <span className="etiqueta">Tipo de solicitud</span>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {TIPOS.map((tipo) => {
-                  const activo = formulario.tipo === tipo;
-                  return (
-                    <button
-                      key={tipo}
-                      type="button"
-                      onClick={() => setFormulario((f) => ({ ...f, tipo }))}
-                      className={`rounded-lg border-2 px-3 py-2 text-left transition ${
-                        activo
-                          ? `${ESTILO_TIPO[tipo]} ring-2 ring-institucional-900/15`
-                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-noche-700 dark:bg-noche-800 dark:text-slate-200'
-                      }`}
-                    >
-                      <span className="block text-sm font-semibold">{tipo}</span>
-                      <span className="mt-0.5 block text-xs leading-snug opacity-80">{AYUDA_TIPO[tipo]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <div>
               <label className="etiqueta" htmlFor="titulo">Titulo</label>
               <input

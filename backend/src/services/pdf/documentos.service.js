@@ -51,7 +51,6 @@ export const construirActaTicket = (ticket, bitacora = [], opciones = {}) => {
   doc.camposClaveValor([
     { etiqueta: 'Ticket', valor: codigoTicket(ticket) },
     { etiqueta: 'Estado', valor: ticket.estado },
-    { etiqueta: 'Tipo', valor: ticket.tipo },
     { etiqueta: 'Servicio', valor: ticket.servicio },
     { etiqueta: 'Categoria', valor: ticket.categoria },
     { etiqueta: 'Prioridad', valor: ticket.prioridad },

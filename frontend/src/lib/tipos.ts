@@ -176,7 +176,6 @@ export interface ResumenEquipos {
 
 export type EstadoTicket =
   | 'Nuevo' | 'Asignado' | 'En Proceso' | 'En Espera' | 'Resuelto' | 'Cerrado';
-export type TipoTicket = 'Incidente' | 'Requerimiento' | 'Mantenimiento' | 'Desarrollo';
 export type ServicioTicket =
   | 'Soporte informatico' | 'Redes' | 'Telefonia' | 'CCTV' | 'Servidores'
   | 'IBS' | 'Desarrollo' | 'Mantenimiento' | 'Proyectos' | 'Gestion tecnologica';
@@ -241,7 +240,6 @@ export interface Ticket {
   numero: number;
   titulo: string;
   descripcion: string;
-  tipo: TipoTicket;
   servicio: ServicioTicket;
   categoria: CategoriaTicket;
   prioridad: PrioridadTicket;
@@ -285,7 +283,6 @@ export interface ObjetivoAtencion {
 }
 
 export interface CatalogoTicket {
-  tipos: TipoTicket[];
   servicios: ServicioTicket[];
   estados: EstadoTicket[];
   prioridades: PrioridadTicket[];

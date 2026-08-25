@@ -4,7 +4,7 @@ import {
   Bell, Boxes, Building, Building2, ClipboardList, Eraser, FileBarChart, Gauge, KeyRound, LayoutGrid, Lightbulb, LogOut, Monitor, Moon,
   ShoppingCart,
   PanelLeftClose, PanelLeftOpen, ScrollText, ShieldCheck, Sun, Tags, Ticket,
-  UserCog, Users, type LucideIcon
+  UserCog, Users, Wrench, type LucideIcon
 } from 'lucide-react';
 import { usarAuth } from '../context/AuthContext';
 import { CambioPassword } from './CambioPassword';
@@ -29,6 +29,7 @@ const ENLACES: Enlace[] = [
   { ruta: '/tickets/nuevo', texto: 'Nuevo ticket', icono: ClipboardList, permisos: ['tickets.crear'], grupo: 'Operacion' },
   { ruta: '/inventario', texto: 'Inventario', icono: Boxes, permisos: ['inventario.ver'], grupo: 'Operacion' },
   { ruta: '/equipos', texto: 'Equipos', icono: Monitor, permisos: ['equipos.ver'], grupo: 'Operacion' },
+  { ruta: '/mantenimiento', texto: 'Mantenimiento', icono: Wrench, permisos: ['mantenimiento.ver'], grupo: 'Operacion' },
   { ruta: '/compras', texto: 'Compras', icono: ShoppingCart, permisos: ['compras.solicitar', 'compras.ver_todas'], grupo: 'Operacion' },
   { ruta: '/proyectos', texto: 'Proyectos', icono: Lightbulb, permisos: ['proyectos.solicitar', 'proyectos.ver_todas'], grupo: 'Operacion' },
   { ruta: '/admin/usuarios', texto: 'Usuarios', icono: Users, permisos: ['admin.usuarios'], grupo: 'Administracion' },
