@@ -92,8 +92,7 @@ export const usarCompras = () => {
           justificacion: nueva.justificacion.trim(),
           tipo_equipo: nueva.tipo_equipo,
           cantidad: Number(nueva.cantidad) || 1,
-          especificaciones: nueva.especificaciones || null,
-          prioridad: nueva.prioridad
+          especificaciones: nueva.especificaciones || null
         }
       });
       setNueva(SOLICITUD_VACIA);

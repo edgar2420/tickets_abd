@@ -25,8 +25,7 @@ export const SOLICITUD_VACIA = {
   justificacion: '',
   tipo_equipo: 'Escritorio',
   cantidad: '1',
-  especificaciones: '',
-  prioridad: 'Media' as PrioridadTicket
+  especificaciones: ''
 };
 
 export type TipoAccion = 'revisar' | 'aprobar-ti' | 'aprobar-gerencia' | 'rechazar' | 'comprar' | 'entregar';
@@ -46,7 +45,8 @@ export const cuerpoDeAccion = (tipo: TipoAccion, datos: Record<string, string>):
   const revision = {
     observacion_ti: datos.observacion_ti || null,
     monto_estimado: datos.monto_estimado ? Number(datos.monto_estimado) : null,
-    equipo_sugerido: datos.equipo_sugerido || null
+    equipo_sugerido: datos.equipo_sugerido || null,
+    ...(datos.prioridad ? { prioridad: datos.prioridad } : {})
   };
 
   const cuerpos: Record<TipoAccion, unknown> = {

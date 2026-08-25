@@ -440,7 +440,8 @@ const construir = async () => {
     { campo: 'Categoria', contenido: 'Catalogo administrable: PC, Red, Camara, Telefonia, IBS, Servidores y otros' },
     { campo: 'Ubicacion', contenido: 'Piso, oficina o area donde ocurre el hecho' },
     { campo: 'Activo relacionado', contenido: 'Equipo del parque sobre el que se trabaja, validado contra inventario' },
-    { campo: 'Prioridad', contenido: 'La determina Sistemas, no el solicitante; queda registrado quien la fijo' },
+    { campo: 'Prioridad', contenido: 'La determina la administracion de Sistemas mediante el permiso '
+      + 'tickets.priorizar; ni el solicitante ni el personal tecnico pueden elegirla' },
     { campo: 'Tiempo empleado', contenido: 'Minutos efectivamente dedicados, se registran al resolver' },
     { campo: 'Observaciones', contenido: 'Recomendacion o pendiente que deja el tecnico' }
   ], { alturaFila: 26 });
@@ -851,6 +852,14 @@ const construir = async () => {
       fecha: new Date().toLocaleDateString('es-BO'),
       descripcion: 'Restablecimiento de contrasena desde la consola del servidor para la cuenta que quede sin '
         + 'acceso, e indicadores del tablero con los rotulos completos',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.9.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'La prioridad de tickets y de solicitudes de compra queda reservada a la administracion '
+        + 'mediante los permisos tickets.priorizar y compras.priorizar; se retira el selector de prioridad de '
+        + 'los formularios del solicitante y de la aplicacion movil',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });

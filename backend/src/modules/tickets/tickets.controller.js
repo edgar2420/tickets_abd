@@ -100,7 +100,7 @@ export const crear = asyncHandler(async (req, res) => {
   const categoria = await validarCategoria(c.categoria);
   const equipoId = await validarEquipo(c.equipo_id);
 
-  const defineLaPrioridad = req.usuario.permisos.includes('tickets.responder');
+  const defineLaPrioridad = req.usuario.permisos.includes('tickets.priorizar');
   const prioridad = defineLaPrioridad && c.prioridad ? c.prioridad : PRIORIDAD_INICIAL;
   const anio = new Date().getFullYear();
 
