@@ -12,7 +12,10 @@ export const salaTicket = (ticketId) => `ticket:${ticketId}`;
 
 export const inicializarSockets = (httpServer) => {
   io = new Server(httpServer, {
-    cors: { origin: env.cors.origins, credentials: true },
+    cors: {
+      origin: (origen, responder) => responder(null, !origen || env.cors.origins.includes(origen)),
+      credentials: true
+    },
     path: '/socket.io'
   });
 

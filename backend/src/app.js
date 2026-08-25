@@ -57,7 +57,7 @@ export const crearApp = () => {
   }));
 
   app.use(cors({
-    origin: env.cors.origins,
+    origin: (origen, responder) => responder(null, !origen || env.cors.origins.includes(origen)),
     credentials: true,
     exposedHeaders: ['Content-Disposition']
   }));
