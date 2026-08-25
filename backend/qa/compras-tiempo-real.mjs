@@ -48,8 +48,11 @@ const conexion = (socket) => new Promise((resolver) => {
   socket.once('conexion:establecida', (d) => { clearTimeout(t); resolver(d); });
 });
 
-const salasGerente = (await conexion(socketGerente))?.salas ?? [];
-const salasTi = (await conexion(socketTi))?.salas ?? [];
+const esperaGerente = conexion(socketGerente);
+const esperaTi = conexion(socketTi);
+const [datosGerente, datosTi] = await Promise.all([esperaGerente, esperaTi]);
+const salasGerente = datosGerente?.salas ?? [];
+const salasTi = datosTi?.salas ?? [];
 marca(salasGerente.includes('sala:compras'), `Gerencia entra a la sala de compras: ${salasGerente.join(', ')}`);
 marca(salasTi.includes('sala:compras'), `TI tambien la recibe: ${salasTi.join(', ')}`);
 

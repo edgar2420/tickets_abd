@@ -135,7 +135,23 @@ const pdf = await fetch(`${WEB}/api/v1/tickets/${ticket.id}/pdf`, {
 const bytes = pdf.ok ? (await pdf.arrayBuffer()).byteLength : 0;
 marca(pdf.ok && bytes > 1500, `la ficha en PDF se descarga (${pdf.status}, ${bytes} bytes)`);
 
-console.log('\n=== 7. CIERRE DE SESION ===');
+console.log('\n=== 7. LO QUE NO EXISTE ===');
+const rutaInventada = await navegar('/api/v1/seccion-que-no-existe');
+marca(rutaInventada.estado === 404, `una ruta de la API inexistente responde 404 (${rutaInventada.estado})`);
+
+const ticketInventado = await navegar('/api/v1/tickets/99999999');
+marca(ticketInventado.estado === 404, `un ticket inexistente responde 404 (${ticketInventado.estado})`);
+
+const equipoInventado = await navegar('/api/v1/equipos/99999999');
+marca([403, 404].includes(equipoInventado.estado),
+  `un equipo inexistente no se inventa (${equipoInventado.estado})`);
+
+const paginaInventada = await fetch(`${WEB}/una-pagina-que-no-existe`);
+const cuerpoPagina = await paginaInventada.text();
+marca(paginaInventada.status === 200 && cuerpoPagina.includes('id="root"'),
+  'una direccion desconocida entrega la aplicacion, que muestra su propia pantalla 404');
+
+console.log('\n=== 8. CIERRE DE SESION ===');
 const salida = await navegar('/api/v1/auth/logout', { metodo: 'POST' });
 marca(salida.estado === 200, `el cierre de sesion se acepta (${salida.estado})`);
 marca(!galletas.has('tickets_sesion'), 'el navegador se queda sin cookie de sesion');
