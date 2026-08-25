@@ -100,6 +100,17 @@ equiposRouter.get('/ubicaciones', requierePermiso('equipos.ver'), asyncHandler(a
   res.json({ ok: true, datos: rows });
 }));
 
+equiposRouter.get('/mios', asyncHandler(async (req, res) => {
+  const { rows } = await query(
+    `SELECT e.id, e.codigo, e.nombre_equipo, e.tipo, e.marca, e.modelo, e.ubicacion, e.estado
+       FROM equipos e
+      WHERE e.activo = TRUE AND e.usuario_id = $1
+      ORDER BY e.codigo`,
+    [req.usuario.id]
+  );
+  res.json({ ok: true, datos: rows });
+}));
+
 equiposRouter.get('/resumen', requierePermiso('equipos.ver'), asyncHandler(async (_req, res) => {
   const { rows } = await query(
     `SELECT

@@ -14,7 +14,7 @@ import {
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { reporteMensual, mesValido, mesVigente } from './reporteMensual.service.js';
 import {
-  SERVICIOS, PRIORIDADES, ESTADOS, OBJETIVOS, PRIORIDAD_INICIAL,
+  SERVICIOS, SERVICIOS_VALIDOS, PRIORIDADES, ESTADOS, OBJETIVOS, PRIORIDAD_INICIAL,
   puedePasar, fechaObjetivo, codigoTicket as codigo
 } from './modelo.js';
 
@@ -75,8 +75,10 @@ export const detalle = asyncHandler(async (req, res) => {
   if (!req.usuario.permisos.includes('tickets.ver_todos') && ticket.solicitante_id !== req.usuario.id) {
     throw HttpError.forbidden('Solo puede consultar los tickets que usted ha registrado');
   }
-  const bitacora = await bitacoraTicket(ticket.id);
-  res.json({ ok: true, datos: { ...ticket, bitacora } });
+  const atiende = req.usuario.permisos.includes('tickets.ver_todos')
+    || req.usuario.permisos.includes('tickets.responder');
+  const bitacora = atiende ? await bitacoraTicket(ticket.id) : undefined;
+  res.json({ ok: true, datos: atiende ? { ...ticket, bitacora } : ticket });
 });
 
 const vacioANulo = (valor) => (valor === '' || valor === undefined ? null : valor);

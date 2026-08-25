@@ -206,23 +206,25 @@ export const DetalleTicket = () => {
 
           <Conversacion ticketId={ticket.id} />
 
-          <Panel titulo="Bitacora de acciones" icono={History}>
-            <ol className="space-y-3">
-              {(ticket.bitacora ?? []).map((registro, indice) => (
-                <li key={indice} className="flex gap-3 border-l-2 border-institucional-200 pl-4">
-                  <div>
-                    <p className="text-sm font-semibold text-institucional-900 dark:text-slate-100">{registro.accion}</p>
-                    <p className="text-xs text-slate-500 dark:text-slate-300">
-                      {registro.usuario_nombre ?? 'Sistema'} - {fechaHora(registro.fecha)}
-                    </p>
-                  </div>
-                </li>
-              ))}
-              {(ticket.bitacora ?? []).length === 0 && (
-                <li className="text-sm text-slate-500 dark:text-slate-300">Sin registros en la bitacora.</li>
-              )}
-            </ol>
-          </Panel>
+          {atiende && (
+            <Panel titulo="Bitacora de acciones" icono={History}>
+              <ol className="space-y-3">
+                {(ticket.bitacora ?? []).map((registro, indice) => (
+                  <li key={indice} className="flex gap-3 border-l-2 border-institucional-200 pl-4">
+                    <div>
+                      <p className="text-sm font-semibold text-institucional-900 dark:text-slate-100">{registro.accion}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-300">
+                        {registro.usuario_nombre ?? 'Sistema'} - {fechaHora(registro.fecha)}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+                {(ticket.bitacora ?? []).length === 0 && (
+                  <li className="text-sm text-slate-500 dark:text-slate-300">Sin registros en la bitacora.</li>
+                )}
+              </ol>
+            </Panel>
+          )}
         </div>
 
         <div className="space-y-5">

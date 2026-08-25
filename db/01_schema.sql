@@ -86,8 +86,6 @@ CREATE INDEX IF NOT EXISTS idx_auditoria_fecha       ON auditoria(fecha DESC);
 CREATE INDEX IF NOT EXISTS idx_notif_usuario_leida   ON notificaciones(usuario_id, leida);
 
 ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_estado;
-ALTER TABLE tickets ADD  CONSTRAINT chk_tickets_estado
-    CHECK (estado IN ('Abierto','En Proceso','Resuelto','Cerrado'));
 
 ALTER TABLE tickets DROP CONSTRAINT IF EXISTS chk_tickets_prioridad;
 ALTER TABLE tickets ADD  CONSTRAINT chk_tickets_prioridad
