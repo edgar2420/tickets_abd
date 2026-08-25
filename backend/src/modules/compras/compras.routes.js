@@ -21,15 +21,19 @@ const solicitudSchema = z.object({
   justificacion: z.string().min(15, 'Explique para que se necesita el equipo'),
   tipo_equipo: z.enum(TIPOS_EQUIPO).default('Escritorio'),
   cantidad: z.number().int().positive().max(999).default(1),
-  especificaciones: z.string().max(500).optional().nullable(),
-  prioridad: z.enum(PRIORIDADES).default('Media')
+  especificaciones: z.string().max(500).optional().nullable()
 });
 
 const revisionSchema = z.object({
   observacion_ti: z.string().max(500).optional().nullable(),
   monto_estimado: z.number().nonnegative().optional().nullable(),
-  equipo_sugerido: z.string().max(200).optional().nullable()
+  equipo_sugerido: z.string().max(200).optional().nullable(),
+  prioridad: z.enum(PRIORIDADES).optional()
 });
+
+const prioridadPedida = (req) => (req.usuario.permisos.includes('compras.priorizar')
+  ? req.body.prioridad ?? null
+  : null);
 
 const gerenciaSchema = z.object({
   observacion_gerencia: z.string().max(500).optional().nullable()
@@ -156,13 +160,13 @@ comprasRouter.get('/:id', requierePermiso('compras.ver_todas', 'compras.solicita
 
 comprasRouter.post('/', requierePermiso('compras.solicitar'), validate(solicitudSchema),
   asyncHandler(async (req, res) => {
-    const { titulo, justificacion, tipo_equipo, cantidad, especificaciones, prioridad } = req.body;
+    const { titulo, justificacion, tipo_equipo, cantidad, especificaciones } = req.body;
     const { rows } = await query(
       `INSERT INTO solicitudes_compra
-         (titulo, justificacion, tipo_equipo, cantidad, especificaciones, prioridad,
+         (titulo, justificacion, tipo_equipo, cantidad, especificaciones,
           solicitante_id, sucursal_id, area_id)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id`,
-      [titulo, justificacion, tipo_equipo, cantidad, especificaciones ?? null, prioridad,
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+      [titulo, justificacion, tipo_equipo, cantidad, especificaciones ?? null,
         req.usuario.id, req.usuario.sucursal_id, req.usuario.area_id]
     );
     const solicitud = await obtener(rows[0].id);
@@ -192,9 +196,11 @@ comprasRouter.put('/:id/revisar', requierePermiso('compras.revisar'), validate(r
     await query(
       `UPDATE solicitudes_compra
           SET estado = 'En revision', revisado_por_id = $1, fecha_revision = CURRENT_TIMESTAMP,
-              observacion_ti = $2, monto_estimado = $3, equipo_sugerido = $4
-        WHERE id = $5`,
-      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null, id]
+              observacion_ti = $2, monto_estimado = $3, equipo_sugerido = $4,
+              prioridad = COALESCE($5::varchar, prioridad)
+        WHERE id = $6`,
+      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null,
+        prioridadPedida(req), id]
     );
     const solicitud = await obtener(id);
 
@@ -226,9 +232,11 @@ comprasRouter.put('/:id/aprobar-ti', requierePermiso('compras.revisar'), validat
               fecha_revision = COALESCE(fecha_revision, CURRENT_TIMESTAMP),
               observacion_ti = COALESCE($2, observacion_ti),
               monto_estimado = COALESCE($3, monto_estimado),
-              equipo_sugerido = COALESCE($4, equipo_sugerido)
-        WHERE id = $5`,
-      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null, id]
+              equipo_sugerido = COALESCE($4, equipo_sugerido),
+              prioridad = COALESCE($5::varchar, prioridad)
+        WHERE id = $6`,
+      [req.usuario.id, observacion_ti ?? null, monto_estimado ?? null, equipo_sugerido ?? null,
+        prioridadPedida(req), id]
     );
     const solicitud = await obtener(id);
 

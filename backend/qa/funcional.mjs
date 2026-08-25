@@ -261,20 +261,31 @@ const compra = await pedir('qa.cliente3', '/compras', {
     tipo_equipo: 'Escritorio',
     cantidad: 1,
     especificaciones: 'Procesador de gama media, 16 GB de memoria, unidad de estado solido.',
-    prioridad: 'Media'
+    prioridad: 'Critica'
   }
 });
 marca('compras', compra.estado === 201, `el cliente registra la solicitud (${compra.estado})`);
 const solicitud = compra.cuerpo.datos;
+marca('compras', solicitud?.prioridad === 'Media',
+  `al cliente se le ignora la prioridad del pedido: quedo en ${solicitud?.prioridad}`);
+
+const revisionTecnico = await pedir('qa.tecnico', `/compras/${solicitud.id}/revisar`, {
+  metodo: 'PUT', cuerpo: { observacion_ti: 'QA - revision sin permiso de priorizar.', prioridad: 'Critica' }
+});
+marca('compras', revisionTecnico.cuerpo.datos?.prioridad === 'Media',
+  `un tecnico tampoco cambia la prioridad del pedido: sigue en ${revisionTecnico.cuerpo.datos?.prioridad}`);
 
 const gerenciaAntes = await pedir('qa.gerente', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
 marca('compras', gerenciaAntes.estado >= 400,
   `Gerencia no puede aprobar antes que TI (${gerenciaAntes.estado})`);
 
 const ti = await pedir('admin', `/compras/${solicitud.id}/aprobar-ti`, {
-  metodo: 'PUT', cuerpo: { observacion_ti: 'QA - requerimiento tecnico validado.', monto_estimado: 5200 }
+  metodo: 'PUT',
+  cuerpo: { observacion_ti: 'QA - requerimiento tecnico validado.', monto_estimado: 5200, prioridad: 'Alta' }
 });
 marca('compras', ti.estado === 200, `TI aprueba en primera instancia (${ti.estado})`);
+marca('compras', ti.cuerpo.datos?.prioridad === 'Alta',
+  `la administracion si fija la prioridad del pedido: ${ti.cuerpo.datos?.prioridad}`);
 
 const clienteAprueba = await pedir('qa.cliente3', `/compras/${solicitud.id}/aprobar-gerencia`, { metodo: 'PUT', cuerpo: {} });
 marca('compras', clienteAprueba.estado === 403, `un cliente no puede aprobar (${clienteAprueba.estado})`);
