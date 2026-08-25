@@ -5,6 +5,7 @@ import { ProveedorNotificaciones } from './context/NotificacionesContext';
 import { Layout } from './components/Layout';
 import { RutaProtegida } from './components/RutaProtegida';
 import { RUTAS, RUTA_INICIAL, RUTA_PUBLICA } from './rutas';
+import { NoEncontrado } from './modulos/errores';
 
 export const App = () => (
   <ProveedorTema>
@@ -21,8 +22,8 @@ export const App = () => (
                 element={<RutaProtegida permisos={permisos}>{elemento}</RutaProtegida>}
               />
             ))}
+            <Route path="*" element={<NoEncontrado />} />
           </Route>
-          <Route path="*" element={<Navigate to={RUTA_INICIAL} replace />} />
         </Routes>
       </ProveedorNotificaciones>
     </ProveedorAuth>

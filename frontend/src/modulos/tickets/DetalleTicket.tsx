@@ -4,7 +4,7 @@ import {
   AlertTriangle, ArrowLeft, CheckCircle2, ClipboardCheck, Clock, FileDown, History,
   Monitor, PauseCircle, PlayCircle, SignalHigh, UserCheck, Users
 } from 'lucide-react';
-import { api, descargarPdf } from '../../lib/api';
+import { api, descargarPdf, ErrorApi } from '../../lib/api';
 import { obtenerSocket } from '../../lib/socket';
 import { usarAuth } from '../../context/AuthContext';
 import { Alerta, Cargando, Etiqueta, Panel } from '../../components/Ui';
@@ -13,6 +13,7 @@ import { codigoTicket, duracionEmpleada, estiloEstado, estiloPrioridad, fechaHor
 import type { Ticket } from '../../lib/tipos';
 import { OBJETIVOS } from './constantes';
 import { ModalAsignar, ModalEspera, ModalPrioridad, ModalResolver } from './componentes/ModalesTicket';
+import { RegistroNoEncontrado } from '../errores';
 
 const Dato = ({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) => (
   <div>
@@ -28,6 +29,7 @@ export const DetalleTicket = () => {
 
   const [ticket, setTicket] = useState<Ticket | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [inexistente, setInexistente] = useState(false);
   const [procesando, setProcesando] = useState(false);
   const [modal, setModal] = useState<'' | 'resolver' | 'asignar' | 'prioridad' | 'espera'>('');
 
@@ -37,6 +39,10 @@ export const DetalleTicket = () => {
       setTicket(datos);
       setError(null);
     } catch (fallo) {
+      if (fallo instanceof ErrorApi && (fallo.estado === 404 || fallo.estado === 403)) {
+        setInexistente(true);
+        return;
+      }
       setError(fallo instanceof Error ? fallo.message : 'Error al cargar el ticket');
     }
   }, [id]);
@@ -74,6 +80,17 @@ export const DetalleTicket = () => {
       setProcesando(false);
     }
   };
+
+  if (inexistente) {
+    return (
+      <RegistroNoEncontrado
+        titulo="Este ticket no existe"
+        mensaje="No hay ningun ticket con ese numero, o fue dado de baja. Tambien puede ocurrir si el ticket pertenece a otra persona y su cuenta solo ve los propios."
+        detalle={`Ticket solicitado: ${id}`}
+        volverA="/tickets"
+      />
+    );
+  }
 
   if (!ticket && !error) return <Cargando texto="Consultando el ticket" />;
   if (error && !ticket) return <Alerta mensaje={error} />;
