@@ -178,7 +178,7 @@ export type EstadoTicket =
   | 'Nuevo' | 'Asignado' | 'En Proceso' | 'En Espera' | 'Resuelto' | 'Cerrado';
 export type ServicioTicket =
   | 'Soporte informatico' | 'Redes' | 'Telefonia' | 'CCTV' | 'Servidores'
-  | 'IBS' | 'Desarrollo' | 'Mantenimiento' | 'Proyectos' | 'Gestion tecnologica';
+  | 'IBS' | 'Desarrollo' | 'Mantenimiento';
 export type PrioridadTicket = 'Baja' | 'Media' | 'Alta' | 'Critica';
 export type CategoriaTicket = string;
 

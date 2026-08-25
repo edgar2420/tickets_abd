@@ -434,8 +434,8 @@ const construir = async () => {
     { titulo: 'Contenido', campo: 'contenido', ancho: 0.76 }
   ], [
     { campo: 'Numero', contenido: 'SYS-AAAA-NNNNN, correlativo unico dentro de cada gestion' },
-    { campo: 'Servicio', contenido: 'Soporte informatico, Redes, Telefonia, CCTV, Servidores, IBS, Desarrollo, '
-      + 'Mantenimiento, Proyectos o Gestion tecnologica' },
+    { campo: 'Servicio', contenido: 'Soporte informatico, Redes, Telefonia, CCTV, Servidores, IBS o '
+      + 'Desarrollo. Mantenimiento es interno: lo pone el plan preventivo, no se elige a mano' },
     { campo: 'Categoria', contenido: 'Catalogo administrable: PC, Red, Camara, Telefonia, IBS, Servidores y otros' },
     { campo: 'Ubicacion', contenido: 'Piso, oficina o area donde ocurre el hecho' },
     { campo: 'Activo relacionado', contenido: 'Equipo del parque sobre el que se trabaja, validado contra inventario' },
@@ -867,6 +867,14 @@ const construir = async () => {
       descripcion: 'Modulo de mantenimiento preventivo con plan por activo, aviso de vencidos y por vencer, '
         + 'generacion del ticket y registro de lo realizado; se retira el campo tipo del ticket, que queda '
         + 'clasificado por servicio y categoria',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.11.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'El catalogo de servicios se reduce a siete opciones elegibles, la bitacora del ticket queda '
+        + 'reservada al personal de Sistemas y el activo relacionado se limita a los equipos asignados a la '
+        + 'cuenta que registra el ticket',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });

@@ -36,7 +36,7 @@ export const NuevoTicket = () => {
       })
       .catch(() => setError('No fue posible cargar el catalogo de categorias'));
 
-    void api<{ datos: Equipo[] }>('/equipos', { parametros: { limite: 200 } })
+    void api<{ datos: Equipo[] }>('/equipos/mios')
       .then(({ datos }) => setEquipos(datos))
       .catch(() => setEquipos([]));
   }, []);
@@ -152,6 +152,11 @@ export const NuevoTicket = () => {
                     <option key={item.id} value={item.id}>{item.codigo} - {item.nombre_equipo}</option>
                   ))}
                 </select>
+                {equipos.length === 0 && (
+                  <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-300">
+                    No tiene equipos asignados a su nombre.
+                  </p>
+                )}
                 {equipo && (
                   <p className="mt-1.5 text-xs text-slate-500 dark:text-slate-300">
                     {[equipo.tipo, equipo.marca, equipo.modelo].filter(Boolean).join(' ')}
