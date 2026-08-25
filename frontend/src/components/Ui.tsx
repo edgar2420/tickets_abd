@@ -76,14 +76,16 @@ const TONOS: Record<Tono, { fondo: string; icono: string }> = {
 
 export const Indicador = ({ etiqueta, valor, icono: Icono, tono = 'neutro', pie }:
   { etiqueta: string; valor: number | string; icono: LucideIcon; tono?: Tono; pie?: string }) => (
-  <div className="panel-interactivo animar-entrada flex items-center gap-4 p-4">
-    <span className={`rounded-xl p-3 ${TONOS[tono].fondo} ${TONOS[tono].icono}`}>
-      <Icono className="h-6 w-6" />
+  <div className="panel-interactivo animar-entrada flex items-center gap-3 p-4">
+    <span className={`shrink-0 rounded-xl p-2.5 ${TONOS[tono].fondo} ${TONOS[tono].icono}`}>
+      <Icono className="h-5 w-5" />
     </span>
-    <div className="min-w-0">
-      <p className="truncate text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-300">{etiqueta}</p>
+    <div className="min-w-0 flex-1">
+      <p className="text-[11px] font-semibold uppercase leading-tight tracking-wide text-slate-500 dark:text-slate-300">
+        {etiqueta}
+      </p>
       <p className="text-2xl font-bold leading-tight text-institucional-900 dark:text-slate-100">{valor}</p>
-      {pie && <p className="truncate text-xs text-slate-400 dark:text-slate-400">{pie}</p>}
+      {pie && <p className="text-xs leading-tight text-slate-400 dark:text-slate-400">{pie}</p>}
     </div>
   </div>
 );
