@@ -180,7 +180,7 @@ const equipo = (equipos.cuerpo.datos ?? []).find((e) => e.tiene_password);
 
 if (equipo) {
   marca('equipos', !('anydesk_password' in equipo) && !('anydesk_password_cifrada' in equipo),
-    'el listado no expone la contrasena de AnyDesk');
+    'el listado no expone la contraseña de AnyDesk');
   const revelada = await pedir('admin', `/equipos/${equipo.id}/credenciales`);
   marca('equipos', revelada.estado === 200 && revelada.cuerpo.datos !== undefined,
     'un administrador puede revelar la credencial bajo demanda');

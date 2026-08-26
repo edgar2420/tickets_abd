@@ -121,7 +121,7 @@ npm start                  # Expo; configurar la IP de la API en app.json
 
 El sistema arranca con una sola cuenta. No se crean tecnicos, clientes ni datos de ejemplo:
 
-| Usuario | Contrasena | Rol |
+| Usuario | Contraseña | Rol |
 |---|---|---|
 | `admin` | `24112001Edgar` | admin (Ing. Edgar Rojas Apaza) |
 
@@ -159,9 +159,9 @@ cabecera. Muestra sus datos, el area y la sucursal a nombre de las cuales quedan
 y el detalle de lo que puede hacer: los permisos agrupados por modulo, cada uno con su
 descripcion, no solo el nombre del rol.
 
-Desde ahi cambia su contrasena, y tambien desde el icono de llave de la cabecera.
+Desde ahi cambia su contraseña, y tambien desde el icono de llave de la cabecera.
 
-## Contrasenas
+## Contraseñas
 
 | Regla | Detalle |
 |---|---|
@@ -234,7 +234,7 @@ Permisos precargados:
 | INVENTARIO | `inventario.movimientos` | Registrar entradas y salidas |
 | EQUIPOS | `equipos.ver` | Consultar el parque informatico |
 | EQUIPOS | `equipos.gestionar` | Alta, edicion y baja de equipos |
-| EQUIPOS | `equipos.credenciales` | Revelar la contrasena de acceso remoto |
+| EQUIPOS | `equipos.credenciales` | Revelar la contraseña de acceso remoto |
 | COMPRAS | `compras.solicitar` | Registrar solicitudes de compra de equipos |
 | COMPRAS | `compras.ver_todas` | Consultar todas las solicitudes |
 | COMPRAS | `compras.revisar` | Revision tecnica y cotizacion |
@@ -390,21 +390,21 @@ Parque informatico con la asignacion de cada maquina y sus datos de acceso remot
 | Identificacion | Codigo, nombre, tipo, marca, modelo y numero de serie |
 | Caracteristicas | Sistema operativo, procesador, memoria RAM y almacenamiento |
 | Conectividad | Direccion IP y MAC, ambas validadas por formato |
-| Acceso remoto | Identificador de AnyDesk y contrasena |
+| Acceso remoto | Identificador de AnyDesk y contraseña |
 | Asignacion | Usuario responsable, area, ubicacion, estado y fecha |
 
-### Tratamiento de la contrasena de acceso remoto
+### Tratamiento de la contraseña de acceso remoto
 
-La contrasena de AnyDesk **no se guarda en texto plano**. Se cifra con AES-256-GCM y una clave
+La contraseña de AnyDesk **no se guarda en texto plano**. Se cifra con AES-256-GCM y una clave
 derivada por scrypt de la variable `CLAVE_CIFRADO`; la etiqueta de autenticidad permite detectar
 cualquier alteracion del dato almacenado.
 
-- No viaja en los listados: la respuesta solo informa si existe contrasena registrada.
+- No viaja en los listados: la respuesta solo informa si existe contraseña registrada.
 - Revelarla exige el permiso `equipos.credenciales` y **queda asentada en la bitacora** con el
   usuario que la consulto y la fecha.
-- Ningun PDF exportable incluye contrasenas.
+- Ningun PDF exportable incluye contraseñas.
 
-Si se pierde la semilla `CLAVE_CIFRADO`, las contrasenas guardadas dejan de poder descifrarse y
+Si se pierde la semilla `CLAVE_CIFRADO`, las contraseñas guardadas dejan de poder descifrarse y
 deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.
 
 Para cargar un parque de ejemplo: `cd backend && npm run demo`.
@@ -519,7 +519,7 @@ explotable por peticiones forjadas entre sitios y por eso queda exento de la ver
 
 ### Controles vigentes
 
-- Contrasenas almacenadas con hash bcrypt (10 rondas).
+- Contraseñas almacenadas con hash bcrypt (10 rondas).
 - Identidad tomada exclusivamente del token; el cliente nunca envia el identificador de usuario.
 - Guard de permisos atomicos por endpoint, con verificacion adicional de propiedad del ticket.
 - Bloqueo temporal por cuenta: cinco intentos fallidos en quince minutos la bloquean otros
@@ -638,7 +638,7 @@ npm run qa:seguridad   # cookies, origen, cabeceras, bloqueo, cache y acceso cer
 npm run qa:funcional   # los once accesos y todos los modulos del sistema
 npm run qa:tiempo-real # canal de WebSockets y reparto por salas
 npm run qa:compras     # el circuito de compras avanzando en tiempo real
-npm run qa:proyectos   # peticiones de proyecto, contrasenas e inyeccion SQL
+npm run qa:proyectos   # peticiones de proyecto, contraseñas e inyeccion SQL
 npm run qa:documentos  # que los PDF salgan al tamano pedido, sin hojas en blanco
 npm run qa:navegador   # recorrido completo atravesando el servidor web
 npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
@@ -651,7 +651,7 @@ npm run qa:limpiar     # retira de la base los datos que dejan las pruebas
 | Funcional | Acceso de las cuentas del entorno, catalogos, ciclo completo del ticket, inventario, equipos, compras con doble aprobacion, tablero, notificaciones, auditoria, paginacion, documentos PDF, validacion de entrada, alcance de Gerencia y reporte mensual | 104 de 104 |
 | Tiempo real | Ingreso al canal, reparto por salas, aviso inmediato y rechazo de conexiones sin sesion | 4 de 4 |
 | Compras en tiempo real | Que Gerencia entre a la sala del circuito y vea cada cambio de estado sin recargar | 6 de 6 |
-| Proyectos y claves | Circuito de las peticiones, politica de contrasenas, restablecimiento por un administrador y cargas de inyeccion SQL sobre las busquedas | 44 de 44 |
+| Proyectos y claves | Circuito de las peticiones, politica de contraseñas, restablecimiento por un administrador y cargas de inyeccion SQL sobre las busquedas | 44 de 44 |
 | Documentos | Que cada PDF salga al tamano de lo que se pide y sin hojas en blanco | 15 de 15 |
 | Navegador | Recorrido de punta a punta contra el servidor web: portada, acceso, las doce pantallas, ciclo del ticket, descarga de PDF y cierre de sesion | 28 de 28 |
 
@@ -676,7 +676,7 @@ solicitados. Se enumeran para que la decision sobre cada uno quede documentada.
 | Respaldo de la base | No hay tarea programada de respaldo ni prueba de restauracion | Alta antes de publicar |
 | Revocacion de sesiones | El token vale hasta su vencimiento; desactivar un usuario no corta la sesion ya abierta | Media |
 | Estado entre instancias | Cache, bloqueo por intentos y freno por origen viven en memoria del proceso; con varias instancias haria falta un almacen comun | Media si se escala |
-| Cambio de clave obligatorio | Las cuentas se entregan con una contrasena inicial conocida y el sistema no exige cambiarla al primer ingreso | Media |
+| Cambio de clave obligatorio | Las cuentas se entregan con una contraseña inicial conocida y el sistema no exige cambiarla al primer ingreso | Media |
 | Aviso por correo | Los avisos llegan por el canal en tiempo real y la bandeja interna, no por correo | Baja |
 | Pruebas unitarias | La verificacion es de extremo a extremo; no hay pruebas unitarias por funcion | Baja |
 | Dependencias de la app movil | No se instalaron nunca, de modo que no se pudo auditar su arbol de dependencias | Media |

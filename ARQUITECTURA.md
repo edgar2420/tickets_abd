@@ -157,7 +157,7 @@ backend/qa/
 ├── funcional.mjs           Todos los modulos de extremo a extremo
 ├── tiempo-real.mjs         Canal de WebSockets
 ├── compras-tiempo-real.mjs Circuito de compras avanzando en vivo
-├── proyectos.mjs           Peticiones de proyecto, contrasenas e inyeccion SQL
+├── proyectos.mjs           Peticiones de proyecto, contraseñas e inyeccion SQL
 ├── documentos.mjs          Tamano de los PDF y ausencia de hojas en blanco
 ├── navegador.mjs           Recorrido completo atravesando el servidor web
 ├── preparar.mjs            Crea las cuentas de prueba que usan las demas baterias

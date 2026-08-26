@@ -66,9 +66,9 @@ const construir = async () => {
   doc.titulo1('Como entra la otra persona', 'usuario');
   doc.lista([
     'Abre el navegador y escribe la direccion de arriba.',
-    'Inicia sesion con el usuario y la contrasena que usted le entregue en persona.',
+    'Inicia sesion con el usuario y la contraseña que usted le entregue en persona.',
     'Cada persona debe tener su propia cuenta: no se comparte la cuenta administradora.',
-    'La contrasena se cambia desde el icono de la llave, en la barra superior.'
+    'La contraseña se cambia desde el icono de la llave, en la barra superior.'
   ]);
 
   doc.titulo1('Advertencias', 'alerta');
@@ -76,7 +76,7 @@ const construir = async () => {
     'La conexion viaja sin cifrar. Sirve para una prueba interna, no para publicar el sistema.',
     'La direccion cambia cada vez que el equipo se conecta a otra red o el router le asigna otra IP.',
     'Si el equipo se apaga o se cierran las ventanas de la API y de la web, el acceso se corta.',
-    'Tras varios intentos fallidos de contrasena la cuenta queda bloqueada por quince minutos.'
+    'Tras varios intentos fallidos de contraseña la cuenta queda bloqueada por quince minutos.'
   ]);
 
   const salida = path.resolve(process.cwd(), 'docs/pdf/Acceso-Red-Local.pdf');

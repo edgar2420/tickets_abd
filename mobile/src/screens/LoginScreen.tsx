@@ -53,7 +53,7 @@ export const LoginScreen = () => {
               />
             </View>
             <View>
-              <Text style={estilos.etiqueta}>Contrasena</Text>
+              <Text style={estilos.etiqueta}>Contraseña</Text>
               <View style={{ justifyContent: 'center' }}>
                 <TextInput
                   style={[estilos.campo, { paddingRight: 44 }]}
@@ -62,20 +62,20 @@ export const LoginScreen = () => {
                   autoCorrect={false}
                   value={password}
                   onChangeText={setPassword}
-                  placeholder="contrasena"
+                  placeholder="contraseña"
                   placeholderTextColor="#94A3B8"
                 />
                 <TouchableOpacity
                   onPress={() => setVerPassword((v) => !v)}
                   style={{ position: 'absolute', right: 10, padding: 4 }}
-                  accessibilityLabel={verPassword ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+                  accessibilityLabel={verPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   <Feather name={verPassword ? 'eye-off' : 'eye'} size={18} color={tema.suave} />
                 </TouchableOpacity>
               </View>
               {password.length > 0 && password === password.toUpperCase() && password !== password.toLowerCase() && (
                 <Text style={{ marginTop: 6, fontSize: 12, color: '#B45309', fontWeight: '600' }}>
-                  La contrasena esta escrita en mayusculas
+                  La contraseña esta escrita en mayusculas
                 </Text>
               )}
             </View>

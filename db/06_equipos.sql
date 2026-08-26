@@ -48,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_equipos_estado  ON equipos(estado);
 INSERT INTO permisos (codigo, descripcion, modulo) VALUES
     ('equipos.ver',          'Consultar el parque de equipos y sus caracteristicas.',        'EQUIPOS'),
     ('equipos.gestionar',    'Alta, edicion y baja de equipos y su asignacion.',             'EQUIPOS'),
-    ('equipos.credenciales', 'Revelar la contrasena de acceso remoto de un equipo.',         'EQUIPOS')
+    ('equipos.credenciales', 'Revelar la contraseña de acceso remoto de un equipo.',         'EQUIPOS')
 ON CONFLICT (codigo) DO NOTHING;
 
 INSERT INTO rol_permisos (rol_id, permiso_id)

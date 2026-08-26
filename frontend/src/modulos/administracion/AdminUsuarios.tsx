@@ -267,7 +267,7 @@ export const AdminUsuarios = () => {
             <div className="sm:col-span-2">
               <CampoPassword
                 id="password-usuario"
-                etiqueta={formulario.id ? 'Nueva contrasena (opcional)' : 'Contrasena inicial'}
+                etiqueta={formulario.id ? 'Nueva contraseña (opcional)' : 'Contraseña inicial'}
                 valor={formulario.password}
                 alCambiar={(password) => setFormulario((f) => ({ ...f, password }))}
                 requerido={!formulario.id}

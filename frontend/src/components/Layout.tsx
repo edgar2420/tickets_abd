@@ -187,8 +187,8 @@ export const Layout = () => {
               type="button"
               onClick={() => setModalPassword(true)}
               className="rounded-md p-2 text-white/80 transition hover:bg-white/10 hover:text-white"
-              aria-label="Cambiar mi contrasena"
-              title="Cambiar mi contrasena"
+              aria-label="Cambiar mi contraseña"
+              title="Cambiar mi contraseña"
             >
               <KeyRound className="h-5 w-5" />
             </button>
