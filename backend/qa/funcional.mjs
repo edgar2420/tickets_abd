@@ -149,6 +149,30 @@ const inventarioCliente = await pedir('qa.cliente2', '/inventario/articulos');
 marca('inventario', inventarioCliente.estado === 403, `el cliente no accede al inventario (${inventarioCliente.estado})`);
 
 console.log('\n=== E. EQUIPOS ===');
+
+const areasConCodigo = await pedir('admin', '/areas');
+marca('equipos', (areasConCodigo.cuerpo.datos ?? []).every((a) => /^[A-Z0-9]{2,10}$/.test(a.codigo ?? '')),
+  `cada area trae su codigo: ${(areasConCodigo.cuerpo.datos ?? []).map((a) => a.codigo).join(', ')}`);
+
+const areaContabilidad = (areasConCodigo.cuerpo.datos ?? []).find((a) => a.nombre === 'Contabilidad');
+if (areaContabilidad) {
+  const propuesto = await pedir('admin', `/equipos/siguiente-codigo?tipo=PC&ubicacion=${areaContabilidad.codigo}`);
+  marca('equipos', propuesto.cuerpo.datos?.codigo?.startsWith(`PC-${areaContabilidad.codigo}-`),
+    `el codigo se arma del tipo y del area: ${propuesto.cuerpo.datos?.codigo}`);
+
+  const repetido = await pedir('admin', '/areas', {
+    metodo: 'POST', cuerpo: { nombre: 'QA Area duplicada', codigo: areaContabilidad.codigo }
+  });
+  marca('equipos', repetido.estado === 400,
+    `no se admite repetir el codigo de un area (${repetido.estado})`);
+}
+
+const codigoInvalido = await pedir('admin', '/areas', {
+  metodo: 'POST', cuerpo: { nombre: 'QA Area con codigo malo', codigo: 'a b' }
+});
+marca('equipos', codigoInvalido.estado === 400,
+  `un codigo de area con espacios se rechaza (${codigoInvalido.estado})`);
+
 const equiposPrevios = await pedir('admin', '/equipos');
 marca('equipos', equiposPrevios.estado === 200, `listado de equipos (${equiposPrevios.cuerpo.datos?.length ?? 0})`);
 

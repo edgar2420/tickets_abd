@@ -890,6 +890,13 @@ const construir = async () => {
       descripcion: 'La palabra contraseña se escribe con la letra correcta en toda la interfaz, en los '
         + 'mensajes del servidor, en los catalogos de la base y en la documentacion',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.14.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Cada area lleva su propio codigo y el codigo del equipo se arma solo con el tipo y el area '
+        + 'elegidos, sin escribir dos veces la ubicacion',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 

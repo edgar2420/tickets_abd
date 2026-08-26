@@ -10,8 +10,8 @@ import type { Area } from '../../lib/tipos';
 
 export const AdminAreas = () => {
   const [areas, setAreas] = useState<Area[] | null>(null);
-  const [formulario, setFormulario] = useState<{ id: number | null; nombre: string; activo: boolean }>({
-    id: null, nombre: '', activo: true
+  const [formulario, setFormulario] = useState<{ id: number | null; nombre: string; codigo: string; activo: boolean }>({
+    id: null, nombre: '', codigo: '', activo: true
   });
   const [modalAbierto, setModalAbierto] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +39,7 @@ export const AdminAreas = () => {
     try {
       await api(formulario.id ? `/areas/${formulario.id}` : '/areas', {
         metodo: formulario.id ? 'PUT' : 'POST',
-        cuerpo: { nombre: formulario.nombre, activo: formulario.activo }
+        cuerpo: { nombre: formulario.nombre, codigo: formulario.codigo, activo: formulario.activo }
       });
       setModalAbierto(false);
       await cargar();
@@ -76,7 +76,7 @@ export const AdminAreas = () => {
         <button
           type="button"
           className="boton-primario"
-          onClick={() => { setFormulario({ id: null, nombre: '', activo: true }); setModalAbierto(true); }}
+          onClick={() => { setFormulario({ id: null, nombre: '', codigo: '', activo: true }); setModalAbierto(true); }}
         >
           <PlusCircle className="h-4 w-4" />
           Nueva area
@@ -94,6 +94,7 @@ export const AdminAreas = () => {
               <thead>
                 <tr>
                   <th>Area</th>
+                  <th>Codigo</th>
                   <th>Usuarios</th>
                   <th>Estado</th>
                   <th>Creacion</th>
@@ -104,6 +105,9 @@ export const AdminAreas = () => {
                 {areas.map((area) => (
                   <tr key={area.id}>
                     <td className="font-medium text-slate-800 dark:text-slate-100">{area.nombre}</td>
+                    <td className="font-mono text-xs font-semibold text-institucional-800 dark:text-institucional-200">
+                      {area.codigo}
+                    </td>
                     <td className="text-slate-600 dark:text-slate-200">{area.total_usuarios ?? 0}</td>
                     <td>
                       <Etiqueta
@@ -119,7 +123,7 @@ export const AdminAreas = () => {
                         <BotonAccion
                           icono={PencilLine}
                           rotulo="Editar area"
-                          alPulsar={() => { setFormulario({ id: area.id, nombre: area.nombre, activo: area.activo }); setModalAbierto(true); }}
+                          alPulsar={() => { setFormulario({ id: area.id, nombre: area.nombre, codigo: area.codigo, activo: area.activo }); setModalAbierto(true); }}
                         />
                         <BotonAccion
                           icono={Ban}
@@ -159,6 +163,21 @@ export const AdminAreas = () => {
             <label className="etiqueta">Nombre del area</label>
             <input className="campo" required minLength={3} value={formulario.nombre}
               onChange={(e) => setFormulario((f) => ({ ...f, nombre: e.target.value }))} />
+          </div>
+          <div>
+            <label className="etiqueta">Codigo para los equipos</label>
+            <input
+              className="campo w-40 font-mono uppercase"
+              required
+              maxLength={10}
+              pattern="[A-Za-z0-9]{2,10}"
+              placeholder="ADM"
+              value={formulario.codigo}
+              onChange={(e) => setFormulario((f) => ({ ...f, codigo: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') }))}
+            />
+            <p className="mt-1 text-xs text-slate-500 dark:text-slate-300">
+              Es el trozo del medio del codigo de los equipos de esta area, por ejemplo PC-{formulario.codigo || 'ADM'}-001.
+            </p>
           </div>
           <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-200">
             <input type="checkbox" className="h-4 w-4 rounded border-slate-300 dark:border-noche-700" checked={formulario.activo}
