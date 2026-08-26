@@ -162,11 +162,11 @@ equiposRouter.get('/:id/credenciales', requierePermiso('equipos.credenciales'), 
   const { rows } = await query('SELECT codigo, anydesk_id, anydesk_password FROM equipos WHERE id = $1', [req.params.id]);
   const equipo = rows[0];
   if (!equipo) throw HttpError.notFound('El equipo indicado no existe');
-  if (!equipo.anydesk_password) throw HttpError.notFound('El equipo no tiene contrasena de acceso remoto registrada');
+  if (!equipo.anydesk_password) throw HttpError.notFound('El equipo no tiene contraseña de acceso remoto registrada');
 
   const password = descifrar(equipo.anydesk_password);
   if (password === null) {
-    throw new HttpError(500, 'La contrasena almacenada no pudo descifrarse. Registrela nuevamente.');
+    throw new HttpError(500, 'La contraseña almacenada no pudo descifrarse. Registrela nuevamente.');
   }
 
   await registrarAuditoria({

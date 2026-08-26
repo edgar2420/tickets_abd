@@ -71,7 +71,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
       setNueva('');
       setRepetida('');
     } catch (fallo) {
-      setError(fallo instanceof Error ? fallo.message : 'No fue posible cambiar la contrasena');
+      setError(fallo instanceof Error ? fallo.message : 'No fue posible cambiar la contraseña');
     } finally {
       setGuardando(false);
     }
@@ -79,7 +79,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
 
   return (
     <Modal
-      titulo="Cambiar mi contrasena"
+      titulo="Cambiar mi contraseña"
       icono={KeyRound}
       abierto={abierto}
       alCerrar={cerrar}
@@ -95,7 +95,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
             className="boton-primario"
             disabled={guardando || !cumpleTodo || !coinciden || actual.length === 0}
           >
-            Cambiar contrasena
+            Cambiar contraseña
           </button>
         </>
       )}
@@ -105,7 +105,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
           <p className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm
                         text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
             <Check className="mt-0.5 h-4 w-4 shrink-0" />
-            Su contrasena fue cambiada. La proxima vez que inicie sesion use la nueva.
+            Su contraseña fue cambiada. La proxima vez que inicie sesion use la nueva.
           </p>
         </div>
       ) : (
@@ -113,7 +113,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
           {error && <Alerta mensaje={error} />}
 
           <CampoPassword
-            etiqueta="Contrasena actual"
+            etiqueta="Contraseña actual"
             valor={actual}
             alCambiar={setActual}
             requerido
@@ -122,7 +122,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
 
           <div>
             <CampoPassword
-              etiqueta="Contrasena nueva"
+              etiqueta="Contraseña nueva"
               valor={nueva}
               alCambiar={setNueva}
               requerido
@@ -135,7 +135,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
 
           <div>
             <CampoPassword
-              etiqueta="Repita la contrasena nueva"
+              etiqueta="Repita la contraseña nueva"
               valor={repetida}
               alCambiar={setRepetida}
               requerido
@@ -143,7 +143,7 @@ export const CambioPassword = ({ abierto, usuario, alCerrar }: {
             />
             {repetida.length > 0 && !coinciden && (
               <p className="mt-1 text-xs font-medium text-rose-600 dark:text-rose-400">
-                Las dos contrasenas no coinciden
+                Las dos contraseñas no coinciden
               </p>
             )}
           </div>

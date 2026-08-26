@@ -97,7 +97,7 @@ export const Tabla = ({
                 <td>
                   <Acciones>
                     {puede('equipos.credenciales') && equipo.tiene_password && (
-                      <BotonAccion icono={Eye} rotulo="Ver contrasena remota" alPulsar={() => alRevelar(equipo)} />
+                      <BotonAccion icono={Eye} rotulo="Ver contraseña remota" alPulsar={() => alRevelar(equipo)} />
                     )}
                     <BotonAccion icono={Info} rotulo="Ver ficha del equipo" alPulsar={() => alVerFicha(equipo)} />
                     <BotonAccion

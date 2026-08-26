@@ -123,7 +123,7 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
           {campo('Direccion MAC', 'direccion_mac', { maxLength: 17, placeholder: 'A4:BB:6D:11:22:33' })}
           {campo('Identificador AnyDesk', 'anydesk_id', { maxLength: 40, placeholder: '123 456 789' })}
           <div>
-            <label className="etiqueta">Contrasena AnyDesk</label>
+            <label className="etiqueta">Contraseña AnyDesk</label>
             <input
               type="password"
               className="campo"
@@ -137,7 +137,7 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
         </div>
         <p className="superficie mt-3 flex items-start gap-2 p-3 text-xs text-slate-600 dark:text-slate-200">
           <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0 text-institucional-700 dark:text-institucional-300" />
-          La contrasena se guarda cifrada y nunca se incluye en listados ni documentos. Consultarla
+          La contraseña se guarda cifrada y nunca se incluye en listados ni documentos. Consultarla
           exige permiso propio y queda registrada en la bitacora de auditoria.
         </p>
       </Seccion>

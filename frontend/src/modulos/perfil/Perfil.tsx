@@ -58,12 +58,12 @@ export const Perfil = () => {
     <div className="space-y-5">
       <EncabezadoPagina
         titulo="Mi perfil"
-        descripcion="Sus datos, su alcance dentro del sistema y su contrasena"
+        descripcion="Sus datos, su alcance dentro del sistema y su contraseña"
         icono={UserRound}
       >
         <button type="button" className="boton-primario" onClick={() => setModalPassword(true)}>
           <KeyRound className="h-4 w-4" />
-          Cambiar mi contrasena
+          Cambiar mi contraseña
         </button>
       </EncabezadoPagina>
 
@@ -151,13 +151,13 @@ export const Perfil = () => {
       <Panel titulo="Seguridad de la cuenta" icono={KeyRound}>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="max-w-2xl text-sm text-slate-600 dark:text-slate-200">
-            La contrasena se guarda cifrada y nadie puede consultarla, ni siquiera un administrador:
+            La contraseña se guarda cifrada y nadie puede consultarla, ni siquiera un administrador:
             solo puede restablecerla por una nueva. Cambiela usted mismo cuando quiera, y hagalo de
             inmediato si sospecha que alguien mas la conoce.
           </p>
           <button type="button" className="boton-secundario" onClick={() => setModalPassword(true)}>
             <KeyRound className="h-4 w-4" />
-            Cambiar mi contrasena
+            Cambiar mi contraseña
           </button>
         </div>
         {usuario.email === null && (

@@ -4,7 +4,7 @@ export const LARGO_MINIMO = 10;
 export const LARGO_MAXIMO = 128;
 
 const OBVIAS = [
-  'password', 'contrasena', 'contraseña', '1234567890', 'qwertyuiop',
+  'password', 'contraseña', 'contraseña', '1234567890', 'qwertyuiop',
   'administrador', 'admin12345', 'abcdefghij', '0123456789'
 ];
 
@@ -36,12 +36,12 @@ export const revisarPassword = (password, usuario = '') => {
 };
 
 export const passwordSchema = z.string()
-  .min(LARGO_MINIMO, `La contrasena debe tener al menos ${LARGO_MINIMO} caracteres`)
-  .max(LARGO_MAXIMO, `La contrasena no puede superar los ${LARGO_MAXIMO} caracteres`)
-  .refine((valor) => !/\s/.test(valor), 'La contrasena no puede contener espacios en blanco')
-  .refine((valor) => /[A-Za-zÀ-ÿ]/.test(valor), 'La contrasena debe incluir al menos una letra')
-  .refine((valor) => /\d/.test(valor), 'La contrasena debe incluir al menos un numero')
-  .refine((valor) => !OBVIAS.includes(valor.toLowerCase()), 'La contrasena es demasiado previsible');
+  .min(LARGO_MINIMO, `La contraseña debe tener al menos ${LARGO_MINIMO} caracteres`)
+  .max(LARGO_MAXIMO, `La contraseña no puede superar los ${LARGO_MAXIMO} caracteres`)
+  .refine((valor) => !/\s/.test(valor), 'La contraseña no puede contener espacios en blanco')
+  .refine((valor) => /[A-Za-zÀ-ÿ]/.test(valor), 'La contraseña debe incluir al menos una letra')
+  .refine((valor) => /\d/.test(valor), 'La contraseña debe incluir al menos un numero')
+  .refine((valor) => !OBVIAS.includes(valor.toLowerCase()), 'La contraseña es demasiado previsible');
 
 export const textoLimpio = (largoMinimo, largoMaximo, campo = 'El texto') => z.string()
   .transform((valor) => valor.trim())
