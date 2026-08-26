@@ -55,7 +55,7 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
     <form id="form-equipo" onSubmit={alEnviar} className="space-y-5">
       <Seccion titulo="Identificacion" icono={Monitor}>
         <div className="grid gap-3 sm:grid-cols-3">
-          <div className="sm:col-span-3">
+          <div>
             <label className="etiqueta">Tipo de equipo</label>
             <select
               className="campo"
@@ -65,10 +65,25 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
               {TIPOS.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
             </select>
           </div>
+          <div className="sm:col-span-2">
+            <label className="etiqueta">Area</label>
+            <select
+              className="campo"
+              value={formulario.area_id}
+              onChange={(e) => setFormulario((previo) => ({ ...previo, area_id: e.target.value }))}
+            >
+              <option value="">Sin area</option>
+              {areas.map((area) => (
+                <option key={area.id} value={area.id}>{area.codigo} - {area.nombre}</option>
+              ))}
+            </select>
+          </div>
 
           <CompositorCodigo
             codigo={formulario.codigo}
             tipo={formulario.tipo}
+            areaId={formulario.area_id}
+            areas={areas}
             esNuevo={formulario.id === null}
             alCambiar={(codigo) => setFormulario((previo) => ({ ...previo, codigo }))}
           />
@@ -159,14 +174,6 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
           >
             <option value="">Sin sucursal</option>
             {sucursales.map((sucursal) => <option key={sucursal.id} value={sucursal.id}>{sucursal.nombre}</option>)}
-          </Seleccion>
-          <Seleccion
-            etiqueta="Area"
-            valor={formulario.area_id}
-            alCambiar={(valor) => setFormulario((previo) => ({ ...previo, area_id: valor }))}
-          >
-            <option value="">Sin area</option>
-            {areas.map((area) => <option key={area.id} value={area.id}>{area.nombre}</option>)}
           </Seleccion>
           <Seleccion
             etiqueta="Estado"
