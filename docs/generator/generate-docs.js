@@ -34,7 +34,7 @@ const PERMISOS = [
   { modulo: 'INVENTARIO', codigo: 'inventario.movimientos', descripcion: 'Registrar entradas y salidas de inventario.' },
   { modulo: 'EQUIPOS', codigo: 'equipos.ver', descripcion: 'Consultar el parque de equipos y sus caracteristicas.' },
   { modulo: 'EQUIPOS', codigo: 'equipos.gestionar', descripcion: 'Alta, edicion y baja de equipos y su asignacion.' },
-  { modulo: 'EQUIPOS', codigo: 'equipos.credenciales', descripcion: 'Revelar la contrasena de acceso remoto de un equipo.' },
+  { modulo: 'EQUIPOS', codigo: 'equipos.credenciales', descripcion: 'Revelar la contraseña de acceso remoto de un equipo.' },
   { modulo: 'COMPRAS', codigo: 'compras.solicitar', descripcion: 'Registrar solicitudes de compra de equipos.' },
   { modulo: 'COMPRAS', codigo: 'compras.ver_todas', descripcion: 'Consultar todas las solicitudes de compra.' },
   { modulo: 'COMPRAS', codigo: 'compras.revisar', descripcion: 'Revisar la viabilidad tecnica y cotizar la solicitud.' },
@@ -45,7 +45,7 @@ const PERMISOS = [
 const ENDPOINTS = [
   { metodo: 'POST', ruta: '/auth/login', permiso: 'Publico', descripcion: 'Autenticacion y emision del token JWT' },
   { metodo: 'GET', ruta: '/auth/perfil', permiso: 'Autenticado', descripcion: 'Perfil, rol y permisos vigentes' },
-  { metodo: 'POST', ruta: '/auth/cambiar-password', permiso: 'Autenticado', descripcion: 'Cambio de contrasena propia' },
+  { metodo: 'POST', ruta: '/auth/cambiar-password', permiso: 'Autenticado', descripcion: 'Cambio de contraseña propia' },
   { metodo: 'GET', ruta: '/tickets', permiso: 'tickets.ver_propios / ver_todos', descripcion: 'Listado con filtros y alcance por permiso' },
   { metodo: 'GET', ruta: '/tickets/tablero', permiso: 'tickets.ver_propios / ver_todos', descripcion: 'Indicadores y distribuciones' },
   { metodo: 'POST', ruta: '/tickets', permiso: 'tickets.crear', descripcion: 'Apertura de un ticket (estado Abierto)' },
@@ -73,7 +73,7 @@ const ENDPOINTS = [
   { metodo: 'POST', ruta: '/equipos', permiso: 'equipos.gestionar', descripcion: 'Alta de equipo y su asignacion' },
   { metodo: 'PUT', ruta: '/equipos/:id', permiso: 'equipos.gestionar', descripcion: 'Edicion del equipo' },
   { metodo: 'DELETE', ruta: '/equipos/:id', permiso: 'equipos.gestionar', descripcion: 'Baja logica del equipo' },
-  { metodo: 'GET', ruta: '/equipos/:id/credenciales', permiso: 'equipos.credenciales', descripcion: 'Revela la contrasena remota, con registro en bitacora' },
+  { metodo: 'GET', ruta: '/equipos/:id/credenciales', permiso: 'equipos.credenciales', descripcion: 'Revela la contraseña remota, con registro en bitacora' },
   { metodo: 'GET', ruta: '/equipos/reporte/pdf', permiso: 'equipos.ver', descripcion: 'Reporte del parque en PDF' },
   { metodo: 'GET', ruta: '/equipos/:id/ficha/pdf', permiso: 'equipos.ver', descripcion: 'Ficha tecnica del equipo en PDF' },
   { metodo: 'GET', ruta: '/sucursales', permiso: 'Autenticado', descripcion: 'Catalogo de sucursales' },
@@ -167,7 +167,7 @@ const CONTROLES_SEGURIDAD = [
   },
   {
     control: 'Bloqueo por cuenta',
-    riesgo: 'Adivinacion de contrasenas rotando la direccion de origen',
+    riesgo: 'Adivinacion de contraseñas rotando la direccion de origen',
     como: 'Cinco fallos en quince minutos bloquean el usuario otros quince, sin inhabilitar la cuenta'
   },
   {
@@ -289,7 +289,7 @@ const PENDIENTES = [
   },
   {
     punto: 'Cambio de clave obligatorio',
-    situacion: 'Las cuentas se entregan con una contrasena inicial conocida y el sistema no exige cambiarla al '
+    situacion: 'Las cuentas se entregan con una contraseña inicial conocida y el sistema no exige cambiarla al '
       + 'primer ingreso',
     prioridad: 'Media'
   },
@@ -365,7 +365,7 @@ const construir = async () => {
     { tabla: 'roles', proposito: 'Roles configurables desde el panel de administracion' },
     { tabla: 'permisos', proposito: 'Permisos atomicos del sistema agrupados por modulo' },
     { tabla: 'rol_permisos', proposito: 'Relacion N:M que materializa la matriz de permisos' },
-    { tabla: 'usuarios', proposito: 'Cuentas con area, rol, estado y hash bcrypt de la contrasena' },
+    { tabla: 'usuarios', proposito: 'Cuentas con area, rol, estado y hash bcrypt de la contraseña' },
     { tabla: 'tickets', proposito: 'Requerimientos con trazabilidad de solicitante, asignado y resolutor' },
     { tabla: 'auditoria', proposito: 'Bitacora de cada accion ejecutada, base de los reportes PDF' },
     { tabla: 'notificaciones', proposito: 'Persistencia de los avisos emitidos por WebSockets' },
@@ -575,21 +575,21 @@ const construir = async () => {
     { grupo: 'Identificacion', contenido: 'Codigo, nombre del equipo, tipo, marca, modelo y numero de serie' },
     { grupo: 'Caracteristicas', contenido: 'Sistema operativo, procesador, memoria RAM y almacenamiento' },
     { grupo: 'Conectividad', contenido: 'Direccion IP y direccion MAC, ambas validadas por formato' },
-    { grupo: 'Acceso remoto', contenido: 'Identificador de AnyDesk y contrasena cifrada' },
+    { grupo: 'Acceso remoto', contenido: 'Identificador de AnyDesk y contraseña cifrada' },
     { grupo: 'Asignacion', contenido: 'Usuario responsable, area, ubicacion, estado y fecha de asignacion' }
   ], { alturaFila: 20 });
 
-  doc.titulo2('Tratamiento de la contrasena de acceso remoto');
+  doc.titulo2('Tratamiento de la contraseña de acceso remoto');
   doc.lista([
     'Se almacena cifrada con AES-256-GCM, nunca en texto plano.',
     'La clave se deriva por scrypt de la semilla definida en la variable CLAVE_CIFRADO.',
     'La etiqueta de autenticidad permite detectar cualquier alteracion del dato guardado.',
-    'No viaja en los listados: la respuesta solo informa si existe contrasena registrada.',
+    'No viaja en los listados: la respuesta solo informa si existe contraseña registrada.',
     'Revelarla exige el permiso equipos.credenciales y queda asentado en la bitacora con usuario y fecha.',
-    'Ningun documento PDF exportable incluye contrasenas.'
+    'Ningun documento PDF exportable incluye contraseñas.'
   ], 'escudo');
 
-  doc.nota('Al perder la semilla CLAVE_CIFRADO las contrasenas guardadas dejan de poder descifrarse y '
+  doc.nota('Al perder la semilla CLAVE_CIFRADO las contraseñas guardadas dejan de poder descifrarse y '
     + 'deben registrarse nuevamente. Conservela junto con el resto de los secretos del despliegue.',
   { icono: 'alerta', color: PALETA.critico });
 
@@ -656,7 +656,7 @@ const construir = async () => {
     'Authorization: Bearer <token>'
   ].join('\n'));
 
-  doc.nota('En produccion el servicio se niega a arrancar si JWT_SECRET, CLAVE_CIFRADO o la contrasena de la base '
+  doc.nota('En produccion el servicio se niega a arrancar si JWT_SECRET, CLAVE_CIFRADO o la contraseña de la base '
     + 'de datos conservan el valor de ejemplo o tienen menos de 24 caracteres.', { icono: 'alerta', color: PALETA.critico });
 
   doc.titulo2('La API no se conecta como dueña de las tablas');
@@ -725,7 +725,7 @@ const construir = async () => {
     'api  -> http://localhost:4000/api/v1',
     'salud -> http://localhost:4000/salud'
   ].join('\n'));
-  doc.nota('Antes de publicar en produccion es obligatorio reemplazar JWT_SECRET y la contrasena de la base de '
+  doc.nota('Antes de publicar en produccion es obligatorio reemplazar JWT_SECRET y la contraseña de la base de '
     + 'datos, y cambiar la clave del usuario administrador inicial.', { icono: 'alerta', color: PALETA.critico });
 
   doc.titulo2('Ejecucion en entorno de desarrollo');
@@ -754,7 +754,7 @@ const construir = async () => {
   doc.titulo1('18. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
-    { etiqueta: 'Contrasena inicial', valor: 'Definida al instalar, minimo diez caracteres' },
+    { etiqueta: 'Contraseña inicial', valor: 'Definida al instalar, minimo diez caracteres' },
     { etiqueta: 'Area asignada', valor: 'Sistemas' },
     { etiqueta: 'Rol asignado', valor: 'admin' }
   ], 2);
@@ -826,7 +826,7 @@ const construir = async () => {
     {
       version: '2.3.0',
       fecha: new Date().toLocaleDateString('es-BO'),
-      descripcion: 'Modulo de peticiones de proyecto, politica de contrasenas con cambio y restablecimiento, '
+      descripcion: 'Modulo de peticiones de proyecto, politica de contraseñas con cambio y restablecimiento, '
         + 'base reiniciada a una sola cuenta administradora y baterias de prueba autosuficientes',
       responsable: 'Ing. Edgar Rojas Apaza'
     },
@@ -849,7 +849,7 @@ const construir = async () => {
     {
       version: '2.8.3',
       fecha: new Date().toLocaleDateString('es-BO'),
-      descripcion: 'Restablecimiento de contrasena desde la consola del servidor para la cuenta que quede sin '
+      descripcion: 'Restablecimiento de contraseña desde la consola del servidor para la cuenta que quede sin '
         + 'acceso, e indicadores del tablero con los rotulos completos',
       responsable: 'Ing. Edgar Rojas Apaza'
     },
@@ -882,6 +882,13 @@ const construir = async () => {
       fecha: new Date().toLocaleDateString('es-BO'),
       descripcion: 'Pantallas propias para lo que no existe: una direccion desconocida y un registro inexistente '
         + 'dejan de redirigir en silencio y explican que ocurrio',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.13.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'La palabra contraseña se escribe con la letra correcta en toda la interfaz, en los '
+        + 'mensajes del servidor, en los catalogos de la base y en la documentacion',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });

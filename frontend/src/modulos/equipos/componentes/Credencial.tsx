@@ -20,7 +20,7 @@ export const Credencial = ({ credencial }: { credencial: DatosCredencial }) => (
     </div>
 
     <div>
-      <p className="etiqueta">Contrasena</p>
+      <p className="etiqueta">Contraseña</p>
       <p className="select-all font-mono text-lg font-bold text-institucional-900 dark:text-slate-100">
         {credencial.password}
       </p>

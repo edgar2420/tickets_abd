@@ -15,7 +15,7 @@ interface Propiedades {
 
 export const CampoPassword = ({
   id = 'password',
-  etiqueta = 'Contrasena',
+  etiqueta = 'Contraseña',
   valor,
   alCambiar,
   requerido = false,
@@ -56,8 +56,8 @@ export const CampoPassword = ({
           type="button"
           onClick={() => setVisible((v) => !v)}
           className="absolute right-2 top-1.5 rounded-md p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-institucional-700 dark:text-slate-300 dark:hover:bg-noche-700 dark:hover:text-institucional-200"
-          title={visible ? 'Ocultar contrasena' : 'Mostrar contrasena'}
-          aria-label={visible ? 'Ocultar contrasena' : 'Mostrar contrasena'}
+          title={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+          aria-label={visible ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           tabIndex={-1}
         >
           {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}

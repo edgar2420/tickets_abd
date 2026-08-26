@@ -8,10 +8,10 @@ dotenv.config();
 const [usuario, password] = process.argv.slice(2);
 
 const AYUDA = `
-  Restablece la contrasena de una cuenta desde el servidor, sin pedir la anterior.
+  Restablece la contraseña de una cuenta desde el servidor, sin pedir la anterior.
   Sirve cuando la persona la olvido y no hay otro administrador que pueda entrar.
 
-    npm run clave -- <usuario> <contrasena nueva>
+    npm run clave -- <usuario> <contraseña nueva>
 
   Ejemplo:
     npm run clave -- edgar MiClaveNueva2026
@@ -33,7 +33,7 @@ const pool = new pg.Pool({
 const ejecutar = async () => {
   const fallas = revisarPassword(password, usuario);
   if (fallas.length) {
-    console.error('[clave] La contrasena no cumple la politica:');
+    console.error('[clave] La contraseña no cumple la politica:');
     for (const falla of fallas) console.error('  -', falla);
     process.exit(1);
   }
@@ -60,7 +60,7 @@ const ejecutar = async () => {
     [cuenta.id, cuenta.id, JSON.stringify({ origen: 'consola del servidor' })]
   );
 
-  console.log(`[clave] Contrasena restablecida para ${cuenta.nombre} (${cuenta.usuario}).`);
+  console.log(`[clave] Contraseña restablecida para ${cuenta.nombre} (${cuenta.usuario}).`);
   if (!cuenta.activo) {
     console.log('[clave] Atencion: la cuenta esta desactivada y no podra entrar hasta reactivarla.');
   }

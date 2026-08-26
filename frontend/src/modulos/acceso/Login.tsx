@@ -126,7 +126,7 @@ export const Login = () => {
                     alCambiar={(password) => setCredenciales((c) => ({ ...c, password }))}
                     requerido
                     conIcono
-                    marcador="contrasena"
+                    marcador="contraseña"
                   />
 
                   {error && <Alerta mensaje={error} />}

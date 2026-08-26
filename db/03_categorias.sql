@@ -14,7 +14,7 @@ INSERT INTO categorias (nombre, descripcion, color, icono) VALUES
     ('Hardware', 'Equipos y componentes fisicos: computadoras, impresoras, monitores, teclados y escaneres que no encienden, fallan o estan danados.', 'ambar',    'monitor'),
     ('Software', 'Programas y sistemas: instalacion de aplicaciones, errores al ejecutarlas, licencias, ofimatica y sistema operativo.',               'violeta',  'codigo'),
     ('Redes',    'Conectividad y comunicaciones: sin internet, wifi intermitente, cableado, telefonia IP y enlaces entre oficinas.',                    'celeste',  'red'),
-    ('Accesos',  'Cuentas y permisos: alta o baja de usuarios, restablecimiento de contrasenas y acceso a carpetas compartidas o sistemas.',            'esmeralda','llave')
+    ('Accesos',  'Cuentas y permisos: alta o baja de usuarios, restablecimiento de contraseñas y acceso a carpetas compartidas o sistemas.',            'esmeralda','llave')
 ON CONFLICT (nombre) DO NOTHING;
 
 INSERT INTO permisos (codigo, descripcion, modulo)

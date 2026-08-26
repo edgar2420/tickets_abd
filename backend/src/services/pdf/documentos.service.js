@@ -551,7 +551,7 @@ export const construirReporteEquipos = ({ filas, resumen }) => {
       color: (f) => (f.estado === 'Operativo' ? PALETA.ok : f.estado === 'En reparacion' ? PALETA.advertencia : PALETA.suave) }
   ], filas, { alturaFila: 15 });
 
-  doc.nota('Por seguridad, las contrasenas de acceso remoto no se incluyen en ningun documento exportable. '
+  doc.nota('Por seguridad, las contraseñas de acceso remoto no se incluyen en ningun documento exportable. '
     + 'Se consultan unicamente desde el sistema, con permiso propio y registro en la bitacora.', { icono: 'escudo' });
 
   return doc;
@@ -590,7 +590,7 @@ export const construirFichaEquipo = ({ equipo }) => {
     { etiqueta: 'Direccion IP', valor: equipo.direccion_ip },
     { etiqueta: 'Direccion MAC', valor: equipo.direccion_mac },
     { etiqueta: 'Identificador AnyDesk', valor: equipo.anydesk_id },
-    { etiqueta: 'Contrasena remota', valor: equipo.tiene_password ? 'Registrada (no se imprime)' : 'No registrada' }
+    { etiqueta: 'Contraseña remota', valor: equipo.tiene_password ? 'Registrada (no se imprime)' : 'No registrada' }
   ], 4);
 
   doc.titulo1('Asignacion', 'usuario');
@@ -606,7 +606,7 @@ export const construirFichaEquipo = ({ equipo }) => {
     doc.parrafo(equipo.observaciones);
   }
 
-  doc.nota('La contrasena de acceso remoto se guarda cifrada y no se incluye en este documento.', { icono: 'escudo' });
+  doc.nota('La contraseña de acceso remoto se guarda cifrada y no se incluye en este documento.', { icono: 'escudo' });
 
   return doc;
 };

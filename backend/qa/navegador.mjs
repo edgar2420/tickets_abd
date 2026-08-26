@@ -66,7 +66,7 @@ marca(galletas.has('tickets_sesion'), 'el navegador guarda la cookie de sesion')
 marca(galletas.has('tickets_csrf'), 'el navegador guarda el token de verificacion de origen');
 marca(acceso.cuerpo.usuario?.nombre !== undefined,
   `identidad recibida: ${acceso.cuerpo.usuario?.nombre} (${acceso.cuerpo.usuario?.rol}, ${acceso.cuerpo.usuario?.sucursal})`);
-marca(acceso.cuerpo.usuario?.password_hash === undefined, 'la respuesta no incluye rastro de la contrasena');
+marca(acceso.cuerpo.usuario?.password_hash === undefined, 'la respuesta no incluye rastro de la contraseña');
 
 console.log('\n=== 4. LAS PANTALLAS CARGAN SUS DATOS ===');
 const pantallas = [

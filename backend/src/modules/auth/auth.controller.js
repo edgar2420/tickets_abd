@@ -11,11 +11,11 @@ import { passwordSchema, revisarPassword, usuarioSchema } from '../../utils/pass
 
 export const loginSchema = z.object({
   usuario: usuarioSchema,
-  password: z.string().min(1, 'Indique su contrasena').max(128)
+  password: z.string().min(1, 'Indique su contraseña').max(128)
 });
 
 export const cambioPasswordSchema = z.object({
-  passwordActual: z.string().min(1, 'Indique su contrasena actual').max(128),
+  passwordActual: z.string().min(1, 'Indique su contraseña actual').max(128),
   passwordNueva: passwordSchema
 });
 
@@ -41,7 +41,7 @@ export const login = asyncHandler(async (req, res) => {
       usuarioId: encontrado?.id ?? null, entidad: 'SESION', accion: 'LOGIN_FALLIDO',
       detalle: { usuario }, ip: req.ip
     });
-    throw HttpError.unauthorized('Usuario o contrasena incorrectos');
+    throw HttpError.unauthorized('Usuario o contraseña incorrectos');
   }
   if (!encontrado.activo) throw HttpError.forbidden('El usuario se encuentra desactivado');
   limpiarIntentos(usuario);
@@ -78,10 +78,10 @@ export const cambiarPassword = asyncHandler(async (req, res) => {
   const { passwordActual, passwordNueva } = req.body;
   const { rows } = await query('SELECT password_hash FROM usuarios WHERE id = $1', [req.usuario.id]);
   if (!(await bcrypt.compare(passwordActual, rows[0].password_hash))) {
-    throw HttpError.badRequest('La contrasena actual no es correcta');
+    throw HttpError.badRequest('La contraseña actual no es correcta');
   }
   if (passwordNueva === passwordActual) {
-    throw HttpError.badRequest('La contrasena nueva debe ser distinta de la actual');
+    throw HttpError.badRequest('La contraseña nueva debe ser distinta de la actual');
   }
 
   const fallas = revisarPassword(passwordNueva, req.usuario.usuario);
@@ -91,7 +91,7 @@ export const cambiarPassword = asyncHandler(async (req, res) => {
   await query('UPDATE usuarios SET password_hash = $1 WHERE id = $2', [hash, req.usuario.id]);
   await registrarAuditoria({ usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: req.usuario.id, accion: 'CAMBIO_PASSWORD', ip: req.ip });
   cerrarSesion(res);
-  res.json({ ok: true, mensaje: 'Contrasena actualizada. Vuelva a iniciar sesion.' });
+  res.json({ ok: true, mensaje: 'Contraseña actualizada. Vuelva a iniciar sesion.' });
 });
 
 export const logout = asyncHandler(async (req, res) => {

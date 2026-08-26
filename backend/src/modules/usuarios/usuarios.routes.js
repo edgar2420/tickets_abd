@@ -134,5 +134,5 @@ usuariosRouter.put('/:id/password', requierePermiso('admin.usuarios'),
       usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: id,
       accion: 'REINICIAR_PASSWORD', detalle: { usuario: destino[0].usuario }, ip: req.ip
     });
-    res.json({ ok: true, mensaje: `Contrasena restablecida para ${destino[0].nombre}` });
+    res.json({ ok: true, mensaje: `Contraseña restablecida para ${destino[0].nombre}` });
   }));
