@@ -15,8 +15,6 @@ services:
       TZ: America/La_Paz
     volumes:
       - datos_postgres:/var/lib/postgresql/data
-      # El esquema y la carga inicial se aplican en el primer arranque
-      - ./db:/docker-entrypoint-initdb.d:ro
     # La base solo se atiende dentro de la red del despliegue. Se publica en
     # la maquina anfitriona atada a su direccion local, nunca a la red externa.
     ports:
@@ -28,6 +26,40 @@ services:
       retries: 10
     networks: [red_tickets]
 
+  # Aplica el esquema y todas las migraciones antes de levantar la API.
+  # Corre en cada arranque: los archivos son idempotentes, de modo que una
+  # base ya creada tambien recibe lo que se agrego despues.
+  migraciones:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tickets_migraciones
+    restart: "no"
+    depends_on:
+      base_datos:
+        condition: service_healthy
+    environment:
+      DB_HOST: base_datos
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-tickets_app}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD en el archivo .env}
+      DB_NAME: ${DB_NAME:-tickets_ti}
+      ADMIN_USUARIO: ${ADMIN_USUARIO:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?defina ADMIN_PASSWORD en el archivo .env}
+      TZ: America/La_Paz
+    volumes:
+      - ./db:/db:ro
+    # La carga inicial crea la cuenta administradora con una clave conocida,
+    # porque su hash viaja en el repositorio. Enseguida se reemplaza por la
+    # que usted definio en el archivo .env, de modo que nunca queda publicada.
+    command:
+      - sh
+      - -c
+      - >-
+        node src/scripts/migrate.js &&
+        node src/scripts/clave.js "$${ADMIN_USUARIO:-admin}" "$$ADMIN_PASSWORD"
+    networks: [red_tickets]
+
   api:
     build:
       context: ./backend
@@ -37,6 +69,8 @@ services:
     depends_on:
       base_datos:
         condition: service_healthy
+      migraciones:
+        condition: service_completed_successfully
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -48,10 +82,17 @@ services:
       DB_NAME: ${DB_NAME:-tickets_ti}
       JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET en el archivo .env}
       CLAVE_CIFRADO: ${CLAVE_CIFRADO:?defina CLAVE_CIFRADO en el archivo .env}
-      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+      # Sobre HTTP la cookie de sesion no vuelve si va marcada como segura:
+      # se entra y despues nada responde. Pongalo en true solo detras de HTTPS.
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
       FORZAR_HTTPS: ${FORZAR_HTTPS:-false}
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-8h}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost,http://localhost:5173,http://localhost:8081}
+      # Dentro de un contenedor la deteccion automatica de direcciones no
+      # sirve: solo ve la red interna de Docker, no la del anfitrion. Escriba
+      # aqui la direccion desde la que entra la gente, por ejemplo
+      # http://192.168.0.37:8080
+      CORS_ORIGINS: ${CORS_ORIGINS:?liste los origenes desde los que se entra}
+      RED_LOCAL: "false"
       DOCS_OUTPUT_DIR: storage/documentos
       TZ: America/La_Paz
     volumes:

@@ -922,6 +922,14 @@ const construir = async () => {
       descripcion: 'La aplicacion web se instala en el telefono con su propio icono y a pantalla completa, sin '
         + 'pasar por ninguna tienda y sin guardar datos de la sesion en el dispositivo',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.15.1',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Despliegue con contenedores puesto al dia: las migraciones se aplican en cada arranque, la '
+        + 'clave administradora se toma del archivo de entorno y el servidor web entrega el manifiesto de la '
+        + 'aplicacion instalable',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
