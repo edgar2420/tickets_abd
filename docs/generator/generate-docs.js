@@ -711,7 +711,25 @@ const construir = async () => {
     { titulo: 'Prioridad', campo: 'prioridad', ancho: 0.28 }
   ], PENDIENTES);
 
-  doc.titulo1('16. Despliegue en servidor', 'engranaje');
+  doc.titulo1('16. Instalacion en el telefono', 'red');
+  doc.parrafo('La aplicacion web es instalable: el navegador la agrega al telefono con su icono propio y se '
+    + 'abre a pantalla completa, sin barra de direcciones. No pasa por ninguna tienda y se actualiza sola, '
+    + 'porque es el mismo sistema web.');
+  doc.tabla([
+    { titulo: 'Pieza', campo: 'pieza', ancho: 0.28 },
+    { titulo: 'Para que sirve', campo: 'para', ancho: 0.72 }
+  ], [
+    { pieza: 'manifest.webmanifest', para: 'Nombre, iconos, color y accesos directos a Nuevo ticket y Tickets' },
+    { pieza: 'sw.js', para: 'Guarda la cascara y los recursos con huella; jamas guarda /api ni /socket.io' },
+    { pieza: 'icono-192 y 512', para: 'Icono de la aplicacion, con una version recortable para Android' }
+  ], { alturaFila: 24 });
+  doc.nota('El navegador solo permite instalarla desde un origen seguro: HTTPS o localhost. Sobre HTTP en la '
+    + 'red local la aplicacion funciona igual, pero queda como acceso directo y no como aplicacion instalada.',
+    { icono: 'alerta' });
+  doc.parrafo('Los datos de la sesion nunca se guardan en el telefono: el trabajador de servicio deja pasar '
+    + 'de largo toda peticion a la API, de modo que cada persona ve lo suyo y siempre al dia.');
+
+  doc.titulo1('17. Despliegue en servidor', 'engranaje');
   doc.parrafo('La solucion se publica con Docker Compose. La base de datos aplica automaticamente el esquema y la '
     + 'carga inicial en su primer arranque; la aplicacion web se sirve mediante Nginx, que ademas actua como proxy '
     + 'de la API y del canal de WebSockets.');
@@ -744,14 +762,14 @@ const construir = async () => {
     'cd ../mobile && npm install && npm start'
   ].join('\n'));
 
-  doc.titulo1('17. Inventario de componentes', 'baseDatos');
+  doc.titulo1('18. Inventario de componentes', 'baseDatos');
   doc.tabla([
     { titulo: 'Componente', campo: 'componente', ancho: 0.18 },
     { titulo: 'Ruta', campo: 'ruta', ancho: 0.38 },
     { titulo: 'Contenido', campo: 'descripcion', ancho: 0.44 }
   ], ARCHIVOS);
 
-  doc.titulo1('18. Acceso inicial y control de versiones', 'usuario');
+  doc.titulo1('19. Acceso inicial y control de versiones', 'usuario');
   doc.camposClaveValor([
     { etiqueta: 'Usuario administrador', valor: 'admin' },
     { etiqueta: 'Contraseña inicial', valor: 'Definida al instalar, minimo diez caracteres' },
@@ -896,6 +914,13 @@ const construir = async () => {
       fecha: new Date().toLocaleDateString('es-BO'),
       descripcion: 'Cada area lleva su propio codigo y el codigo del equipo se arma solo con el tipo y el area '
         + 'elegidos, sin escribir dos veces la ubicacion',
+      responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.15.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'La aplicacion web se instala en el telefono con su propio icono y a pantalla completa, sin '
+        + 'pasar por ninguna tienda y sin guardar datos de la sesion en el dispositivo',
       responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
