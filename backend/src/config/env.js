@@ -8,7 +8,7 @@ const required = (key, fallback) => {
   return value;
 };
 
-const PUERTOS_DE_RED = [5173, 8080, 4000];
+const PUERTOS_DE_RED = [5173, 4173, 8080, 4000];
 
 export const direccionesLocales = () => Object.values(os.networkInterfaces())
   .flat()
