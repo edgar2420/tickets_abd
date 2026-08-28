@@ -87,3 +87,7 @@ EOF
 
 
  npm install expo@^54.0.0 
+npx expo install --fix
+npx expo-doctor
+rm -rf node_modules package-lock.json npm install
+npx expo start -c
