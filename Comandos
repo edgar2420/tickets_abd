@@ -82,3 +82,8 @@ SELECT 'Ing. Edgar Rojas Apaza', 'admin', NULL,
        (SELECT id FROM roles WHERE nombre = 'admin')
 WHERE NOT EXISTS (SELECT 1 FROM usuarios);
 EOF
+
+
+
+
+ npm install expo@^54.0.0 
