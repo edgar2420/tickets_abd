@@ -1,5 +1,7 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View
+} from 'react-native';
 import { Feather } from '@expo/vector-icons';
 import { tema } from '../lib/tema';
 
@@ -21,10 +23,13 @@ export const Boton = ({ texto, icono, alPresionar, variante = 'primario', deshab
   texto: string;
   icono?: keyof typeof Feather.glyphMap;
   alPresionar: () => void;
-  variante?: 'primario' | 'secundario' | 'acento';
+  variante?: 'primario' | 'secundario' | 'acento' | 'peligro';
   deshabilitado?: boolean;
 }) => {
-  const fondo = variante === 'secundario' ? '#FFFFFF' : variante === 'acento' ? tema.acento : tema.primario;
+  const fondo = variante === 'secundario' ? '#FFFFFF'
+    : variante === 'acento' ? tema.acento
+      : variante === 'peligro' ? tema.critico
+        : tema.primario;
   const colorTexto = variante === 'secundario' ? tema.texto : '#FFFFFF';
   return (
     <TouchableOpacity
@@ -62,6 +67,77 @@ export const Dato = ({ etiqueta, valor }: { etiqueta: string; valor?: string | n
   </View>
 );
 
+export const Campo = ({ etiqueta, valor, alCambiar, ...resto }: {
+  etiqueta: string;
+  valor: string;
+  alCambiar: (valor: string) => void;
+  placeholder?: string;
+  multiline?: boolean;
+  keyboardType?: 'default' | 'numeric';
+  maxLength?: number;
+  secureTextEntry?: boolean;
+  autoCapitalize?: 'none' | 'sentences';
+}) => (
+  <View>
+    <Text style={estilos.etiqueta}>{etiqueta}</Text>
+    <TextInput
+      style={[estilos.campo, resto.multiline ? { minHeight: 96, textAlignVertical: 'top' } : null]}
+      value={valor}
+      onChangeText={alCambiar}
+      placeholderTextColor={tema.suave}
+      {...resto}
+    />
+  </View>
+);
+
+export const Selector = ({ etiqueta, opciones, valor, alCambiar }: {
+  etiqueta?: string;
+  opciones: readonly string[];
+  valor: string;
+  alCambiar: (valor: string) => void;
+}) => (
+  <View>
+    {etiqueta && <Text style={estilos.etiqueta}>{etiqueta}</Text>}
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={estilos.fichas}>
+      {opciones.map((opcion) => {
+        const activa = opcion === valor;
+        return (
+          <TouchableOpacity
+            key={opcion}
+            onPress={() => alCambiar(opcion)}
+            style={[estilos.ficha, activa && { backgroundColor: tema.primario, borderColor: tema.primario }]}
+          >
+            <Text style={[estilos.fichaTexto, activa && { color: '#FFFFFF' }]}>{opcion}</Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  </View>
+);
+
+export const Tarjeta = ({ alPresionar, children }: {
+  alPresionar?: () => void;
+  children: React.ReactNode;
+}) => {
+  if (!alPresionar) return <View style={estilos.tarjeta}>{children}</View>;
+  return (
+    <TouchableOpacity style={estilos.tarjeta} onPress={alPresionar} activeOpacity={0.7}>
+      {children}
+    </TouchableOpacity>
+  );
+};
+
+export const Indicador = ({ etiqueta, valor, color = tema.acento }: {
+  etiqueta: string;
+  valor: number | string;
+  color?: string;
+}) => (
+  <View style={estilos.indicador}>
+    <Text style={[estilos.indicadorValor, { color }]}>{valor}</Text>
+    <Text style={estilos.indicadorEtiqueta}>{etiqueta}</Text>
+  </View>
+);
+
 export const Cargando = ({ texto = 'Cargando' }: { texto?: string }) => (
   <View style={estilos.cargando}>
     <ActivityIndicator color={tema.acento} />
@@ -74,6 +150,10 @@ export const Vacio = ({ texto }: { texto: string }) => (
     <Feather name="inbox" size={22} color={tema.suave} />
     <Text style={estilos.cargandoTexto}>{texto}</Text>
   </View>
+);
+
+export const Alerta = ({ mensaje }: { mensaje: string }) => (
+  <Text style={estilos.error}>{mensaje}</Text>
 );
 
 export const estilos = StyleSheet.create({
@@ -103,6 +183,22 @@ export const estilos = StyleSheet.create({
   dato: { gap: 2 },
   datoEtiqueta: { fontSize: 10, fontWeight: '700', color: tema.suave, letterSpacing: 0.6 },
   datoValor: { fontSize: 14, color: tema.texto, fontWeight: '500' },
+  fichas: { gap: 8, paddingVertical: 2 },
+  ficha: {
+    borderWidth: 1, borderColor: tema.borde, borderRadius: 999,
+    paddingHorizontal: 14, paddingVertical: 7, backgroundColor: '#FFFFFF'
+  },
+  fichaTexto: { fontSize: 12, fontWeight: '600', color: tema.texto },
+  tarjeta: {
+    backgroundColor: tema.panel, borderRadius: 10, borderWidth: 1, borderColor: tema.borde,
+    padding: 14, gap: 6
+  },
+  indicador: {
+    flex: 1, minWidth: 96, backgroundColor: tema.panel, borderRadius: 10,
+    borderWidth: 1, borderColor: tema.borde, padding: 12, gap: 2
+  },
+  indicadorValor: { fontSize: 22, fontWeight: '700' },
+  indicadorEtiqueta: { fontSize: 11, color: tema.suave, fontWeight: '600' },
   cargando: { alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 40 },
   cargandoTexto: { fontSize: 13, color: tema.suave },
   error: {

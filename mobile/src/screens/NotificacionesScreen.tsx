@@ -5,7 +5,8 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { api } from '../lib/api';
 import { obtenerSocket } from '../lib/socket';
 import { Boton, Cargando, PiePagina, Vacio, estilos } from '../components/Comunes';
-import { fechaHora, tema } from '../lib/tema';
+import { tema } from '../lib/tema';
+import { fechaHora } from '../lib/formato';
 import type { Notificacion } from '../lib/tipos';
 import type { ParametrosNavegacion } from '../navegacion';
 
