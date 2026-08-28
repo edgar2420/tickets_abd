@@ -12,8 +12,10 @@ export const tema = {
 };
 
 export const colorEstado: Record<string, string> = {
-  'Abierto': '#0369A1',
+  'Nuevo': '#0369A1',
+  'Asignado': '#6D28D9',
   'En Proceso': '#B45309',
+  'En Espera': '#C2410C',
   'Resuelto': '#15803D',
   'Cerrado': '#475569'
 };
@@ -25,7 +27,29 @@ export const colorPrioridad: Record<string, string> = {
   'Critica': '#B91C1C'
 };
 
-export const codigoTicket = (id: number) => `TI-${String(id).padStart(5, '0')}`;
+export const colorSituacion: Record<string, string> = {
+  'Vencido': '#B91C1C',
+  'Por vencer': '#B45309',
+  'Al dia': '#15803D',
+  'Sin registro': '#475569'
+};
 
-export const fechaHora = (valor?: string | null) =>
-  valor ? new Date(valor).toLocaleString('es-BO') : 'No registrado';
+export const colorEstadoCompra: Record<string, string> = {
+  'Solicitada': '#0369A1',
+  'En revision': '#B45309',
+  'Aprobada por TI': '#6D28D9',
+  'Aprobada por Gerencia': '#15803D',
+  'Comprada': '#0F766E',
+  'Entregada': '#15803D',
+  'Rechazada': '#B91C1C'
+};
+
+export const colorEstadoProyecto: Record<string, string> = {
+  'Recibida': '#0369A1',
+  'En evaluacion': '#B45309',
+  'Aprobada': '#6D28D9',
+  'En desarrollo': '#0F766E',
+  'En pruebas': '#A16207',
+  'Implementada': '#15803D',
+  'Rechazada': '#B91C1C'
+};

@@ -930,6 +930,13 @@ const construir = async () => {
         + 'clave administradora se toma del archivo de entorno y el servidor web entrega el manifiesto de la '
         + 'aplicacion instalable',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.16.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Aplicacion movil rehecha sobre el modelo vigente, con inicio, tickets de seis estados, '
+        + 'mantenimiento preventivo, equipos, compras, proyectos, avisos y perfil',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
