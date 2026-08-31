@@ -91,3 +91,10 @@ npx expo install --fix
 npx expo-doctor
 rm -rf node_modules package-lock.json npm install
 npx expo start -c
+
+
+
+sudo -u postgres psql -c "\du"                    # que roles existen
+sudo -u postgres psql -l | grep tickets           # que bases existen
+grep -E "^DB_" ~/tickets_abd/backend/.env         # que dice su configuracion
+
