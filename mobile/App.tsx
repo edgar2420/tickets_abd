@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { Feather } from '@expo/vector-icons';
@@ -7,6 +7,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ProveedorAuth, usarAuth } from './src/context/AuthContext';
 import { LoginScreen } from './src/screens/LoginScreen';
+import { RegistroScreen } from './src/screens/RegistroScreen';
 import { InicioScreen } from './src/screens/InicioScreen';
 import { TicketsScreen } from './src/screens/TicketsScreen';
 import { NuevoTicketScreen } from './src/screens/NuevoTicketScreen';
@@ -31,9 +32,14 @@ const opcionesEncabezado = {
 
 const Navegacion = () => {
   const { usuario, cargando } = usarAuth();
+  const [registrando, setRegistrando] = useState(false);
 
   if (cargando) return <Cargando texto="Validando sesion" />;
-  if (!usuario) return <LoginScreen />;
+  if (!usuario) {
+    return registrando
+      ? <RegistroScreen alVolver={() => setRegistrando(false)} />
+      : <LoginScreen alRegistrarse={() => setRegistrando(true)} />;
+  }
 
   return (
     <Pila.Navigator screenOptions={opcionesEncabezado}>

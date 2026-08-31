@@ -23,7 +23,7 @@ export const login = asyncHandler(async (req, res) => {
   const { usuario, password } = req.body;
   verificarBloqueo(usuario);
   const { rows } = await query(
-    `SELECT u.id, u.nombre, u.usuario, u.email, u.password_hash, u.activo,
+    `SELECT u.id, u.nombre, u.usuario, u.email, u.password_hash, u.activo, u.aprobado,
             u.rol_id, r.nombre AS rol, u.area_id, a.nombre AS area,
             u.sucursal_id, s.nombre AS sucursal, s.codigo AS sucursal_codigo
        FROM usuarios u
@@ -42,6 +42,11 @@ export const login = asyncHandler(async (req, res) => {
       detalle: { usuario }, ip: req.ip
     });
     throw HttpError.unauthorized('Usuario o contraseña incorrectos');
+  }
+  if (!encontrado.aprobado) {
+    throw HttpError.forbidden(
+      'Su cuenta esta a la espera de que Sistemas la apruebe. Le avisaremos cuando pueda entrar.'
+    );
   }
   if (!encontrado.activo) throw HttpError.forbidden('El usuario se encuentra desactivado');
   limpiarIntentos(usuario);

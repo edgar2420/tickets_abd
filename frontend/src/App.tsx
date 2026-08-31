@@ -4,7 +4,7 @@ import { ProveedorTema } from './context/TemaContext';
 import { ProveedorNotificaciones } from './context/NotificacionesContext';
 import { Layout } from './components/Layout';
 import { RutaProtegida } from './components/RutaProtegida';
-import { RUTAS, RUTA_INICIAL, RUTA_PUBLICA } from './rutas';
+import { RUTAS, RUTA_INICIAL, RUTA_PUBLICA, RUTA_REGISTRO } from './rutas';
 import { NoEncontrado } from './modulos/errores';
 
 export const App = () => (
@@ -13,6 +13,7 @@ export const App = () => (
       <ProveedorNotificaciones>
         <Routes>
           <Route path={RUTA_PUBLICA.path} element={RUTA_PUBLICA.elemento} />
+          <Route path={RUTA_REGISTRO.path} element={RUTA_REGISTRO.elemento} />
           <Route element={<RutaProtegida><Layout /></RutaProtegida>}>
             <Route index element={<Navigate to={RUTA_INICIAL} replace />} />
             {RUTAS.map(({ path, elemento, permisos }) => (

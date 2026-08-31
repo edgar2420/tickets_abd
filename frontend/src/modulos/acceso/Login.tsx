@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   BellRing, FileText, Loader2, LockKeyhole, LogIn, ShieldCheck, TicketCheck, User
 } from 'lucide-react';
@@ -135,6 +135,13 @@ export const Login = () => {
                     {enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogIn className="h-4 w-4" />}
                     {enviando ? 'Validando credenciales' : 'Ingresar al sistema'}
                   </button>
+
+                  <p className="text-center text-sm text-slate-600 dark:text-slate-300">
+                    No tiene cuenta?{' '}
+                    <Link to="/registro" className="font-semibold text-institucional-700 underline dark:text-institucional-300">
+                      Crear una
+                    </Link>
+                  </p>
                 </div>
 
                 <p className="mt-7 border-t border-slate-200 pt-5 text-xs text-slate-500 dark:border-noche-700 dark:text-slate-300">
