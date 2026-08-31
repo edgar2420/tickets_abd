@@ -24,6 +24,7 @@ export const RegistroScreen = ({ alVolver }: { alVolver: () => void }) => {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [listo, setListo] = useState(false);
+  const [inmediato, setInmediato] = useState(false);
 
   useEffect(() => {
     fetch(`${API_URL}/auth/catalogo-registro`)
@@ -66,6 +67,7 @@ export const RegistroScreen = ({ alVolver }: { alVolver: () => void }) => {
       });
       const cuerpo = await respuesta.json();
       if (!respuesta.ok) throw new Error(cuerpo.mensaje ?? 'No fue posible registrar la cuenta');
+      setInmediato(cuerpo.datos?.acceso_inmediato === true);
       setListo(true);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'No fue posible registrar la cuenta');
@@ -79,9 +81,13 @@ export const RegistroScreen = ({ alVolver }: { alVolver: () => void }) => {
       <View style={[estilos.pantalla, { justifyContent: 'center', padding: 24 }]}>
         <View style={{ alignItems: 'center', gap: 12 }}>
           <Feather name="check-circle" size={44} color={tema.ok} />
-          <Text style={estilos.titulo}>Su cuenta quedo registrada</Text>
+          <Text style={estilos.titulo}>
+            {inmediato ? 'Su cuenta esta lista' : 'Su cuenta quedo registrada'}
+          </Text>
           <Text style={[estilos.subtitulo, { textAlign: 'center' }]}>
-            Sistemas debe habilitarla antes de que pueda entrar. Le llegara un aviso en cuanto la aprueben.
+            {inmediato
+              ? 'Ya puede entrar con el usuario y la contraseña que eligio.'
+              : 'Sistemas debe habilitarla antes de que pueda entrar. Le llegara un aviso en cuanto la aprueben.'}
           </Text>
           <View style={{ alignSelf: 'stretch', marginTop: 8 }}>
             <Boton texto="Volver al inicio de sesion" icono="arrow-left" alPresionar={alVolver} />
@@ -97,7 +103,7 @@ export const RegistroScreen = ({ alVolver }: { alVolver: () => void }) => {
         <View>
           <Text style={estilos.titulo}>Crear una cuenta</Text>
           <Text style={estilos.subtitulo}>
-            Complete sus datos. Sistemas revisara la solicitud y le habilitara el acceso.
+            Complete sus datos para crear su cuenta y entrar al sistema.
           </Text>
         </View>
 

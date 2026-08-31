@@ -23,7 +23,13 @@ const publico = async (ruta, opciones = {}) => {
 
 const sello = Date.now().toString().slice(-6);
 const CUENTA = `qa.registro${sello}`;
+const OTRA = `qa.segunda${sello}`;
 const CLAVE = 'ClaveDeRegistro2026';
+
+const registrar = (usuario, nombre, areaId, sucursalId) => publico('/auth/registro', {
+  metodo: 'POST',
+  cuerpo: { nombre, usuario, password: CLAVE, area_id: areaId, sucursal_id: sucursalId }
+});
 
 console.log('=== 1. EL CATALOGO PUBLICO ===');
 const catalogo = await publico('/auth/catalogo-registro');
@@ -33,124 +39,144 @@ marca((catalogo.cuerpo.datos?.areas ?? []).length > 0,
 marca((catalogo.cuerpo.datos?.sucursales ?? []).length > 0,
   `ofrece ${catalogo.cuerpo.datos?.sucursales?.length} sucursales`);
 marca(!JSON.stringify(catalogo.cuerpo).includes('password'),
-  'el catalogo publico no filtra nada mas que nombres');
+  'el catalogo publico solo entrega nombres, nada mas');
 
 const area = catalogo.cuerpo.datos.areas[0];
 const sucursal = catalogo.cuerpo.datos.sucursales[0];
 
-console.log('\n=== 2. QUIEN SE REGISTRA ===');
-const cortita = await publico('/auth/registro', {
+console.log('\n=== 2. LO QUE NO SE ADMITE ===');
+const floja = await publico('/auth/registro', {
   metodo: 'POST',
   cuerpo: {
     nombre: 'QA Registro Prueba', usuario: CUENTA, password: 'corta',
     area_id: area.id, sucursal_id: sucursal.id
   }
 });
-marca(cortita.estado === 400, `una contrasena floja se rechaza (${cortita.estado})`);
+marca(floja.estado === 400, `una contrasena floja se rechaza (${floja.estado})`);
 
-const sinArea = await publico('/auth/registro', {
+const areaFalsa = await publico('/auth/registro', {
   metodo: 'POST',
   cuerpo: {
     nombre: 'QA Registro Prueba', usuario: CUENTA, password: CLAVE,
     area_id: 999999, sucursal_id: sucursal.id
   }
 });
-marca(sinArea.estado === 400, `un area inexistente se rechaza (${sinArea.estado})`);
+marca(areaFalsa.estado === 400, `un area inexistente se rechaza (${areaFalsa.estado})`);
 
-const alta = await publico('/auth/registro', {
-  metodo: 'POST',
-  cuerpo: {
-    nombre: 'QA Registro Prueba', usuario: CUENTA, email: `${CUENTA}@empresa.bo`,
-    password: CLAVE, area_id: area.id, sucursal_id: sucursal.id
-  }
-});
-marca(alta.estado === 201, `la solicitud se registra (${alta.estado})`);
-marca(/aprobacion/i.test(alta.cuerpo.mensaje ?? ''),
-  `se avisa que falta la aprobacion: ${alta.cuerpo.mensaje}`);
+console.log('\n=== 3. EL ALTA ===');
+const alta = await registrar(CUENTA, 'QA Registro Prueba', area.id, sucursal.id);
+marca(alta.estado === 201, `la cuenta se registra (${alta.estado})`);
 
-const repetido = await publico('/auth/registro', {
-  metodo: 'POST',
-  cuerpo: {
-    nombre: 'QA Registro Repetido', usuario: CUENTA, password: CLAVE,
-    area_id: area.id, sucursal_id: sucursal.id
-  }
-});
+const repetido = await registrar(CUENTA, 'QA Registro Repetido', area.id, sucursal.id);
 marca(repetido.estado === 400, `un usuario ya tomado se rechaza (${repetido.estado})`);
 
-console.log('\n=== 3. NO ENTRA HASTA QUE LA APRUEBEN ===');
-const sinAprobar = await publico('/auth/login', {
-  metodo: 'POST', cuerpo: { usuario: CUENTA, password: CLAVE }
-});
-marca(sinAprobar.estado === 403, `no puede entrar todavia (${sinAprobar.estado})`);
-marca(/aprueb/i.test(sinAprobar.cuerpo.mensaje ?? ''),
-  `y se le explica por que: ${sinAprobar.cuerpo.mensaje}`);
+// El servidor decide si la cuenta entra de una o espera aprobacion. La bateria
+// comprueba lo que corresponda a como este configurado.
+const inmediato = alta.cuerpo.datos?.acceso_inmediato === true;
 
-console.log('\n=== 4. QUIEN PUEDE APROBAR ===');
-const negado = await pedir('qa.cliente', '/usuarios/pendientes');
-marca(negado.estado === 403, `un solicitante no ve las cuentas pendientes (${negado.estado})`);
+console.log(`\n=== 4. EL ACCESO (modo ${inmediato ? 'inmediato' : 'con aprobacion'}) ===`);
+const intento = await publico('/auth/login', { metodo: 'POST', cuerpo: { usuario: CUENTA, password: CLAVE } });
+
+if (inmediato) {
+  marca(intento.estado === 200, `entra apenas se registra (${intento.estado})`);
+  marca(intento.cuerpo.usuario?.rol === 'cliente',
+    `siempre con el rol mas limitado: ${intento.cuerpo.usuario?.rol}`);
+  marca((intento.cuerpo.usuario?.permisos ?? []).every((c) => !c.startsWith('admin.')),
+    'sin ningun permiso de administracion');
+  marca(!(intento.cuerpo.usuario?.permisos ?? []).includes('tickets.ver_todos'),
+    'y sin poder ver los tickets de los demas');
+} else {
+  marca(intento.estado === 403, `no puede entrar todavia (${intento.estado})`);
+  marca(/aprueb/i.test(intento.cuerpo.mensaje ?? ''),
+    `y se le explica por que: ${intento.cuerpo.mensaje}`);
+}
+
+console.log('\n=== 5. LA ADMINISTRACION SE ENTERA ===');
+const avisos = await pedir('admin', '/notificaciones');
+marca((avisos.cuerpo.datos ?? []).some((a) => ['CUENTA_NUEVA', 'CUENTA_PENDIENTE'].includes(a.tipo)),
+  'le llega el aviso de cada alta');
+
+const listado = await pedir('admin', `/usuarios?busqueda=${CUENTA}`);
+const cuenta = (listado.cuerpo.datos ?? []).find((u) => u.usuario === CUENTA);
+marca(Boolean(cuenta), `la cuenta figura en el listado: ${cuenta?.nombre}`);
+marca(cuenta?.area === area.nombre && cuenta?.sucursal === sucursal.nombre,
+  `con el area y la sucursal que eligio: ${cuenta?.area}, ${cuenta?.sucursal}`);
+marca(cuenta?.registrado_solo === true, 'consta que se registro sola, no la creo un administrador');
+
+console.log('\n=== 6. QUIEN MIRA Y QUIEN DECIDE ===');
+const negadoCliente = await pedir('qa.cliente', '/usuarios/pendientes');
+marca(negadoCliente.estado === 403, `un solicitante no ve las cuentas pendientes (${negadoCliente.estado})`);
 
 const negadoTecnico = await pedir('qa.tecnico', '/usuarios/pendientes');
 marca(negadoTecnico.estado === 403, `un tecnico tampoco (${negadoTecnico.estado})`);
 
-const pendientes = await pedir('admin', '/usuarios/pendientes');
-marca(pendientes.estado === 200, `la administracion si (${pendientes.estado})`);
-const cuenta = (pendientes.cuerpo.datos ?? []).find((u) => u.usuario === CUENTA);
-marca(Boolean(cuenta), `la solicitud figura en la bandeja: ${cuenta?.nombre}`);
-marca(cuenta?.area === area.nombre && cuenta?.sucursal === sucursal.nombre,
-  `con el area y la sucursal que eligio: ${cuenta?.area}, ${cuenta?.sucursal}`);
-marca(cuenta?.registrado_solo === true, 'consta que se registro sola');
+const bandeja = await pedir('admin', '/usuarios/pendientes');
+marca(bandeja.estado === 200, `la administracion si (${bandeja.estado})`);
 
-const intentoAjeno = await pedir('qa.cliente', `/usuarios/${cuenta.id}/aprobar`, {
-  metodo: 'PUT', cuerpo: {}
-});
-marca(intentoAjeno.estado === 403, `un solicitante no puede aprobarla (${intentoAjeno.estado})`);
+const ajeno = await pedir('qa.cliente', `/usuarios/${cuenta.id}/aprobar`, { metodo: 'PUT', cuerpo: {} });
+marca(ajeno.estado === 403, `un solicitante no puede aprobar cuentas (${ajeno.estado})`);
 
-console.log('\n=== 5. LA APROBACION ===');
-const aprobada = await pedir('admin', `/usuarios/${cuenta.id}/aprobar`, {
-  metodo: 'PUT', cuerpo: {}
-});
-marca(aprobada.estado === 200, `la administracion la aprueba (${aprobada.estado})`);
-marca(aprobada.cuerpo.datos?.aprobado === true && aprobada.cuerpo.datos?.activo === true,
-  'queda aprobada y activa');
+if (inmediato) {
+  console.log('\n=== 7. CON ACCESO INMEDIATO ===');
+  marca(!(bandeja.cuerpo.datos ?? []).some((u) => u.usuario === CUENTA),
+    'la cuenta no queda esperando en la bandeja');
 
-const dosVeces = await pedir('admin', `/usuarios/${cuenta.id}/aprobar`, { metodo: 'PUT', cuerpo: {} });
-marca(dosVeces.estado === 400, `no se aprueba dos veces (${dosVeces.estado})`);
+  const yaAprobada = await pedir('admin', `/usuarios/${cuenta.id}/aprobar`, { metodo: 'PUT', cuerpo: {} });
+  marca(yaAprobada.estado === 400, `no se aprueba lo que ya estaba aprobado (${yaAprobada.estado})`);
 
-const entra = await publico('/auth/login', { metodo: 'POST', cuerpo: { usuario: CUENTA, password: CLAVE } });
-marca(entra.estado === 200, `ahora si entra (${entra.estado})`);
-marca(entra.cuerpo.usuario?.rol === 'cliente',
-  `nace con el rol mas limitado: ${entra.cuerpo.usuario?.rol}`);
+  const noSeRetira = await pedir('admin', `/usuarios/${cuenta.id}/registro`, { metodo: 'DELETE' });
+  marca(noSeRetira.estado === 400, `tampoco se retira por la via del rechazo (${noSeRetira.estado})`);
 
-const avisos = await fetch(BASE + '/notificaciones', {
-  headers: { Authorization: 'Bearer ' + entra.cuerpo.token }
-});
-const listaAvisos = (await avisos.json()).datos ?? [];
-marca(listaAvisos.some((a) => a.tipo === 'CUENTA_APROBADA'),
-  'recibe el aviso de que su cuenta fue habilitada');
+  // Lo que le queda a la administracion es desactivar la cuenta
+  const desactivada = await pedir('admin', `/usuarios/${cuenta.id}`, {
+    metodo: 'PUT',
+    cuerpo: {
+      nombre: cuenta.nombre, usuario: cuenta.usuario, email: cuenta.email,
+      area_id: cuenta.area_id, sucursal_id: cuenta.sucursal_id, rol_id: cuenta.rol_id,
+      activo: false
+    }
+  });
+  marca(desactivada.estado === 200, `la administracion puede desactivarla (${desactivada.estado})`);
 
-console.log('\n=== 6. EL RECHAZO ===');
-const otra = `qa.rechazo${sello}`;
-const segunda = await publico('/auth/registro', {
-  metodo: 'POST',
-  cuerpo: {
-    nombre: 'QA Registro Rechazado', usuario: otra, password: CLAVE,
-    area_id: area.id, sucursal_id: sucursal.id
-  }
-});
-marca(segunda.estado === 201, `se registra la segunda solicitud (${segunda.estado})`);
-const pendientes2 = await pedir('admin', '/usuarios/pendientes');
-const aRechazar = (pendientes2.cuerpo.datos ?? []).find((u) => u.usuario === otra);
-marca(Boolean(aRechazar), 'la segunda solicitud figura en la bandeja');
+  const trasDesactivar = await publico('/auth/login', {
+    metodo: 'POST', cuerpo: { usuario: CUENTA, password: CLAVE }
+  });
+  marca(trasDesactivar.estado === 403, `y entonces deja de entrar (${trasDesactivar.estado})`);
+} else {
+  console.log('\n=== 7. CON APROBACION PREVIA ===');
+  marca((bandeja.cuerpo.datos ?? []).some((u) => u.usuario === CUENTA),
+    'la solicitud espera en la bandeja');
 
-const rechazo = await pedir('admin', `/usuarios/${aRechazar.id}/registro`, { metodo: 'DELETE' });
-marca(rechazo.estado === 200, `se retira la solicitud (${rechazo.estado})`);
+  const aprobada = await pedir('admin', `/usuarios/${cuenta.id}/aprobar`, { metodo: 'PUT', cuerpo: {} });
+  marca(aprobada.estado === 200, `la administracion la aprueba (${aprobada.estado})`);
+  marca(aprobada.cuerpo.datos?.aprobado === true && aprobada.cuerpo.datos?.activo === true,
+    'queda aprobada y activa');
 
-const trasRechazo = await publico('/auth/login', { metodo: 'POST', cuerpo: { usuario: otra, password: CLAVE } });
-marca(trasRechazo.estado === 401, `la cuenta rechazada ya no existe (${trasRechazo.estado})`);
+  const dosVeces = await pedir('admin', `/usuarios/${cuenta.id}/aprobar`, { metodo: 'PUT', cuerpo: {} });
+  marca(dosVeces.estado === 400, `no se aprueba dos veces (${dosVeces.estado})`);
 
-const noSeRechazaAprobada = await pedir('admin', `/usuarios/${cuenta.id}/registro`, { metodo: 'DELETE' });
-marca(noSeRechazaAprobada.estado === 400,
-  `una cuenta ya aprobada no se retira por esta via (${noSeRechazaAprobada.estado})`);
+  const entra = await publico('/auth/login', { metodo: 'POST', cuerpo: { usuario: CUENTA, password: CLAVE } });
+  marca(entra.estado === 200, `ahora si entra (${entra.estado})`);
+
+  const suyos = await fetch(BASE + '/notificaciones', {
+    headers: { Authorization: 'Bearer ' + entra.cuerpo.token }
+  });
+  marca(((await suyos.json()).datos ?? []).some((a) => a.tipo === 'CUENTA_APROBADA'),
+    'recibe el aviso de que su cuenta fue habilitada');
+
+  const segunda = await registrar(OTRA, 'QA Segunda Solicitud', area.id, sucursal.id);
+  marca(segunda.estado === 201, `se registra una segunda solicitud (${segunda.estado})`);
+
+  const bandeja2 = await pedir('admin', '/usuarios/pendientes');
+  const aRetirar = (bandeja2.cuerpo.datos ?? []).find((u) => u.usuario === OTRA);
+  marca(Boolean(aRetirar), 'la segunda figura en la bandeja');
+
+  const rechazo = await pedir('admin', `/usuarios/${aRetirar.id}/registro`, { metodo: 'DELETE' });
+  marca(rechazo.estado === 200, `se retira la solicitud (${rechazo.estado})`);
+
+  const trasRechazo = await publico('/auth/login', { metodo: 'POST', cuerpo: { usuario: OTRA, password: CLAVE } });
+  marca(trasRechazo.estado === 401, `la cuenta rechazada ya no existe (${trasRechazo.estado})`);
+}
 
 console.log('\n========================================');
 console.log(fallos === 0 ? 'REGISTRO DE CUENTAS: TODAS LAS PRUEBAS PASARON' : `REGISTRO DE CUENTAS: ${fallos} FALLA(S)`);

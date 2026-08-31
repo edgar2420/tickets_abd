@@ -51,6 +51,9 @@ export const env = {
     expiresIn: process.env.JWT_EXPIRES_IN ?? '8h'
   },
   redLocal: (process.env.RED_LOCAL ?? 'false') === 'true',
+  // Con esto en true la cuenta nueva espera el visto bueno de la administracion.
+  // Apagado, la persona entra apenas se registra, siempre con el rol mas limitado.
+  registroConAprobacion: (process.env.REGISTRO_APROBACION ?? 'false') === 'true',
   cors: {
     get origins() {
       return origenesPermitidos();

@@ -5,6 +5,7 @@ import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { passwordSchema, usuarioSchema, textoLimpio } from '../../utils/password.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
 import { notificarUsuario } from '../../services/notificaciones.service.js';
+import { env } from '../../config/env.js';
 
 // El rol con el que nace toda cuenta que se registra sola. Nunca hereda
 // permisos de atencion: eso lo decide quien la aprueba.
@@ -43,14 +44,15 @@ export const registrar = asyncHandler(async (req, res) => {
   const rol = await query('SELECT id FROM roles WHERE nombre = $1', [ROL_INICIAL]);
   if (!rol.rows.length) throw HttpError.badRequest('No hay un rol inicial configurado');
 
+  const esperaAprobacion = env.registroConAprobacion;
   const hash = await bcrypt.hash(password, 10);
   const { rows } = await query(
     `INSERT INTO usuarios
        (nombre, usuario, email, password_hash, area_id, sucursal_id, rol_id,
         activo, aprobado, registrado_solo)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, FALSE, FALSE, TRUE)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $8, TRUE)
      RETURNING id, nombre, usuario`,
-    [nombre, usuario, email || null, hash, area_id, sucursal_id, rol.rows[0].id]
+    [nombre, usuario, email || null, hash, area_id, sucursal_id, rol.rows[0].id, !esperaAprobacion]
   );
   const cuenta = rows[0];
 
@@ -66,18 +68,24 @@ export const registrar = asyncHandler(async (req, res) => {
        JOIN permisos p      ON p.id = rp.permiso_id
       WHERE p.codigo = 'admin.aprobar_cuentas' AND u.activo = TRUE`
   );
+  // Aunque el acceso sea inmediato se avisa igual: la administracion se entera
+  // de cada alta sin tener que revisar el listado.
   for (const aprobador of aprobadores) {
     await notificarUsuario({
       usuarioId: aprobador.id,
-      tipo: 'CUENTA_PENDIENTE',
-      titulo: 'Una cuenta espera aprobacion',
-      mensaje: `${cuenta.nombre} se registro y espera que le habiliten el acceso.`
+      tipo: esperaAprobacion ? 'CUENTA_PENDIENTE' : 'CUENTA_NUEVA',
+      titulo: esperaAprobacion ? 'Una cuenta espera aprobacion' : 'Se registro una cuenta nueva',
+      mensaje: esperaAprobacion
+        ? `${cuenta.nombre} se registro y espera que le habiliten el acceso.`
+        : `${cuenta.nombre} creo su cuenta y ya puede entrar. Revise su rol si corresponde.`
     });
   }
 
   res.status(201).json({
     ok: true,
-    mensaje: 'Su cuenta quedo registrada y espera la aprobacion de Sistemas.',
-    datos: { usuario: cuenta.usuario }
+    mensaje: esperaAprobacion
+      ? 'Su cuenta quedo registrada y espera la aprobacion de Sistemas.'
+      : 'Su cuenta quedo creada. Ya puede entrar con el usuario y la contrasena que eligio.',
+    datos: { usuario: cuenta.usuario, acceso_inmediato: !esperaAprobacion }
   });
 });

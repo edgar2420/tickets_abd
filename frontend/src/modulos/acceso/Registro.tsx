@@ -28,6 +28,7 @@ export const Registro = () => {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [listo, setListo] = useState(false);
+  const [accesoInmediato, setAccesoInmediato] = useState(false);
 
   useEffect(() => {
     void api<{ datos: CatalogoRegistro }>('/auth/catalogo-registro')
@@ -50,7 +51,7 @@ export const Registro = () => {
     setError(null);
     setEnviando(true);
     try {
-      await api('/auth/registro', {
+      const respuesta = await api<{ datos: { acceso_inmediato?: boolean } }>('/auth/registro', {
         metodo: 'POST',
         cuerpo: {
           nombre: formulario.nombre.trim(),
@@ -61,6 +62,7 @@ export const Registro = () => {
           sucursal_id: Number(formulario.sucursal_id)
         }
       });
+      setAccesoInmediato(respuesta.datos?.acceso_inmediato === true);
       setListo(true);
     } catch (fallo) {
       setError(fallo instanceof Error ? fallo.message : 'No fue posible registrar la cuenta');
@@ -75,15 +77,16 @@ export const Registro = () => {
         <div className="w-full max-w-md rounded-xl bg-white p-8 text-center shadow-2xl dark:bg-noche-850">
           <CheckCircle2 className="mx-auto h-12 w-12 text-emerald-600" />
           <h1 className="mt-4 text-lg font-bold text-institucional-900 dark:text-slate-100">
-            Su cuenta quedo registrada
+            {accesoInmediato ? 'Su cuenta esta lista' : 'Su cuenta quedo registrada'}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-200">
-            Sistemas debe habilitarla antes de que pueda entrar. Le llegara un aviso dentro del
-            sistema en cuanto la aprueben.
+            {accesoInmediato
+              ? 'Ya puede entrar con el usuario y la contraseña que eligio.'
+              : 'Sistemas debe habilitarla antes de que pueda entrar. Le llegara un aviso dentro del sistema en cuanto la aprueben.'}
           </p>
           <button type="button" className="boton-primario mt-6 w-full justify-center"
             onClick={() => navegar('/login', { replace: true })}>
-            Volver al inicio de sesion
+            {accesoInmediato ? 'Entrar al sistema' : 'Volver al inicio de sesion'}
           </button>
         </div>
       </div>
@@ -101,7 +104,7 @@ export const Registro = () => {
             Crear una cuenta
           </h1>
           <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
-            Complete sus datos. Sistemas revisara la solicitud y le habilitara el acceso.
+            Complete sus datos para crear su cuenta y entrar al sistema.
           </p>
         </header>
 
