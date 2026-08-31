@@ -114,7 +114,7 @@ npm run dev                # http://localhost:5173
 # 4. Aplicacion movil
 cd ../mobile
 npm install
-npm start                  # Expo; configurar la IP de la API en app.json
+API_URL=http://192.168.0.37:4000 npm start   # Expo; la IP de la maquina que corre la API
 ```
 
 ## Acceso inicial
