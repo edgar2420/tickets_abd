@@ -162,10 +162,24 @@ export const Formulario = ({ formulario, setFormulario, usuarios, areas, sucursa
           <Seleccion
             etiqueta="Asignado a"
             valor={formulario.usuario_id}
-            alCambiar={(valor) => setFormulario((previo) => ({ ...previo, usuario_id: valor }))}
+            alCambiar={(valor) => {
+              // La persona ya tiene area y sucursal: se copian para no volver a
+              // preguntar lo mismo, y para que el codigo del equipo salga solo.
+              const elegido = usuarios.find((u) => String(u.id) === valor);
+              setFormulario((previo) => ({
+                ...previo,
+                usuario_id: valor,
+                sucursal_id: elegido?.sucursal_id ? String(elegido.sucursal_id) : previo.sucursal_id,
+                area_id: elegido?.area_id ? String(elegido.area_id) : previo.area_id
+              }));
+            }}
           >
             <option value="">Sin asignar</option>
-            {usuarios.map((usuario) => <option key={usuario.id} value={usuario.id}>{usuario.nombre}</option>)}
+            {usuarios.map((usuario) => (
+              <option key={usuario.id} value={usuario.id}>
+                {usuario.nombre}{usuario.sucursal ? ` - ${usuario.sucursal}` : ''}
+              </option>
+            ))}
           </Seleccion>
           <Seleccion
             etiqueta="Sucursal"

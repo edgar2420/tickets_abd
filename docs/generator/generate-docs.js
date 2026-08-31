@@ -944,6 +944,14 @@ const construir = async () => {
       descripcion: 'Registro de cuentas por la propia persona, indicando su area y su sucursal, con aprobacion '
         + 'previa de la administracion antes de habilitar el acceso',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.18.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'El registro entrega el acceso de inmediato con el rol mas limitado, avisando de cada alta a '
+        + 'la administracion; la aprobacion previa queda disponible como opcion. Al asignar un equipo a una '
+        + 'persona se toman su area y su sucursal',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
