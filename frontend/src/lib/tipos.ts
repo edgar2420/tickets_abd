@@ -207,6 +207,9 @@ export interface Usuario {
   sucursal: string | null;
   sucursal_codigo?: string | null;
   permisos: string[];
+  aprobado?: boolean;
+  registrado_solo?: boolean;
+  fecha_aprobacion?: string | null;
   fecha_creacion?: string;
 }
 

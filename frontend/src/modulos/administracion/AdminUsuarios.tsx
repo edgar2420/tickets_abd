@@ -6,6 +6,8 @@ import {
 } from '../../components/Ui';
 import { usarConfirmacion } from '../../components/Confirmacion';
 import { Paginacion } from '../../components/Paginacion';
+import { CuentasPendientes } from './componentes/CuentasPendientes';
+import { usarAuth } from '../../context/AuthContext';
 import { CampoPassword } from '../../components/CampoPassword';
 import { LARGO_MINIMO, Reglas } from '../../components/CambioPassword';
 import { fechaCorta } from '../../lib/formato';
@@ -29,6 +31,7 @@ const FORMULARIO_VACIO: Formulario = {
 };
 
 export const AdminUsuarios = () => {
+  const { puede } = usarAuth();
   const [usuarios, setUsuarios] = useState<Usuario[] | null>(null);
   const [areas, setAreas] = useState<Area[]>([]);
   const [roles, setRoles] = useState<Rol[]>([]);
@@ -142,6 +145,10 @@ export const AdminUsuarios = () => {
           Nuevo usuario
         </button>
       </EncabezadoPagina>
+
+      {puede('admin.aprobar_cuentas') && (
+        <CuentasPendientes roles={roles} alCambiar={() => void cargar()} />
+      )}
 
       {error && <Alerta mensaje={error} />}
 

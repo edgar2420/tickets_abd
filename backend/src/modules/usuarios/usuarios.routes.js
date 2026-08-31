@@ -7,6 +7,7 @@ import { requierePermiso } from '../../middleware/rbac.js';
 import { validate } from '../../middleware/validate.js';
 import { asyncHandler, HttpError } from '../../utils/httpError.js';
 import { registrarAuditoria } from '../../services/auditoria.service.js';
+import { notificarUsuario } from '../../services/notificaciones.service.js';
 import { paginacion, respuestaPaginada } from '../../utils/paginacion.js';
 import { passwordSchema, revisarPassword, textoLimpio, usuarioSchema } from '../../utils/password.js';
 
@@ -30,6 +31,7 @@ const editarUsuarioSchema = crearUsuarioSchema.partial({ password: true }).exten
 
 const SELECT_USUARIO = `
   SELECT u.id, u.nombre, u.usuario, u.email, u.activo, u.fecha_creacion,
+         u.aprobado, u.registrado_solo, u.fecha_aprobacion,
          u.area_id, a.nombre AS area, u.rol_id, r.nombre AS rol,
          u.sucursal_id, s.nombre AS sucursal, s.codigo AS sucursal_codigo
     FROM usuarios u
@@ -39,6 +41,76 @@ const SELECT_USUARIO = `
 
 export const usuariosRouter = Router();
 usuariosRouter.use(autenticar);
+
+usuariosRouter.get('/pendientes', requierePermiso('admin.aprobar_cuentas'),
+  asyncHandler(async (_req, res) => {
+    const { rows } = await query(
+      `${SELECT_USUARIO} WHERE u.aprobado = FALSE ORDER BY u.fecha_creacion`
+    );
+    res.json({ ok: true, datos: rows });
+  }));
+
+usuariosRouter.put('/:id/aprobar', requierePermiso('admin.aprobar_cuentas'),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const rolId = req.body?.rol_id ? Number(req.body.rol_id) : null;
+
+    const { rows: previo } = await query(
+      'SELECT id, nombre, usuario, aprobado FROM usuarios WHERE id = $1', [id]
+    );
+    if (!previo[0]) throw HttpError.notFound('La cuenta indicada no existe');
+    if (previo[0].aprobado) throw HttpError.badRequest('Esa cuenta ya estaba aprobada');
+
+    if (rolId) {
+      const { rows: rol } = await query('SELECT id FROM roles WHERE id = $1', [rolId]);
+      if (!rol.length) throw HttpError.badRequest('El rol indicado no existe');
+    }
+
+    await query(
+      `UPDATE usuarios
+          SET aprobado = TRUE, activo = TRUE,
+              rol_id = COALESCE($1::int, rol_id),
+              aprobado_por_id = $2, fecha_aprobacion = CURRENT_TIMESTAMP
+        WHERE id = $3`,
+      [rolId, req.usuario.id, id]
+    );
+
+    await registrarAuditoria({
+      usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: id, accion: 'APROBAR_CUENTA',
+      detalle: { usuario: previo[0].usuario, rol_id: rolId }, ip: req.ip
+    });
+    await notificarUsuario({
+      usuarioId: id, tipo: 'CUENTA_APROBADA',
+      titulo: 'Su cuenta fue habilitada',
+      mensaje: 'Ya puede entrar al sistema con el usuario y la contrasena que registro.'
+    });
+
+    const { rows } = await query(`${SELECT_USUARIO} WHERE u.id = $1`, [id]);
+    res.json({ ok: true, datos: rows[0] });
+  }));
+
+usuariosRouter.delete('/:id/registro', requierePermiso('admin.aprobar_cuentas'),
+  asyncHandler(async (req, res) => {
+    const id = Number(req.params.id);
+    const { rows: previo } = await query(
+      'SELECT id, usuario, aprobado, registrado_solo FROM usuarios WHERE id = $1', [id]
+    );
+    if (!previo[0]) throw HttpError.notFound('La cuenta indicada no existe');
+    if (previo[0].aprobado || !previo[0].registrado_solo) {
+      throw HttpError.badRequest('Solo se rechazan las cuentas que se registraron solas y siguen pendientes');
+    }
+
+    await query('DELETE FROM notificaciones WHERE usuario_id = $1', [id]);
+    await query('DELETE FROM auditoria WHERE usuario_id = $1', [id]);
+    await query('DELETE FROM usuarios WHERE id = $1', [id]);
+
+    await registrarAuditoria({
+      usuarioId: req.usuario.id, entidad: 'USUARIO', entidadId: id, accion: 'RECHAZAR_CUENTA',
+      detalle: { usuario: previo[0].usuario }, ip: req.ip
+    });
+
+    res.json({ ok: true, mensaje: 'La solicitud de cuenta fue retirada' });
+  }));
 
 usuariosRouter.get('/', requierePermiso('admin.usuarios'), asyncHandler(async (req, res) => {
   const { limite, pagina, desplazamiento } = paginacion(req.query);

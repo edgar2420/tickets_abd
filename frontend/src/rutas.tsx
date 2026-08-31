@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Login } from './modulos/acceso';
+import { Login, Registro } from './modulos/acceso';
 import { Tablero } from './modulos/tablero';
 import { Reportes } from './modulos/reportes';
 import { Perfil } from './modulos/perfil';
@@ -21,6 +21,8 @@ export interface Ruta {
 }
 
 export const RUTA_PUBLICA = { path: '/login', elemento: <Login /> };
+
+export const RUTA_REGISTRO = { path: '/registro', elemento: <Registro /> };
 
 export const RUTA_INICIAL = '/tablero';
 
