@@ -10,7 +10,7 @@ module.exports = {
   expo: {
     name: 'Tickets TI',
     slug: 'tickets-ti',
-    version: '2.16.0',
+    version: '2.17.0',
     orientation: 'portrait',
     userInterfaceStyle: 'light',
     backgroundColor: '#0F2A47',

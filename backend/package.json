@@ -1,6 +1,6 @@
 {
   "name": "tickets-ti-backend",
-  "version": "2.16.0",
+  "version": "2.17.0",
   "description": "API REST + WebSockets del Sistema de Gestion de Tickets TI (STD-2026-TI)",
   "author": "Ing. Edgar Rojas Apaza",
   "license": "UNLICENSED",
@@ -14,7 +14,7 @@
     "privilegios": "node src/scripts/privilegios.js",
     "reiniciar": "node src/scripts/reiniciar.js",
     "docs:pdf": "node ../docs/generator/generate-docs.js",
-    "qa": "npm run qa:secretos && npm run qa:seguridad && npm run qa:funcional && npm run qa:tiempo-real && npm run qa:compras && npm run qa:ticket && npm run qa:mantenimiento && npm run qa:movil && npm run qa:proyectos && npm run qa:documentos",
+    "qa": "npm run qa:secretos && npm run qa:seguridad && npm run qa:funcional && npm run qa:registro && npm run qa:tiempo-real && npm run qa:compras && npm run qa:ticket && npm run qa:mantenimiento && npm run qa:movil && npm run qa:proyectos && npm run qa:documentos",
     "qa:navegador": "node qa/navegador.mjs",
     "qa:documentos": "node qa/documentos.mjs",
     "qa:ticket": "node qa/ticket-modelo.mjs",
@@ -29,7 +29,8 @@
     "clave": "node src/scripts/clave.js",
     "qa:mantenimiento": "node qa/mantenimiento.mjs",
     "limpiar-registros": "node src/scripts/limpiar-registros.js",
-    "qa:movil": "node qa/movil.mjs"
+    "qa:movil": "node qa/movil.mjs",
+    "qa:registro": "node qa/registro.mjs"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

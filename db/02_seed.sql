@@ -1,11 +1,16 @@
-INSERT INTO areas (nombre) VALUES
+-- Se filtra antes de armar la fila: si el area ya existe no se construye
+-- ninguna, y asi no chocan las columnas que agregan las migraciones siguientes.
+INSERT INTO areas (nombre)
+SELECT v.nombre
+  FROM (VALUES
     ('Sistemas'),
     ('Recursos Humanos'),
     ('Contabilidad'),
     ('Operaciones'),
     ('Comercial'),
     ('Gerencia')
-ON CONFLICT (nombre) DO NOTHING;
+  ) AS v(nombre)
+ WHERE NOT EXISTS (SELECT 1 FROM areas a WHERE a.nombre = v.nombre);
 
 INSERT INTO roles (nombre, descripcion) VALUES
     ('admin',      'Administrador del sistema con acceso total a mantenimiento y tickets'),

@@ -5,7 +5,7 @@ import { usarAuth } from '../context/AuthContext';
 import { Boton, PiePagina, estilos } from '../components/Comunes';
 import { tema } from '../lib/tema';
 
-export const LoginScreen = () => {
+export const LoginScreen = ({ alRegistrarse }: { alRegistrarse: () => void }) => {
   const { iniciarSesion } = usarAuth();
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
@@ -87,6 +87,13 @@ export const LoginScreen = () => {
               icono="log-in"
               alPresionar={() => void ingresar()}
               deshabilitado={enviando || !usuario || !password}
+            />
+
+            <Boton
+              texto="Crear una cuenta"
+              icono="user-plus"
+              variante="secundario"
+              alPresionar={alRegistrarse}
             />
           </View>
         </ScrollView>

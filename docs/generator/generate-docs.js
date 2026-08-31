@@ -937,6 +937,13 @@ const construir = async () => {
       descripcion: 'Aplicacion movil rehecha sobre el modelo vigente, con inicio, tickets de seis estados, '
         + 'mantenimiento preventivo, equipos, compras, proyectos, avisos y perfil',
       responsable: 'Ing. Edgar Rojas Apaza'
+    },
+    {
+      version: '2.17.0',
+      fecha: new Date().toLocaleDateString('es-BO'),
+      descripcion: 'Registro de cuentas por la propia persona, indicando su area y su sucursal, con aprobacion '
+        + 'previa de la administracion antes de habilitar el acceso',
+      responsable: 'Ing. Edgar Rojas Apaza'
     }
   ], { alturaFila: 26 });
 
